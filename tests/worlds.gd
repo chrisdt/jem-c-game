@@ -42,6 +42,7 @@ func run() -> void:
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 1 and not game.underground and game.ore == 1)
+	assert(not game.green_surface.visible)
 	var layout = game.FROST_LAYOUT
 	assert(layout.can_walk(game.player))
 	assert(layout.can_walk(game.ICE_CAMP))
@@ -54,8 +55,8 @@ func run() -> void:
 	var bridge_start: Vector2 = layout.from_art(Vector2(640,500)) - layout.FOOT_OFFSET
 	var crossed: Vector2 = layout.move_on_floor(bridge_start,Vector2(400,0))
 	assert(crossed.x > layout.from_art(Vector2(885,500)).x)
-	var edge_start: Vector2 = layout.from_art(Vector2(640,540)) - layout.FOOT_OFFSET
-	var blocked: Vector2 = layout.move_on_floor(edge_start,Vector2(500,0))
+	var edge_start: Vector2 = layout.from_art(Vector2(600,700)) - layout.FOOT_OFFSET
+	var blocked: Vector2 = layout.move_on_floor(edge_start,Vector2(200,0))
 	assert(blocked.x < layout.from_art(Vector2(650,540)).x)
 	var surface := explore(layout,game.player,false)
 	var mine := explore(layout,game.ICE_SPAWN,true)
@@ -87,6 +88,7 @@ func run() -> void:
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 0 and game.rocks[0].hp == 0 and game.frost_ore == 3)
+	assert(game.green_surface.visible)
 	for i in range(1,5):
 		game.player = game.rocks[i].pos
 		game.start_mining(i)

@@ -3,48 +3,282 @@ extends RefCounted
 const ART_SIZE := Vector2(1499, 1049)
 const WORLD_SIZE := Vector2(2000, 1400)
 const FOOT_OFFSET := Vector2(0, 20)
-const RADIUS := 9.0
-static var SURFACE_ROUTES := [
-	[PackedVector2Array([Vector2(360,820),Vector2(350,700),Vector2(320,610),Vector2(370,520),Vector2(480,500),Vector2(660,500),Vector2(770,500),Vector2(900,500),Vector2(1010,470),Vector2(1080,390),Vector2(1070,320),Vector2(1150,250),Vector2(1210,220)]), 48.0],
-	[PackedVector2Array([Vector2(370,520),Vector2(350,430),Vector2(370,370),Vector2(420,310),Vector2(390,250),Vector2(320,220),Vector2(230,230)]), 40.0],
-	[PackedVector2Array([Vector2(1010,470),Vector2(1090,570),Vector2(1180,640),Vector2(1190,700)]), 42.0],
+const RADIUS := 8.0
+const FLOOR_MOTION = preload("res://floor_motion.gd")
+# These regions follow the painted floor edges, including the broad clearings.
+# Route centerlines alone would create invisible walls in the snow and chambers.
+static var SURFACE_FLOORS := [
+PackedVector2Array([
+	Vector2(15, 245),
+	Vector2(85, 205),
+	Vector2(160, 240),
+	Vector2(220, 245),
+	Vector2(300, 225),
+	Vector2(360, 230),
+	Vector2(435, 260),
+	Vector2(450, 310),
+	Vector2(405, 345),
+	Vector2(395, 395),
+	Vector2(465, 420),
+	Vector2(535, 440),
+	Vector2(600, 450),
+	Vector2(650, 478),
+	Vector2(665, 490),
+	Vector2(665, 532),
+	Vector2(610, 545),
+	Vector2(540, 565),
+	Vector2(500, 580),
+	Vector2(540, 640),
+	Vector2(585, 665),
+	Vector2(620, 715),
+	Vector2(655, 745),
+	Vector2(655, 795),
+	Vector2(605, 820),
+	Vector2(610, 885),
+	Vector2(635, 925),
+	Vector2(610, 980),
+	Vector2(535, 980),
+	Vector2(475, 970),
+	Vector2(440, 935),
+	Vector2(365, 955),
+	Vector2(310, 915),
+	Vector2(235, 925),
+	Vector2(180, 895),
+	Vector2(110, 915),
+	Vector2(40, 880),
+	Vector2(50, 805),
+	Vector2(110, 775),
+	Vector2(85, 730),
+	Vector2(20, 705),
+	Vector2(10, 625),
+	Vector2(80, 620),
+	Vector2(145, 635),
+	Vector2(195, 665),
+	Vector2(245, 660),
+	Vector2(225, 635),
+	Vector2(245, 585),
+	Vector2(270, 550),
+	Vector2(190, 540),
+	Vector2(135, 565),
+	Vector2(70, 550),
+	Vector2(15, 575),
+	Vector2(10, 510),
+	Vector2(75, 490),
+	Vector2(100, 445),
+	Vector2(180, 435),
+	Vector2(240, 445),
+	Vector2(285, 420),
+	Vector2(295, 375),
+	Vector2(270, 350),
+	Vector2(195, 355),
+	Vector2(145, 345),
+	Vector2(95, 355),
+	Vector2(45, 340),
+	Vector2(10, 320),
+]),
+PackedVector2Array([
+	Vector2(875, 485),
+	Vector2(925, 460),
+	Vector2(970, 425),
+	Vector2(1015, 390),
+	Vector2(1045, 350),
+	Vector2(1070, 300),
+	Vector2(1080, 260),
+	Vector2(1140, 225),
+	Vector2(1180, 200),
+	Vector2(1260, 195),
+	Vector2(1320, 220),
+	Vector2(1390, 230),
+	Vector2(1425, 270),
+	Vector2(1450, 320),
+	Vector2(1480, 360),
+	Vector2(1475, 405),
+	Vector2(1410, 415),
+	Vector2(1360, 395),
+	Vector2(1300, 405),
+	Vector2(1240, 385),
+	Vector2(1190, 405),
+	Vector2(1145, 445),
+	Vector2(1160, 500),
+	Vector2(1120, 545),
+	Vector2(1160, 590),
+	Vector2(1235, 635),
+	Vector2(1300, 675),
+	Vector2(1370, 715),
+	Vector2(1420, 780),
+	Vector2(1420, 840),
+	Vector2(1375, 885),
+	Vector2(1290, 895),
+	Vector2(1220, 870),
+	Vector2(1150, 880),
+	Vector2(1100, 845),
+	Vector2(1115, 790),
+	Vector2(1075, 750),
+	Vector2(1030, 715),
+	Vector2(1015, 655),
+	Vector2(970, 625),
+	Vector2(940, 585),
+	Vector2(945, 550),
+	Vector2(885, 535),
+	Vector2(870, 525),
+]),
+PackedVector2Array([
+	Vector2(650, 490),
+	Vector2(665, 484),
+	Vector2(870, 484),
+	Vector2(890, 492),
+	Vector2(890, 526),
+	Vector2(870, 532),
+	Vector2(665, 532),
+	Vector2(650, 526),
+])
 ]
-static var MINE_ROUTES := [
-	[PackedVector2Array([Vector2(725,820),Vector2(725,735),Vector2(750,650),Vector2(740,580)]), 49.0],
-	[PackedVector2Array([Vector2(740,550),Vector2(620,495),Vector2(520,425),Vector2(430,375),Vector2(340,320)]), 52.0],
-	[PackedVector2Array([Vector2(340,280),Vector2(350,210),Vector2(310,165),Vector2(285,140)]), 33.0],
-	[PackedVector2Array([Vector2(840,550),Vector2(960,480),Vector2(1030,400),Vector2(1100,320),Vector2(1210,300)]), 53.0],
-	[PackedVector2Array([Vector2(1210,270),Vector2(1240,210),Vector2(1230,150),Vector2(1240,125)]), 34.0],
-]
+static var SURFACE_POOL := PackedVector2Array([
+	Vector2(1250, 725),
+	Vector2(1300, 720),
+	Vector2(1350, 745),
+	Vector2(1380, 780),
+	Vector2(1385, 820),
+	Vector2(1345, 850),
+	Vector2(1290, 860),
+	Vector2(1235, 830),
+	Vector2(1205, 800),
+	Vector2(1215, 760),
+])
+static var MINE_FLOOR := PackedVector2Array([
+	Vector2(640, 965),
+	Vector2(675, 990),
+	Vector2(735, 1000),
+	Vector2(800, 990),
+	Vector2(835, 960),
+	Vector2(835, 900),
+	Vector2(825, 850),
+	Vector2(835, 800),
+	Vector2(835, 755),
+	Vector2(820, 715),
+	Vector2(825, 670),
+	Vector2(865, 625),
+	Vector2(905, 610),
+	Vector2(925, 565),
+	Vector2(945, 530),
+	Vector2(1005, 510),
+	Vector2(1050, 475),
+	Vector2(1100, 495),
+	Vector2(1145, 500),
+	Vector2(1180, 480),
+	Vector2(1225, 485),
+	Vector2(1260, 465),
+	Vector2(1325, 455),
+	Vector2(1380, 430),
+	Vector2(1410, 380),
+	Vector2(1410, 340),
+	Vector2(1385, 300),
+	Vector2(1330, 275),
+	Vector2(1305, 230),
+	Vector2(1325, 190),
+	Vector2(1320, 145),
+	Vector2(1300, 115),
+	Vector2(1250, 105),
+	Vector2(1190, 120),
+	Vector2(1170, 155),
+	Vector2(1180, 200),
+	Vector2(1170, 240),
+	Vector2(1120, 245),
+	Vector2(1070, 275),
+	Vector2(1010, 280),
+	Vector2(970, 320),
+	Vector2(960, 365),
+	Vector2(950, 410),
+	Vector2(920, 435),
+	Vector2(875, 455),
+	Vector2(825, 440),
+	Vector2(775, 440),
+	Vector2(725, 440),
+	Vector2(675, 445),
+	Vector2(635, 425),
+	Vector2(615, 380),
+	Vector2(570, 365),
+	Vector2(530, 345),
+	Vector2(500, 300),
+	Vector2(495, 265),
+	Vector2(460, 240),
+	Vector2(430, 230),
+	Vector2(415, 200),
+	Vector2(410, 160),
+	Vector2(390, 125),
+	Vector2(345, 110),
+	Vector2(290, 110),
+	Vector2(255, 140),
+	Vector2(260, 185),
+	Vector2(285, 220),
+	Vector2(275, 245),
+	Vector2(225, 255),
+	Vector2(185, 280),
+	Vector2(160, 310),
+	Vector2(160, 340),
+	Vector2(205, 365),
+	Vector2(255, 365),
+	Vector2(290, 390),
+	Vector2(350, 405),
+	Vector2(400, 420),
+	Vector2(430, 455),
+	Vector2(475, 470),
+	Vector2(520, 480),
+	Vector2(565, 500),
+	Vector2(600, 530),
+	Vector2(600, 575),
+	Vector2(640, 610),
+	Vector2(670, 640),
+	Vector2(680, 685),
+	Vector2(665, 730),
+	Vector2(650, 780),
+	Vector2(645, 830),
+	Vector2(630, 875),
+	Vector2(635, 920),
+])
+static var MINE_PILLARS := [PackedVector2Array([
+	Vector2(785, 450),
+	Vector2(808, 480),
+	Vector2(815, 515),
+	Vector2(840, 525),
+	Vector2(825, 545),
+	Vector2(775, 550),
+	Vector2(750, 535),
+	Vector2(765, 495),
+]),
+PackedVector2Array([
+	Vector2(1200, 295),
+	Vector2(1230, 310),
+	Vector2(1240, 340),
+	Vector2(1280, 370),
+	Vector2(1250, 390),
+	Vector2(1205, 380),
+	Vector2(1175, 375),
+	Vector2(1180, 335),
+])]
 static var LAMPS := PackedVector2Array([Vector2(280,110),Vector2(195,275),Vector2(470,290),Vector2(565,390),Vector2(670,455),Vector2(860,450),Vector2(980,325),Vector2(1115,235),Vector2(1245,90),Vector2(1380,320),Vector2(620,570),Vector2(895,600),Vector2(705,700),Vector2(825,705),Vector2(665,920),Vector2(805,920)])
 
 static func from_art(point: Vector2) -> Vector2:
 	return point / ART_SIZE * WORLD_SIZE
 
-static func in_ellipse(point: Vector2, shape: Vector4) -> bool:
-	return ((point - Vector2(shape.x, shape.y)) / Vector2(shape.z, shape.w)).length() < 1.0
-
 static func floor_contains(world_point: Vector2, cave: bool) -> bool:
-	var p := world_point / WORLD_SIZE * ART_SIZE
-	var inside := false
+	var point := world_point / WORLD_SIZE * ART_SIZE
 	if cave:
-		for shape in [Vector4(760,550,181,104),Vector4(320,300,145,73),Vector4(300,150,62,37),Vector4(1200,330,158,75),Vector4(1240,140,57,36)]:
-			inside = inside or in_ellipse(p,shape)
-		for shape in [Vector4(790,505,39,57),Vector4(1215,352,43,46)]:
-			if in_ellipse(p,shape): return false
-	else:
-		inside = Rect2(110,790,440,110).has_point(p) or Rect2(245,760,280,130).has_point(p)
-		# The only canyon crossing is the narrow bridge deck.
-		if p.x > 650 and p.x < 885 and (p.y < 485 or p.y > 520): return false
-		for shape in [Vector4(1250,790,100,85),Vector4(430,590,35,52)]:
-			if in_ellipse(p,shape): return false
-	var routes: Array = MINE_ROUTES if cave else SURFACE_ROUTES
-	for route in routes:
-		var points: PackedVector2Array = route[0]
-		for i in range(points.size()-1):
-			if p.distance_to(Geometry2D.get_closest_point_to_segment(p,points[i],points[i+1])) < route[1]:
-				inside = true
-	return inside
+		if not Geometry2D.is_point_in_polygon(point, MINE_FLOOR):
+			return false
+		for pillar in MINE_PILLARS:
+			if Geometry2D.is_point_in_polygon(point, pillar):
+				return false
+		return true
+	if Geometry2D.is_point_in_polygon(point, SURFACE_POOL):
+		return false
+	# A small basalt outcrop has a solid base, rather than a full-height collider.
+	if ((point - Vector2(430, 600)) / Vector2(27, 15)).length() < 1.0:
+		return false
+	for floor_region in SURFACE_FLOORS:
+		if Geometry2D.is_point_in_polygon(point, floor_region):
+			return true
+	return false
 
 static func can_walk(point: Vector2, cave := false) -> bool:
 	for offset in [Vector2.ZERO,Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
@@ -52,12 +286,4 @@ static func can_walk(point: Vector2, cave := false) -> bool:
 	return true
 
 static func move_on_floor(start: Vector2, motion: Vector2, cave := false) -> Vector2:
-	var steps := maxi(1,ceili(motion.length()/8.0))
-	var step := motion / steps
-	var result := start
-	for i in steps:
-		if can_walk(result+step,cave): result += step
-		else:
-			if can_walk(result+Vector2(step.x,0),cave): result.x += step.x
-			if can_walk(result+Vector2(0,step.y),cave): result.y += step.y
-	return result
+	return FLOOR_MOTION.move(start, motion, can_walk.bind(cave))

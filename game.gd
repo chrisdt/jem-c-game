@@ -25,6 +25,8 @@ var ice_won := false
 var title: Label
 var player := Vector2(560, 550)
 var ground_art: Texture2D = preload("res://assets/green_planet.png")
+var green_surface: Sprite2D
+const FOLIAGE_WIND: Shader = preload("res://shaders/foliage_wind.gdshader")
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
@@ -68,6 +70,16 @@ var action_button: Button
 var decorations: Array[Vector2] = []
 
 func _ready() -> void:
+	green_surface = Sprite2D.new()
+	green_surface.name = "GreenPlanetFoliage"
+	green_surface.texture = ground_art
+	green_surface.centered = false
+	green_surface.scale = Vector2(2000, 1400) / ground_art.get_size()
+	green_surface.z_index = -1
+	var wind := ShaderMaterial.new()
+	wind.shader = FOLIAGE_WIND
+	green_surface.material = wind
+	add_child(green_surface)
 	scout = AnimatedSprite2D.new()
 	scout.name = "SunnyScout"
 	scout.sprite_frames = SCOUT_FRAMES
@@ -413,6 +425,7 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	green_surface.visible = world == 0 and not underground
 	if status == null:
 		return
 	title.text = "SUNNY SCOUT   /   " + ("FROST CANYON" if world == 1 else "GREEN PLANET")
@@ -448,7 +461,8 @@ func label_at(pos: Vector2, text: String, color := Color("f6e5b8"), size := 20) 
 	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
+	if underground or world == 1:
+		draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
 	if underground:
 		draw_texture_rect(FROST_MINE_ART if world == 1 else MINE_ART, Rect2(Vector2.ZERO, MINE_LAYOUT.WORLD_SIZE), false)
 		var lamps: PackedVector2Array = FROST_LAYOUT.LAMPS if world == 1 else MINE_LAYOUT.LAMPS
@@ -460,7 +474,8 @@ func _draw() -> void:
 		label_at(exit_position() + Vector2(-85, 80), "[E] SURFACE", Color("ffe4ac"), 18)
 		draw_arc(exit_position(), 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
-		draw_texture_rect(ICE_ART if world == 1 else ground_art, Rect2(0, 0, 2000, 1400), false)
+		if world == 1:
+			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
 		label_at(camp_position() + Vector2(-95, -110), "CAMP / UPGRADE")
 		label_at(cave_position() + Vector2(-65, -140), mine_name().to_upper())
 		label_at(ship_position() + Vector2(-65, 80), "[E] ROCKET", Color("ffe4ac"), 18)

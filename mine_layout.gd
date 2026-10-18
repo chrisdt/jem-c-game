@@ -4,13 +4,16 @@ extends RefCounted
 # Keep art and navigation together when changing the mine layout.
 const ART_SIZE := Vector2(1499, 1049)
 const WORLD_SIZE := Vector2(2000, 1400)
-const PLAYER_RADIUS := 10.0
+const PLAYER_RADIUS := 8.0
+const FLOOR_MOTION = preload("res://floor_motion.gd")
 const FOOT_OFFSET := Vector2(0, 20)
 static var FLOOR := PackedVector2Array([
 	Vector2(30, 430), Vector2(180, 410), Vector2(320, 435),
-	Vector2(400, 365), Vector2(420, 285), Vector2(350, 270),
-	Vector2(330, 220), Vector2(420, 195), Vector2(480, 210),
-	Vector2(490, 290), Vector2(460, 365), Vector2(500, 430),
+	Vector2(400, 400), Vector2(400, 365), Vector2(410, 330),
+	Vector2(390, 300), Vector2(375, 270), Vector2(330, 245),
+	Vector2(320, 220), Vector2(365, 200), Vector2(430, 195),
+	Vector2(465, 210), Vector2(470, 245), Vector2(470, 275),
+	Vector2(495, 305), Vector2(520, 335), Vector2(540, 380), Vector2(550, 425),
 	Vector2(580, 420), Vector2(660, 425), Vector2(730, 365),
 	Vector2(760, 300), Vector2(720, 250), Vector2(735, 200),
 	Vector2(800, 160), Vector2(870, 180), Vector2(875, 245),
@@ -64,16 +67,4 @@ static func can_walk(point: Vector2) -> bool:
 	return true
 
 static func move_on_floor(start: Vector2, motion: Vector2) -> Vector2:
-	var steps := maxi(1, ceili(motion.length() / 8.0))
-	var step := motion / steps
-	var result := start
-	for i in steps:
-		if can_walk(result + step):
-			result += step
-		else:
-			# Slide along the wall rather than snagging on a diagonal edge.
-			if can_walk(result + Vector2(step.x, 0)):
-				result.x += step.x
-			if can_walk(result + Vector2(0, step.y)):
-				result.y += step.y
-	return result
+	return FLOOR_MOTION.move(start, motion, can_walk)

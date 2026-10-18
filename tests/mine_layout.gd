@@ -15,7 +15,7 @@ func run() -> void:
 	for blocked in [Vector2(755, 640), Vector2(780, 450), Vector2(1070, 515), Vector2(50, 50), Vector2(1000, 900)]:
 		assert(not layout.can_walk(layout.from_art(blocked)))
 	# Even a slow frame must not jump through a pillar to the floor beyond it.
-	var start: Vector2 = layout.from_art(Vector2(710, 450))
+	var start: Vector2 = layout.from_art(Vector2(710, 425)) - layout.FOOT_OFFSET
 	var stopped: Vector2 = layout.move_on_floor(start, Vector2(200, 0))
 	assert(layout.can_walk(stopped))
 	assert(stopped.x < layout.from_art(Vector2(780, 450)).x)

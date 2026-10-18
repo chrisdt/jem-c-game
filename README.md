@@ -44,3 +44,9 @@ The smoke test exercises movement and facing, timed copper collection, the upgra
 The mine navigation check (`godot --headless --path . --script tests/mine_layout.gd`) verifies walls, pool and pillar collisions, all ore and side-chamber routes, and entry/exit interactions.
 
 Run `godot --headless --path . --script tests/worlds.gd` to check planet travel, persistent session progress, bridge collision, both new route networks and the Frost Canyon mission.
+
+## Floor boundaries and foliage
+
+Navigation follows the visible clearings, chamber outlines and full bridge deck, with collision measured at Sunny Scout’s feet. `floor_motion.gd` sweeps short steps and slides along sloping edges. Run `godot --headless --path . --script tests/navigation_paths.gd` to walk artwork-based routes through the clearings and mine passages and verify hazards remain solid.
+
+Green Planet trees, grass and plants have a gentle wind effect in `shaders/foliage_wind.gdshader`. Canopy motion is strongest on the trees and lighter on small plants. Rocks, paths, buildings and the character keep their original positions. The effect is applied only to the Green Planet surface; its `wind_strength_pixels` and `wind_speed` shader parameters can be adjusted in Godot.

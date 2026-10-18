@@ -8,6 +8,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	assert(game.ore == 0 and not game.upgraded)
+	assert(game.green_surface.visible and game.green_surface.material.shader == game.FOLIAGE_WIND)
 	# Exercise the movement path used by keyboard input, including diagonal speed
 	# and blocked movement; the visual must settle to idle when motion stops.
 	game.player = Vector2(600, 600)
@@ -64,7 +65,7 @@ func run() -> void:
 	game.player = game.CAVE
 	game.cooldown = 0
 	game.interact()
-	assert(game.underground)
+	assert(game.underground and not game.green_surface.visible)
 	game.player = Vector2(1180, 450)
 	game.cooldown = 0
 	game.interact()
@@ -75,6 +76,6 @@ func run() -> void:
 	game.player = game.MINE_EXIT
 	game.cooldown = 0
 	game.interact()
-	assert(not game.underground)
+	assert(not game.underground and game.green_surface.visible)
 	print("PASS: mining, inventory, upgrade, mine entry, crystal mission and exit")
 	quit()
