@@ -16,7 +16,7 @@ Collect five copper deposits (2 seconds each), return to the camp workbench for 
 
 ## Second planet: Frost Canyon
 
-Walk to the rocket beside the Green Planet camp and press **E** to fly to Frost Canyon. Travel is available immediately for playtesting. Press E at the rocket on Frost Canyon to return. Inventory, pick upgrades and depleted deposits persist across trips during the current play session; **R** resets both planets. There is no disk save yet.
+Walk to the rocket beside the Green Planet camp and press **E** to fly to Frost Canyon. Travel is available immediately for playtesting. Press E at the rocket on Frost Canyon to return. Each trip plays booster ignition, an accelerating upward blastoff, and a slowing booster descent to touchdown on the next planet. Sunny Scout boards during the sequence and steps out after landing; movement and mining resume then. Inventory, pick upgrades and depleted deposits persist across trips during the current play session; **R** resets both planets. There is no disk save yet.
 
 Frost Canyon has its own snowy canyon map: a southern landing camp, a single bridge to the eastern plateau, an ice-arch side trail, and a winding climb to the Frost Mine. The Frost Mine uses a separate Y-shaped layout with a southern entrance and two northern branches. `frost_layout.gd` controls these two new navigation layouts, including the bridge, canyon and mine walls.
 
@@ -24,11 +24,11 @@ The second mission is to collect **3 frost ore (3 seconds each)** and **1 amethy
 
 ## Exploration and random ore
 
-A softly moving mist covers unexplored ground on both planets and in both mines. Sunny Scout reveals a circle as he walks, and visited areas remain clear for the rest of the current game. Ore stays hidden and cannot be selected or mined until its location is explored. Each of the four maps remembers its own discovery; travelling through a doorway or rocket does not reveal a line between arrival and departure points.
+A subtle, translucent mist softly blurs unexplored ground on both planets and in both mines. The landscape remains visible through it; discovered ground becomes crisp and clear. Sunny Scout reveals a circle as he walks, and visited areas remain clear for the rest of the current game. Ore stays hidden and cannot be selected or mined until its location is explored. Each of the four maps remembers its own discovery; travelling through a doorway or rocket does not reveal a line between arrival and departure points.
 
 Every new game creates new ore locations. Returning to a map keeps its existing layout and depleted deposits. **R** starts a fresh game with new ore and fresh mist. There is no disk persistence. `ore_spawns.gd` selects separated deposits on connected walkable floor, leaves space around doors/camp/rocket, and keeps Green Planet deposits off the pond, painted boulders, cliff and tree canopies. Deposit counts, upgrades and mining times are unchanged.
 
-The mist radius is controlled by `CLEAR_RADIUS` and `REVEAL_RADIUS` in `exploration_fog.gd`. Discovery uses small reusable texture masks, with the mist drawn above the world and below the HUD. Run `tests/exploration.gd` and `tests/ore_spawns.gd` with the same headless command as the other gameplay checks to verify discovery/travel/reset behaviour and 100 seeded ore layouts.
+The mist radius is controlled by `CLEAR_RADIUS` and `REVEAL_RADIUS` in `exploration_fog.gd`. Discovery uses small reusable texture masks, with the mist drawn above the world and below the HUD. The mist shader blurs a screen copy using filtered mipmaps; undiscovered ore is omitted from rendering and interaction. Run `tests/exploration.gd` and `tests/ore_spawns.gd` with the same headless command as the other gameplay checks to verify discovery/travel/reset behaviour and 100 seeded ore layouts.
 
 ## Browser build
 
@@ -67,3 +67,5 @@ White, yellow, pink and blue flowers, green reeds and cattails use `environment/
 `environment/pond.tscn` adds a swimming fish, small wakes, occasional jumps and landing splashes. After an initial 5–9 second wait, jumps have a random 8–18 second wait between landings and takeoffs. Adjust the pond's **Minimum Jump Wait**, **Maximum Jump Wait** and **Jump Height** in the Inspector. `environment/duck.tscn` provides the illustrated duck's wandering, walking poses and occasional ground pecks. Both animals pause while the Green Planet surface is hidden.
 
 Run `godot --headless --path . --script tests/pond_life.gd` for wildlife movement, random jump spacing, landings, effect cleanup and visibility checks. Run `godot --headless --path . --script tests/mine_transitions.gd` for automatic entry/exit on both planets, safe arrivals, held movement and slow-frame doorway crossing.
+
+The rocket is a separate reusable illustrated actor in `environment/rocket.gd`; the surface paintings contain empty landing sites. Flight phases and timings live beside `Flight` in `game.gd`. Camera framing stays on each landing site during flight, and a short fade covers the planet change. Run `godot --headless --path . --script tests/rocket_travel.gd` for takeoff/landing motion, input locks, frame rates, session progress and recovery after landing.

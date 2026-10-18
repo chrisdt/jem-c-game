@@ -60,9 +60,11 @@ func run() -> void:
 			check(false,"Returning to the surface removed explored pixels")
 			break
 	game.travel_to_other_planet()
+	game.advance_flight(10)
 	check(game.fog.active_map == 2 and game.fog.is_revealed(2,game.player),"Second planet did not start around its landing point")
 	check(not game.fog.is_revealed(2,Vector2(1680,450)),"Second planet inherited Green Planet exploration")
 	game.travel_to_other_planet()
+	game.advance_flight(10)
 	check(game.rocks.map(func(rock): return rock.pos) == locations,"Returning to a planet moved its remaining ore")
 	check(game.fog.is_revealed(0,start),"Planet travel lost exploration memory")
 	if hidden >= 0:

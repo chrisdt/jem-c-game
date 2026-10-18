@@ -11,6 +11,15 @@ const SHIP := Vector2(240, 400)
 const FROST_LAYOUT = preload("res://frost_layout.gd")
 const ORE_SPAWNS = preload("res://ore_spawns.gd")
 const EXPLORATION_FOG = preload("res://exploration_fog.gd")
+const ROCKET = preload("res://environment/rocket.gd")
+enum Flight { IDLE, IGNITION, ASCENT, DESCENT, TOUCHDOWN }
+const FLIGHT_DURATIONS := {Flight.IGNITION:0.75, Flight.ASCENT:1.85, Flight.DESCENT:2.6, Flight.TOUCHDOWN:0.5}
+const FLIGHT_HEIGHT := 920.0
+var flight: Flight = Flight.IDLE
+var flight_elapsed := 0.0
+var flight_camera_smoothing := true
+var rocket: ROCKET
+var travel_fade: ColorRect
 const ICE_ART: Texture2D = preload("res://assets/ice_planet.png")
 const FROST_MINE_ART: Texture2D = preload("res://assets/frost_mine.png")
 const AMETHYST_ART: Texture2D = preload("res://assets/amethyst_ore.png")
@@ -72,11 +81,17 @@ var status: Label
 var prompt: Label
 var note: Label
 var action_button: Button
+var hud_layer: CanvasLayer
+var flight_caption_panel: Panel
+var flight_caption: Label
 
 func _ready() -> void:
 	y_sort_enabled = true
 	green_surface = GREEN_ENVIRONMENT.instantiate()
 	add_child(green_surface)
+	rocket = ROCKET.new()
+	add_child(rocket)
+	rocket.reset_pad(ship_position(), world == 1)
 	scout = AnimatedSprite2D.new()
 	scout.name = "SunnyScout"
 	scout.sprite_frames = SCOUT_FRAMES
@@ -106,6 +121,7 @@ func _ready() -> void:
 	add_child(fog)
 	update_exploration()
 	var layer := CanvasLayer.new()
+	hud_layer = layer
 	add_child(layer)
 	var panel := Panel.new()
 	panel.position = Vector2(20, 20)
@@ -152,6 +168,26 @@ func _ready() -> void:
 	action_button.size = Vector2(190, 65)
 	action_button.pressed.connect(interact)
 	layer.add_child(action_button)
+	var travel_layer := CanvasLayer.new()
+	travel_layer.layer = 2
+	add_child(travel_layer)
+	flight_caption_panel = Panel.new()
+	flight_caption_panel.position = Vector2(190, 708)
+	flight_caption_panel.size = Vector2(900, 60)
+	flight_caption_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flight_caption_panel.add_theme_stylebox_override("panel", hud_style)
+	travel_layer.add_child(flight_caption_panel)
+	flight_caption = Label.new()
+	flight_caption.position = Vector2(14, 15)
+	flight_caption.size = Vector2(872, 32)
+	flight_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	flight_caption.add_theme_font_size_override("font_size", 20)
+	flight_caption_panel.add_child(flight_caption)
+	travel_fade = ColorRect.new()
+	travel_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	travel_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	travel_fade.color = Color(0.025, 0.045, 0.08, 0)
+	travel_layer.add_child(travel_fade)
 	refresh_ui()
 
 func reset_rocks() -> void:
@@ -199,8 +235,74 @@ func material_name(rock: Dictionary) -> String:
 	return "blue crystal" if rock.hard else "copper"
 
 func travel_to_other_planet() -> void:
-	if underground or mining_target >= 0:
+	if flight != Flight.IDLE or underground or mining_target >= 0:
 		return
+	flight = Flight.IGNITION
+	flight_elapsed = 0
+	walking = false
+	walk_distance = 0
+	particles.clear()
+	scout.visible = false
+	rocket.reset_pad(ship_position(), world == 1)
+	# Flight remains crisp above the mist without revealing an aerial trail.
+	rocket.z_index = 1001
+	flight_camera_smoothing = camera.position_smoothing_enabled
+	camera.position_smoothing_enabled = false
+	camera.position = ship_position() + Vector2(180, -60)
+	camera.reset_smoothing()
+	message = "All aboard! Warming up the boosters..."
+	update_flight_visual()
+	refresh_ui()
+	queue_redraw()
+
+func advance_flight(delta: float) -> void:
+	# Consume phase boundaries even on a slow frame; switch planets once,
+	# under the fade, after the ship has left the departure screen.
+	while flight != Flight.IDLE and delta > 0:
+		var duration: float = FLIGHT_DURATIONS[flight]
+		var step := minf(delta, duration - flight_elapsed)
+		flight_elapsed += step
+		delta -= step
+		update_flight_visual()
+		if flight_elapsed >= duration:
+			flight_elapsed = 0
+			match flight:
+				Flight.IGNITION:
+					flight = Flight.ASCENT
+					message = "Blastoff! Next stop: " + ("Green Planet!" if world == 1 else "Frost Canyon!")
+				Flight.ASCENT:
+					switch_planet()
+					flight = Flight.DESCENT
+					message = "Boosters on! Slowing down for a gentle landing..."
+				Flight.DESCENT:
+					flight = Flight.TOUCHDOWN
+					message = "Touchdown! Welcome to " + ("Frost Canyon." if world == 1 else "Green Planet.")
+				Flight.TOUCHDOWN:
+					finish_flight()
+			update_flight_visual()
+	refresh_ui()
+	queue_redraw()
+
+func update_flight_visual() -> void:
+	if flight == Flight.IDLE:
+		rocket.set_flight(0, 0)
+		travel_fade.color.a = 0
+		return
+	var t := clampf(flight_elapsed / float(FLIGHT_DURATIONS[flight]), 0, 1)
+	match flight:
+		Flight.IGNITION:
+			rocket.set_flight(0, 0.15 + 0.65 * t)
+		Flight.ASCENT:
+			rocket.set_flight(FLIGHT_HEIGHT * t * t, 1)
+			travel_fade.color.a = smoothstep(0.65, 1.0, t)
+		Flight.DESCENT:
+			rocket.set_flight(FLIGHT_HEIGHT * pow(1 - t, 2.3), 0.85 * (1 - smoothstep(0.87, 1, t)))
+			travel_fade.color.a = 1 - smoothstep(0, 0.22, t)
+		Flight.TOUCHDOWN:
+			rocket.set_flight(0, 0)
+			travel_fade.color.a = 0
+
+func switch_planet() -> void:
 	planet_rocks[world] = rocks
 	world = 1 - world
 	if planet_rocks.has(world):
@@ -211,11 +313,24 @@ func travel_to_other_planet() -> void:
 		planet_rocks[world] = rocks
 	particles.clear()
 	player = Vector2(390,1120) if world == 1 else Vector2(320,500)
+	rocket.reset_pad(ship_position(), world == 1)
+	camera.position = ship_position() + Vector2(180, -60)
+	camera.reset_smoothing()
+	update_exploration()
+
+func finish_flight() -> void:
+	flight = Flight.IDLE
+	flight_elapsed = 0
+	rocket.z_index = 2
+	scout.visible = true
 	restore_walk_visual()
 	scout.animation = StringName("idle_" + str(facing))
 	scout.position = player
 	camera.position = player
+	camera.position_smoothing_enabled = flight_camera_smoothing
 	camera.reset_smoothing()
+	cooldown = 0.3
+	mine_transition_cooldown = 0.6
 	message = "Frost Canyon! Cross the bridge to the Frost Mine. Collect 3 frost ore and 1 amethyst." if world == 1 else "Back on Green Planet! Your ore and mining progress are still here."
 	update_exploration()
 	refresh_ui()
@@ -226,6 +341,9 @@ func _process(delta: float) -> void:
 	cooldown = maxf(0, cooldown - delta)
 	update_particles(delta)
 	mining_fx.queue_redraw()
+	if flight != Flight.IDLE:
+		advance_flight(delta)
+		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
 	move_player(direction, delta)
 	advance_mining(delta)
@@ -250,6 +368,8 @@ func restore_walk_visual() -> void:
 	scout.rotation = 0.0
 
 func move_player(direction: Vector2, delta: float) -> void:
+	if flight != Flight.IDLE:
+		return
 	mine_transition_cooldown = maxf(0, mine_transition_cooldown - delta)
 	var previous := player
 	if mining_target >= 0:
@@ -328,6 +448,8 @@ func nearest_rock() -> int:
 	return best
 
 func interact() -> void:
+	if flight != Flight.IDLE:
+		return
 	if mining_target >= 0:
 		cancel_mining()
 		refresh_ui()
@@ -356,6 +478,8 @@ func interact() -> void:
 	refresh_ui()
 
 func start_mining(index: int) -> void:
+	if flight != Flight.IDLE:
+		return
 	if index < 0 or index >= rocks.size():
 		return
 	var rock: Dictionary = rocks[index]
@@ -454,14 +578,23 @@ func update_particles(delta: float) -> void:
 
 func refresh_ui() -> void:
 	green_surface.visible = world == 0 and not underground
+	rocket.visible = not underground
 	if status == null:
 		return
+	hud_layer.visible = flight == Flight.IDLE
+	flight_caption_panel.visible = flight != Flight.IDLE
+	flight_caption.text = message
 	title.text = "SUNNY SCOUT   /   " + ("FROST CANYON" if world == 1 else "GREEN PLANET")
 	var place := mine_name().to_upper() if underground else "SURFACE"
 	status.text = "%s   •   Copper: %d   •   %s" % [place, ore, "STRONG PICK" if upgraded else "STARTER PICK"]
 	if world == 1:
 		status.text = "%s   •   Frost: %d/3   •   Amethyst: %d/1" % [place,frost_ore,amethysts]
 	note.text = message
+	action_button.disabled = flight != Flight.IDLE
+	if flight != Flight.IDLE:
+		action_button.text = "FLYING..."
+		prompt.text = "Enjoy the ride! You can explore again after landing."
+		return
 	action_button.text = "CANCEL [E]" if mining_target >= 0 else "MINE / USE [E]"
 	if mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
@@ -506,7 +639,8 @@ func _draw() -> void:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
 		label_at(camp_position() + Vector2(-95, -110), "CAMP / UPGRADE")
 		label_at(cave_position() + Vector2(-65, -140), mine_name().to_upper())
-		label_at(ship_position() + Vector2(-65, 80), "[E] ROCKET", Color("ffe4ac"), 18)
+		if flight == Flight.IDLE:
+			label_at(ship_position() + Vector2(-65, 80), "[E] ROCKET", Color("ffe4ac"), 18)
 		for point in [camp_position(), cave_position() + Vector2(0, 85), ship_position()]:
 			draw_arc(point, 36, 0, TAU, 40, Color(1, 0.89, 0.63, 0.55 + sin(elapsed * 2) * 0.15), 2)
 
@@ -522,7 +656,8 @@ func _draw() -> void:
 		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false)
 		if player.distance_to(p) < 100:
 			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
-	ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
+	if flight == Flight.IDLE:
+		ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
 	if mining_target >= 0:
 		var target: Dictionary = rocks[mining_target]
 		var bar_pos: Vector2 = target.pos + Vector2(-48, -72)

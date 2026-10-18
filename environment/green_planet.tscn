@@ -19,7 +19,7 @@ z_index = -1
 material = SubResource("GroundPlants")
 texture = ExtResource("1")
 centered = false
-scale = Vector2(1.334222815, 1.334604385)
+scale = Vector2(1.333333333, 1.334604385)
 
 [node name="Tree01" parent="." instance=ExtResource("3")]
 position = Vector2(53.369, 226.883)

@@ -43,6 +43,7 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.advance_flight(10)
 	assert(game.world == 1 and not game.underground and game.ore == 1)
 	assert(not game.green_surface.visible)
 	var layout = game.FROST_LAYOUT
@@ -94,6 +95,7 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.advance_flight(10)
 	assert(game.world == 0 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	assert(game.green_surface.visible)
 	for i in range(1,5):
@@ -110,6 +112,7 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.advance_flight(10)
 	assert(game.world == 1 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	game.player = game.ICE_CAVE
 	game.update_exploration()
@@ -133,10 +136,12 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.advance_flight(10)
 	game.player = game.SHIP
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.advance_flight(10)
 	assert(game.world == 1 and game.ice_won and game.rocks[9].hp == 0)
 	print("PASS: rocket travel, distinct surface/mine routes, bridge and canyon collision, all ore reachable, 3s/10s materials, upgrade, second mission and progress retained on return")
 	quit()

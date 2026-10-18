@@ -1,6 +1,7 @@
 shader_type canvas_item;
 
 uniform sampler2D revealed_mask : filter_linear, repeat_disable;
+uniform sampler2D landscape : hint_screen_texture, filter_linear_mipmap, repeat_disable;
 uniform vec2 scout_position;
 uniform float clear_radius = 210.0;
 uniform float reveal_radius = 265.0;
@@ -26,7 +27,10 @@ void fragment() {
 	vec2 drift = vec2(TIME * 0.025, TIME * -0.016);
 	float clouds = cloud_noise(UV * vec2(9.0, 6.3) + drift);
 	clouds += 0.45 * cloud_noise(UV * vec2(20.0, 14.0) - drift * 1.5);
-	vec3 colour = mist_colour.rgb * (0.88 + clouds * 0.15);
-	// Unexplored ground is fully covered, rather than leaking silhouettes.
-	COLOR = vec4(colour, 1.0 - revealed);
+	// Filtered screen mipmaps soften fine details without offset silhouettes.
+	vec3 sharp = texture(landscape, SCREEN_UV).rgb;
+	vec3 blurred = textureLod(landscape, SCREEN_UV, 2.4).rgb;
+	vec3 misty_landscape = mix(blurred, mist_colour.rgb, 0.17 + clouds * 0.045);
+	// Ore is withheld by discovery logic, so translucency reveals only scenery.
+	COLOR = vec4(mix(sharp, misty_landscape, 1.0 - revealed), 1.0);
 }
