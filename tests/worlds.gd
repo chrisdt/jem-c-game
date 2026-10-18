@@ -75,14 +75,14 @@ func run() -> void:
 		assert(game.frost_ore == i+1)
 	game.player = game.ICE_CAVE
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and game.player == game.ICE_SPAWN)
 	game.player = game.rocks[9].pos
 	game.start_mining(9)
 	assert(game.mining_target == -1 and not game.ice_won)
 	game.player = game.ICE_EXIT
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground and layout.can_walk(game.player))
 	game.player = game.ICE_SHIP
 	game.cooldown = 0
@@ -103,7 +103,7 @@ func run() -> void:
 	assert(game.world == 1 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	game.player = game.ICE_CAVE
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	game.player = game.rocks[9].pos
 	game.start_mining(9)
 	game.advance_mining(9.5)
@@ -115,7 +115,7 @@ func run() -> void:
 	assert(game.world == 1 and game.underground)
 	game.player = game.ICE_EXIT
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	game.player = game.ICE_SHIP
 	game.cooldown = 0
 	game.interact()

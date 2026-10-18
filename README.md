@@ -1,13 +1,14 @@
 # Sunny Scout — Planet Adventures
 
-A small Godot 4.6.3 prototype for Jeremy. Uses the Compatibility renderer and GDScript, with a painted Green Planet surface and illustrated Sunny Scout inspired by the approved mockups. The wide exploration camera is preserved. Surface art, copper and blue ore deposits, and character are AI-generated original project assets. Copper and blue crystal share illustrated rough stone, with orange-red copper veins or bright blue mineral veins. The Moss Mine has a painted cavern map with timber supports, lanterns, moss, side chambers and an underground pool. `mine_layout.gd` traces its walkable floor and blocks walls, pillars and water. Creature art remains provisional. Walking uses a four-pose illustrated cycle with alternating arms and legs. The pick is carried on the backpack while walking. Animation advances with distance travelled and returns to a standing pose when stopped or blocked. Front, rear and side walk/idle artwork follows movement direction. Left uses a mirrored side view; stopping retains the last facing. Diagonals use the stronger input axis, with equal diagonals choosing up/down.
+A small Godot 4.6.3 prototype for Jeremy. Uses the Compatibility renderer and GDScript, with a painted Green Planet surface and illustrated Sunny Scout inspired by the approved mockups. The wide exploration camera is preserved. Surface art, copper and blue ore deposits, and character are AI-generated original project assets. Copper and blue crystal share illustrated rough stone, with orange-red copper veins or bright blue mineral veins. The Moss Mine has a painted cavern map with timber supports, lanterns, moss, side chambers and an underground pool. `mine_layout.gd` traces its walkable floor and blocks walls, pillars and water. The illustrated duck wanders near the pond and occasionally pecks the ground. Walking uses a four-pose illustrated cycle with alternating arms and legs. The pick is carried on the backpack while walking. Animation advances with distance travelled and returns to a standing pose when stopped or blocked. Front, rear and side walk/idle artwork follows movement direction. Left uses a mirrored side view; stopping retains the last facing. Diagonals use the stronger input axis, with equal diagonals choosing up/down.
 
 ## Play
 
 Import `project.godot` in Godot 4.6.3 and press **F6** with `main.tscn` open, or **F5** to play the project.
 
 - **WASD / arrow keys:** move
-- **E / Space / MINE button:** start mining, use workbench, enter or leave mine
+- **E / Space / MINE button:** start mining, use workbench or rocket
+- **Mine doorways:** walk into an entrance or exit to change areas automatically
 - While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.
 - **R:** restart
 
@@ -49,6 +50,12 @@ Run `godot --headless --path . --script tests/worlds.gd` to check planet travel,
 
 Navigation follows the visible clearings, chamber outlines and full bridge deck, with collision measured at Sunny Scout’s feet. `floor_motion.gd` sweeps short steps and slides along sloping edges. Run `godot --headless --path . --script tests/navigation_paths.gd` to walk artwork-based routes through the clearings and mine passages and verify hazards remain solid.
 
-Green Planet now uses a clean ground painting and separate reusable tree instances in `environment/green_planet.tscn`. Two broadleaf styles and a pine share `environment/wind_tree.tscn`, with fixed trunks/contact shadows and gently bending canopy meshes. The leaf shader moves neighbouring clusters by slightly different amounts, and each tree has its own wind phase and speed. Low plants retain a much lighter background breeze. The trees are arranged around the existing paths, camp, pond and mine entrance; this change does not add tree collisions.
+Green Planet uses a clean ground painting and separate reusable tree instances in `environment/green_planet.tscn`. Two broadleaf styles and a pine share `environment/wind_tree.tscn`, with fixed trunks/contact shadows and gently bending canopy meshes. The leaf shader moves neighbouring clusters by slightly different amounts, and each tree has its own wind phase and speed. Tree roots are placed on grass, away from the cliff and rock outcrops. This change does not add tree collisions.
 
 To experiment in Godot, open `environment/green_planet.tscn`, select a tree, and adjust **Tree Style**, **Wind Strength**, **Wind Speed** or **Wind Phase** in the Inspector. Duplicate and move tree instances to reuse the effect. The scene origin marks the roots and controls whether Sunny Scout appears in front of or behind a tree. This layered environment is used on the Green Planet surface; the other maps retain their existing artwork.
+
+White, yellow, pink and blue flowers, green reeds and cattails use `environment/wind_plant.tscn`. Their stems bend while roots remain anchored; reeds sway more than the flowers. The plants and trees share a cached mesh in `environment/wind_mesh.gd`. The ground shader adds faint water refraction and highlights only inside the turquoise pond, preserving the shoreline and lily pads.
+
+`environment/pond.tscn` adds a swimming fish, small wakes, occasional jumps and landing splashes. After an initial 5–9 second wait, jumps have a random 8–18 second wait between landings and takeoffs. Adjust the pond's **Minimum Jump Wait**, **Maximum Jump Wait** and **Jump Height** in the Inspector. `environment/duck.tscn` provides the illustrated duck's wandering, walking poses and occasional ground pecks. Both animals pause while the Green Planet surface is hidden.
+
+Run `godot --headless --path . --script tests/pond_life.gd` for wildlife movement, random jump spacing, landings, effect cleanup and visibility checks. Run `godot --headless --path . --script tests/mine_transitions.gd` for automatic entry/exit on both planets, safe arrivals, held movement and slow-frame doorway crossing.

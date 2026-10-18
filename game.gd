@@ -15,8 +15,10 @@ const AMETHYST_ART: Texture2D = preload("res://assets/amethyst_ore.png")
 const ICE_CAMP := Vector2(570, 1060)
 const ICE_SHIP := Vector2(260, 1070)
 const ICE_CAVE := Vector2(1620, 280)
-const ICE_EXIT := Vector2(968, 1094)
-const ICE_SPAWN := Vector2(968, 947)
+const ICE_EXIT := Vector2(968, 1230)
+const ICE_SPAWN := Vector2(968, 1115)
+const MINE_TRIGGER_RADIUS := 65.0
+var mine_transition_cooldown := 0.0
 var world := 0
 var planet_rocks: Dictionary = {}
 var frost_ore := 0
@@ -236,6 +238,8 @@ func restore_walk_visual() -> void:
 	scout.rotation = 0.0
 
 func move_player(direction: Vector2, delta: float) -> void:
+	mine_transition_cooldown = maxf(0, mine_transition_cooldown - delta)
+	var previous := player
 	if mining_target >= 0:
 		if direction.is_zero_approx():
 			walking = false
@@ -264,6 +268,30 @@ func move_player(direction: Vector2, delta: float) -> void:
 		scout.frame = 0
 	scout.flip_h = facing_left
 	scout.position = player
+	check_mine_transition(previous)
+
+func check_mine_transition(previous: Vector2) -> void:
+	if mine_transition_cooldown > 0:
+		return
+	var doorway := exit_position() if underground else cave_position()
+	var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
+	if closest.distance_to(doorway) >= MINE_TRIGGER_RADIUS:
+		return
+	cancel_mining()
+	particles.clear()
+	underground = not underground
+	player = (ICE_SPAWN if world == 1 else MINE_SPAWN) if underground else (Vector2(1575,385) if world == 1 else Vector2(1430,520))
+	walking = false
+	walk_distance = 0
+	scout.animation = StringName("idle_" + str(facing))
+	scout.frame = 0
+	scout.position = player
+	camera.position = player
+	camera.reset_smoothing()
+	mine_transition_cooldown = 0.6
+	message = ("Frost Mine: follow either branch to find amethyst. A stronger pick is required." if world == 1 else "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick.") if underground else "Back outside. The rocket and workbench are at your landing camp."
+	refresh_ui()
+	queue_redraw()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -303,14 +331,6 @@ func interact() -> void:
 			message = "Your stronger pick is ready. Find amethyst in the Frost Mine!" if world == 1 else "Your stronger pick is ready. Blue crystals are inside the mine!"
 		else:
 			message = "Workbench: bring 5 copper from Green Planet to build a stronger pick." if world == 1 else "Workbench: collect 5 copper from the orange rocks nearby."
-	elif (not underground and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
-		particles.clear()
-		underground = not underground
-		player = (ICE_SPAWN if world == 1 else MINE_SPAWN) if underground else (Vector2(1570,330) if world == 1 else Vector2(1430,520))
-		scout.position = player
-		camera.position = player
-		camera.reset_smoothing()
-		message = ("Frost Mine: follow either branch to find amethyst. A stronger pick is required." if world == 1 else "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick.") if underground else "Back outside. The rocket and workbench are at your landing camp."
 	else:
 		var i := nearest_rock()
 		if i >= 0:
@@ -438,7 +458,7 @@ func refresh_ui() -> void:
 	elif not underground and player.distance_to(camp_position()) < 140:
 		prompt.text = "[E] Workbench — stronger pick costs 5 copper"
 	elif (not underground and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
-		prompt.text = "[E] Leave mine" if underground else "[E] Enter " + mine_name()
+		prompt.text = "Walk into the doorway to leave the mine" if underground else "Walk into the entrance to enter " + mine_name()
 	elif nearest_rock() >= 0:
 		var rock: Dictionary = rocks[nearest_rock()]
 		prompt.text = "[E / Space] Mine %s — %ds" % [material_name(rock),int(rock.seconds)]
@@ -464,7 +484,7 @@ func _draw() -> void:
 			var flicker := 0.012 + sin(elapsed * 4.3 + i * 2.1) * 0.004
 			for radius in [25, 40, 58]:
 				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
-		label_at(exit_position() + Vector2(-85, 80), "[E] SURFACE", Color("ffe4ac"), 18)
+		label_at(exit_position() + Vector2(-85, -95 if world == 1 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
 		draw_arc(exit_position(), 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
 		if world == 1:
@@ -474,11 +494,6 @@ func _draw() -> void:
 		label_at(ship_position() + Vector2(-65, 80), "[E] ROCKET", Color("ffe4ac"), 18)
 		for point in [camp_position(), cave_position() + Vector2(0, 85), ship_position()]:
 			draw_arc(point, 36, 0, TAU, 40, Color(1, 0.89, 0.63, 0.55 + sin(elapsed * 2) * 0.15), 2)
-		if world == 0:
-			var buddy := Vector2(990 + sin(elapsed * 0.5) * 65, 940 + cos(elapsed * 0.5) * 35)
-			ellipse(buddy, Vector2(23, 17), Color("ead9aa"))
-			draw_circle(buddy + Vector2(17, -10), 12, Color("ead9aa"))
-			draw_circle(buddy + Vector2(22, -12), 3, Color("263f3a"))
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]

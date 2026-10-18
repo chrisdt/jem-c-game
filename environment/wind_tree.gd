@@ -3,7 +3,7 @@ extends Node2D
 
 const PARTS: Texture2D = preload("res://assets/tree_parts.png")
 const LEAF_SHADER: Shader = preload("res://shaders/tree_leaves.gdshader")
-const GRID := 16
+const WIND_MESH = preload("res://environment/wind_mesh.gd")
 
 @export_enum("Sunlit broadleaf", "Emerald broadleaf", "Pine") var tree_style := 0:
 	set(value):
@@ -46,7 +46,7 @@ func _rebuild() -> void:
 	var leaves := MeshInstance2D.new()
 	leaves.name = "MovingLeaves"
 	leaves.texture = PARTS
-	leaves.mesh = canopy_mesh(cell)
+	leaves.mesh = WIND_MESH.make(cell)
 	leaves.position = Vector2(-cell.x * 0.5, -cell.y * 1.04)
 	var wind := ShaderMaterial.new()
 	wind.shader = LEAF_SHADER
@@ -57,28 +57,6 @@ func _rebuild() -> void:
 	leaves.material = wind
 	add_child(leaves)
 	queue_redraw()
-
-func canopy_mesh(cell: Vector2) -> ArrayMesh:
-	var vertices := PackedVector2Array()
-	var uvs := PackedVector2Array()
-	var indices := PackedInt32Array()
-	for y in range(GRID + 1):
-		for x in range(GRID + 1):
-			var uv := Vector2(x, y) / GRID
-			vertices.append(uv * cell)
-			uvs.append(uv)
-	for y in GRID:
-		for x in GRID:
-			var corner := y * (GRID + 1) + x
-			indices.append_array(PackedInt32Array([corner, corner + 1, corner + GRID + 1, corner + 1, corner + GRID + 2, corner + GRID + 1]))
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_TEX_UV] = uvs
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
 
 func _draw() -> void:
 	# A small fixed contact shadow grounds the tree without swaying its roots.

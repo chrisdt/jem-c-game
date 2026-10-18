@@ -64,7 +64,7 @@ func run() -> void:
 	assert(game.upgraded and game.ore == 0)
 	game.player = game.CAVE
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and not game.green_surface.visible)
 	game.player = Vector2(1180, 450)
 	game.cooldown = 0
@@ -75,7 +75,7 @@ func run() -> void:
 	assert(game.won)
 	game.player = game.MINE_EXIT
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground and game.green_surface.visible)
 	print("PASS: mining, inventory, upgrade, mine entry, crystal mission and exit")
 	quit()

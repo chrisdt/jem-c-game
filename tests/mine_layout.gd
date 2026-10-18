@@ -52,14 +52,14 @@ func run() -> void:
 				reachable = true
 				break
 		assert(reachable, "Unreachable mine location: %s" % target)
-	# Enter and leave through the actual interaction points.
+	# Doorways transition automatically without an interaction key.
 	game.player = game.CAVE
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and game.player == game.MINE_SPAWN)
 	game.player = game.MINE_EXIT
 	game.cooldown = 0
-	game.interact()
+	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground)
 	print("PASS: cave walls, pool, pillars, slow-frame collision, connected ore and side chambers, entry and exit")
 	quit()

@@ -35,7 +35,9 @@ func run() -> void:
 	game.set_process(false)
 	# These waypoints come from visible paths/clearings in the artwork, not
 	# from the navigation geometry. Walk each segment with real player controls.
-	run_route(game,"ice",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1270,280),Vector2(1210,230)])
+	# Surface routes stop before the automatic doorway; mine_transitions.gd
+	# checks crossing it and arriving in the next area.
+	run_route(game,"ice",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1270,280),Vector2(1210,290)])
 	run_route(game,"ice",[Vector2(340,550),Vector2(335,440),Vector2(340,365),Vector2(370,320),Vector2(355,275),Vector2(300,275),Vector2(270,300)])
 	run_route(game,"ice",[Vector2(1000,470),Vector2(1080,560),Vector2(1160,620),Vector2(1230,690)])
 	run_route(game,"ice",[Vector2(330,610),Vector2(260,620)])
