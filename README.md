@@ -7,10 +7,11 @@ A small Godot 4.6.3 prototype for Jeremy. Uses the Compatibility renderer and GD
 Import `project.godot` in Godot 4.6.3 and press **F6** with `main.tscn` open, or **F5** to play the project.
 
 - **WASD / arrow keys:** move
-- **E / Space / MINE button:** mine, use workbench, enter or leave mine
+- **E / Space / MINE button:** start mining, use workbench, enter or leave mine
+- While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.
 - **R:** restart
 
-Collect five copper deposits (two hits each), return to the camp workbench for a stronger pick, then enter the Moss Mine at the northeast and mine a blue crystal. You can continue exploring after completing the mission. The painted pond blocks movement; decorative trees and rocks currently do not. No enemies, saving, sound, touch movement, or spaceflight yet.
+Collect five copper deposits (2 seconds each), return to the camp workbench for a stronger pick, then enter the Moss Mine at the northeast and mine a blue crystal (9 seconds; requires the stronger pick). Press once to start: mining continues automatically until complete or cancelled. Directional pick-swing poses, rock tremors, sparks, dust and a progress bar show the work. The upgrade unlocks crystal mining; copper remains 2 seconds. Durations are set by `COPPER_SECONDS` and `CRYSTAL_SECONDS` in `game.gd`. You can continue exploring after completing the mission. The painted pond blocks movement; decorative trees and rocks currently do not. No enemies, saving, sound, touch movement, or spaceflight yet.
 
 ## Browser build
 
@@ -30,4 +31,4 @@ Open the served page in a desktop browser. Web exports must be served over HTTP(
 godot --headless --path . --script tests/smoke.gd
 ```
 
-The smoke test exercises copper collection, the upgrade purchase, mine entry, crystal completion and returning outdoors.
+The smoke test exercises movement and facing, timed copper collection, the upgrade purchase, mine entry, the 9-second crystal objective and returning outdoors. Run `godot --headless --path . --script tests/mining.gd` for interruption, tool restrictions, directional mining poses, frame-rate independence and effect cleanup checks.

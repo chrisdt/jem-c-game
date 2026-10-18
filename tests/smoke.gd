@@ -46,12 +46,16 @@ func run() -> void:
 	assert(game.player == Vector2(1090, 960))
 	assert(not game.walking and str(game.scout.animation).begins_with("idle_"))
 	print("PASS: directional walk cycle, retained idle facing, diagonal speed, pond and map boundaries")
-	# Two hits per deposit; moving between deposits also allows cooldown to expire.
+	# Timed copper collection; the first click starts work and cannot award early.
 	for i in range(5):
 		game.player = game.rocks[i].pos
-		for hit in range(2):
-			game.cooldown = 0
-			game.interact()
+		game.cooldown = 0
+		game.interact()
+		assert(game.mining_target == i)
+		game.advance_mining(1.5)
+		assert(game.ore == i)
+		game.advance_mining(0.5)
+		assert(game.ore == i + 1)
 	assert(game.ore == 5)
 	game.player = game.CAMP
 	game.cooldown = 0
@@ -62,9 +66,11 @@ func run() -> void:
 	game.interact()
 	assert(game.underground)
 	game.player = Vector2(1180, 450)
-	for hit in range(2):
-		game.cooldown = 0
-		game.interact()
+	game.cooldown = 0
+	game.interact()
+	game.advance_mining(8.5)
+	assert(not game.won)
+	game.advance_mining(0.5)
 	assert(game.won)
 	game.player = Vector2(350, 700)
 	game.cooldown = 0
