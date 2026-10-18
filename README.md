@@ -20,7 +20,7 @@ Collect five copper deposits (2 seconds each), return to the camp workbench for 
 
 The compact teal-and-brass HUD follows approved concept A: location and planet badge at top left, this world's two mineral icons and actual inventory counts at top right, and the equipped pick/drill icon. Ore icons reuse the exact deposit textures. Earth blue crystals have a separate collected count. The contextual action button appears only near an interaction; notifications fade after 4.5 seconds. The small **?** button opens the controls. Travel cards use illustrated planet thumbnails, material previews, keyboard focus and current-world status. `ui/world_catalog.gd` keeps world names, icons and materials together; the first world is named **Earth** throughout gameplay and travel.
 
-Build the **hand drill for 5 copper** at any camp workbench. It stays visibly fitted in front, rear and side walking/idle poses and replaces pick swings with continuous directional drilling in both outfits, on all twelve maps. Mining durations remain unchanged. `drill_visual.gd` anchors the new poses to the same ground contact line, including after cancellation, mine transitions and rocket travel. The checked-in atlas resources and anchors can be regenerated with `python tools/build_drill_frames.py` (optional authoring dependencies: Pillow, NumPy and SciPy); the tool analyzes source alpha without editing the art. Godot itself needs no Python dependencies.
+Build the **hand drill for 5 copper** at any camp workbench. It stays visibly fitted in front, rear and side walking/idle poses and replaces pick swings with continuous directional drilling in both outfits, on all twenty-four maps. Mining durations remain unchanged. `drill_visual.gd` anchors the new poses to the same ground contact line, including after cancellation, mine transitions and rocket travel. The checked-in atlas resources and anchors can be regenerated with `python tools/build_drill_frames.py` (optional authoring dependencies: Pillow, NumPy and SciPy); the tool analyzes source alpha without editing the art. Godot itself needs no Python dependencies.
 
 Run `godot --headless --path . --script tests/hud_drill.gd` to check the compact HUD, mineral counters, purchase cost, all upgraded directions/outfits, ground anchors, session persistence and reset. Fonts are Noto under the SIL Open Font License; see `assets/ui/FONT_LICENSE.txt`.
 
@@ -44,9 +44,39 @@ The meadow's east trail reaches Pinewood; its south trail reaches Willow Marsh. 
 
 `environment/earth_stream.gd` loads nearby scenery ahead of the player within 700 world units of a signed trail or mine entrance. Native Godot uses threaded resource loading. Only one district's extra scenery/foliage is instantiated, and a three-texture LRU cache retains recently used backgrounds; at most two requests run together. Inactive home wildlife pauses. Lightweight ore records and 250 × 175 discovery masks remain independent of that cache. Distant scenery can be evicted without losing progress.
 
-The enabled `addons/earth_streaming` export plugin keeps the six new background textures out of the initial **Web** PCK, and writes them into an `earth_chunks/` folder beside `index.html`. The exporter makes high-quality JPEG copies of these opaque paintings for smaller downloads and faster decoding. The browser downloads those files as the player approaches their area, decodes at most one image per frame and releases stale HTTP requests. Keep that folder with the exported game when hosting or zipping it. Native builds use the original imported PNG assets automatically. A slow connection holds the short transition fade with a visible destination caption; a failed download returns to a safe spot in the previous district and allows another attempt.
+The enabled `addons/earth_streaming` export plugin keeps all eighteen additional district/mine backgrounds out of the initial **Web** PCK, and writes `earth_chunks/`, `frost_chunks/` and `ember_chunks/` folders beside `index.html`. The exporter makes high-quality JPEG copies of these opaque paintings for smaller downloads and faster decoding. The browser downloads those files as the player approaches their area, decodes at most one image per frame and releases stale HTTP requests. Keep all three folders with the exported game when hosting or zipping it. Native builds use the original imported PNG assets automatically. A slow connection holds the short transition fade with a visible destination caption; a failed download returns to a safe spot in the previous district and allows another attempt.
 
 Run `godot --headless --path . --script tests/earth_expansion.gd` for painted trail/bridge/gallery routes, water/rock boundaries, 200 randomized ore layouts, automatic area changes, session progress after cache eviction, loading input locks and failed-load recovery. Browser performance should also be checked on the intended player devices; headless checks establish resource budgets and state correctness rather than a target frame rate.
+
+## Expanded Frost Canyon and Ember Dunes
+
+Both off-world planets now have **five times their original surface area**: five 2000 × 1400 districts and three separate mines each. All three worlds together offer **15 surface districts and 9 mines**, with 24 independent exploration masks. The original landing camps, workbenches, rockets and first mines remain in place.
+
+| Frost Canyon district | Landmark | Mine |
+| --- | --- | --- |
+| Canyon Camp | Original chasm and wooden bridge; west/east snow trails | Frost Mine |
+| Frozen Basin | Wide snow basin, frozen pools and abandoned sled | Blue Echo Mine |
+| Prism Pass | Crystal formations, northern loop and ruined observatory | — |
+| Aurora Shelf | Two northern approaches, ice arch and frozen lake | — |
+| Glacier Crown | Glacial amphitheatre and ancient sundial | Deep Prism Mine |
+
+Canyon Camp's **west** trail reaches Frozen Basin; its **east** trail reaches Prism Pass. Both continue south to separate northern entrances on Aurora Shelf, forming a loop. Prism Pass also leads east to Glacier Crown. Snow paths stay open around the solid crystal/rock islands and frozen pools.
+
+| Ember Dunes district | Landmark | Mine |
+| --- | --- | --- |
+| Mesa Camp | Original mesa and landing camp; west/south sand trails | Lava Mine |
+| Dune Sea | Open rippled dunes and stranded mining sled | Sunfire Cavern |
+| Sunken Oasis | Pond, palms, old well and waterside loop | — |
+| Redrock Arches | Sandstone islands and walkable natural arch | — |
+| Obsidian Rise | Basalt formations and volcanic fissures | Magma Vault |
+
+Mesa Camp's **west** trail reaches Dune Sea; its **south** trail reaches Sunken Oasis. Dune Sea continues south to Redrock Arches, which connects east to the oasis. The oasis also leads east to Obsidian Rise. Sunfire Cavern has a broad dry ring around its lava basin; Magma Vault has multiple galleries and a dry western rim beside its lava lake. Lava, solid columns and water block movement. Small masked flow layers and embers animate lava in the current district; Frost districts have a bounded set of drifting snow flecks.
+
+`outer_regions.gd` holds both trail networks, floor outlines traced from the paintings, mineral zones and unique discovery IDs. `game.gd` uses the same transition/state handling and existing `environment/earth_stream.gd` loader for all planets; the historical Earth-named fields/file remain compatible with project tools. A **single** three-background cache and two-request limit apply across all worlds. Changing planets releases the previous planet's streamed scenery. Prefetch never creates ore or reveals a district. Returning after eviction or rocket travel retains depleted deposits, discoveries, materials and the fitted drill during the session. Rockets return to each planet's landing camp.
+
+Frost ore/gold still take **3 seconds**; amethyst/fire ruby take **10 seconds** and require the hand drill. Sunny Scout keeps his spacesuit/drill artwork in every off-world district and mine. Expanded areas generate ore on first entry: eight surface deposits per new district and seven per new mine. Each expanded off-world planet has 58 deposits including its original area/mine. **R** or closing the game resets the session; there is no disk save.
+
+Run `godot --headless --path . --script tests/outer_expansion.gd` for all new painted routes, 400 randomized layouts, 24 unique map IDs, automatic trails/mine doors, real rocket travel, tool requirements, per-world mineral counters, cache eviction, failed-load recovery and preserved progress. The original thirteen checks still cover Earth and the original off-world routes, wildlife, HUD and rocket animations.
 
 ## Second planet: Frost Canyon
 
@@ -66,7 +96,7 @@ The mission is **3 gold (3 seconds each)** and **1 fire ruby (10 seconds)**. Fir
 
 ## Exploration and random ore
 
-A subtle, translucent mist softly blurs unexplored ground on all three planets and in all five mines. The landscape remains visible through it; discovered ground becomes crisp and clear. Sunny Scout reveals a circle as he walks, and visited areas remain clear for the rest of the current game. Ore stays hidden and cannot be selected or mined until its location is explored. Newly discovered deposits, their shadows and selection rings fade in together over 0.75 seconds; revisiting a discovered deposit does not restart the fade. Adjust `ORE_REVEAL_SECONDS` in `game.gd` to change the duration. Each of the twelve maps remembers its own discovery; travelling through a doorway or rocket does not reveal a line between arrival and departure points.
+A subtle, translucent mist softly blurs unexplored ground on all three planets and in all nine mines. The landscape remains visible through it; discovered ground becomes crisp and clear. Sunny Scout reveals a circle as he walks, and visited areas remain clear for the rest of the current game. Ore stays hidden and cannot be selected or mined until its location is explored. Newly discovered deposits, their shadows and selection rings fade in together over 0.75 seconds; revisiting a discovered deposit does not restart the fade. Adjust `ORE_REVEAL_SECONDS` in `game.gd` to change the duration. Each of the twenty-four maps remembers its own discovery; travelling through a doorway or rocket does not reveal a line between arrival and departure points.
 
 Every new game creates new ore locations. Returning to a map keeps its existing layout and depleted deposits. **R** starts a fresh game with new ore and fresh mist. There is no disk persistence. `ore_spawns.gd` selects separated deposits on connected walkable floor, leaves space around doors/camp/rocket, and keeps Earth deposits off the pond, painted boulders, cliff and tree canopies. The original maps retain their deposit counts; upgrades and mining times are unchanged.
 
@@ -102,7 +132,7 @@ Navigation follows the visible clearings, chamber outlines and full bridge deck,
 
 Earth uses a clean ground painting and separate reusable tree instances in `environment/green_planet.tscn`. Two broadleaf styles and a pine share `environment/wind_tree.tscn`, with fixed trunks/contact shadows and gently bending canopy meshes. The leaf shader moves neighbouring clusters by slightly different amounts, and each tree has its own wind phase and speed. Tree roots are placed on grass, away from the cliff and rock outcrops. This change does not add tree collisions.
 
-To experiment in Godot, open `environment/green_planet.tscn`, select a tree, and adjust **Tree Style**, **Wind Strength**, **Wind Speed** or **Wind Phase** in the Inspector. Duplicate and move tree instances to reuse the effect. The scene origin marks the roots and controls whether Sunny Scout appears in front of or behind a tree. Landing Meadow uses this layered environment. New Earth districts instantiate the same wind trees and flowers from `earth_regions.gd`; Frost Canyon and Ember Dunes retain their existing artwork.
+To experiment in Godot, open `environment/green_planet.tscn`, select a tree, and adjust **Tree Style**, **Wind Strength**, **Wind Speed** or **Wind Phase** in the Inspector. Duplicate and move tree instances to reuse the effect. The scene origin marks the roots and controls whether Sunny Scout appears in front of or behind a tree. Landing Meadow uses this layered environment. New Earth districts instantiate the same wind trees and flowers from `earth_regions.gd`; Frost Canyon and Ember Dunes use their own illustrated scenery and lightweight snow/lava ambience.
 
 White, yellow, pink and blue flowers, green reeds and cattails use `environment/wind_plant.tscn`. Their stems bend while roots remain anchored; reeds sway more than the flowers. The plants and trees share a cached mesh in `environment/wind_mesh.gd`. The ground shader adds faint water refraction and highlights only inside the turquoise pond, preserving the shoreline and lily pads.
 

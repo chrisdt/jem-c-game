@@ -150,6 +150,8 @@ static func floor_contains(point: Vector2, cave: bool) -> bool:
 			if ((art - Vector2(pillar.x,pillar.y)) / Vector2(pillar.z,pillar.w)).length_squared() < 1:
 				return false
 		return true
+	# New southern trail cuts through the former border cliff.
+	if Rect2(805,820,130,229).has_point(art): return true
 	if not Geometry2D.is_point_in_polygon(art, SURFACE_FLOOR) or Geometry2D.is_point_in_polygon(art, MESA):
 		return false
 	for rock in SURFACE_ROCKS:

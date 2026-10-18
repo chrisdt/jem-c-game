@@ -1,7 +1,7 @@
 extends RefCounted
 
 const NAMES := ["Earth", "Frost Canyon", "Ember Dunes"]
-const DESCRIPTIONS := ["Five districts & three mines", "Snow & Frost Mine", "Desert & Lava Mine"]
+const DESCRIPTIONS := ["Five districts & three mines", "Five districts & three mines", "Five districts & three mines"]
 const MATERIALS := [["Copper", "Blue crystal"], ["Frost ore", "Amethyst"], ["Gold", "Fire ruby"]]
 const ORES := [
 	[preload("res://assets/copper_ore.png"), preload("res://assets/blue_ore.png")],

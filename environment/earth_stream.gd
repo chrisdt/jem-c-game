@@ -1,6 +1,11 @@
 extends Node2D
 
-const REGIONS = preload("res://earth_regions.gd")
+# Shared by all planets; the historical file name remains for project links.
+const OUTER_REGIONS = preload("res://outer_regions.gd")
+const AMBIENCE = preload("res://environment/region_ambience.gd")
+const LAVA_FLOW = preload("res://shaders/lava_flow.gdshader")
+
+var REGIONS = preload("res://earth_regions.gd")
 const TREE: PackedScene = preload("res://environment/wind_tree.tscn")
 const PLANT: PackedScene = preload("res://environment/wind_plant.tscn")
 const MAX_TEXTURES := 3
@@ -129,7 +134,7 @@ func _start(key: String) -> void:
 		var base: String = JavaScriptBridge.eval("new URL('.', document.baseURI).href")
 		var name: String = REGIONS.ASSETS[key].get_file().get_basename()+".jpg"
 		network_requests += 1
-		if http.request(base+"earth_chunks/"+name) != OK:
+		if http.request(base+REGIONS.ASSETS[key].get_base_dir().get_file()+"_chunks/"+name) != OK:
 			jobs.erase(key)
 			http.queue_free()
 			failures[key] = clock
@@ -171,14 +176,14 @@ func show_area(region: int, cave: bool) -> void:
 		remove_child(scenery)
 		scenery.free()
 		scenery = null
-	var key := REGIONS.key(region,cave)
+	var key: String = REGIONS.key(region,cave)
 	active_key = key if REGIONS.ASSETS.has(key) else ""
 	pinned = ""
 	if active_key.is_empty(): return
-	assert(textures.has(key),"Cannot enter Earth scenery before it is ready")
+	assert(textures.has(key),"Cannot enter scenery before it is ready")
 	used_at[key] = clock
 	scenery = Node2D.new()
-	scenery.name = "ActiveEarthScenery"
+	scenery.name = "ActivePlanetScenery"
 	scenery.y_sort_enabled = true
 	add_child(scenery)
 	var ground := Sprite2D.new()
@@ -188,6 +193,25 @@ func show_area(region: int, cave: bool) -> void:
 	ground.z_index = -2
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	scenery.add_child(ground)
+	if REGIONS is OUTER_REGIONS:
+		var atmosphere := AMBIENCE.new()
+		atmosphere.world = REGIONS.world
+		atmosphere.pools = REGIONS.lava_pools(region,cave)
+		atmosphere.z_index = 2
+		scenery.add_child(atmosphere)
+		if not atmosphere.pools.is_empty():
+			var mask := Image.create(64,44,false,Image.FORMAT_R8)
+			for y in 44:
+				for x in 64:
+					var point: Vector2 = Vector2((x+0.5)/64.0,(y+0.5)/44.0)*REGIONS.ART_SIZE
+					var molten := false
+					for pool in atmosphere.pools:
+						if ((point-Vector2(pool.x,pool.y))/Vector2(pool.z,pool.w)).length_squared() < 0.96: molten = true
+					mask.set_pixel(x,y,Color.WHITE if molten else Color.BLACK)
+			var flow := ShaderMaterial.new()
+			flow.shader = LAVA_FLOW
+			flow.set_shader_parameter("lava_mask",ImageTexture.create_from_image(mask))
+			ground.material = flow
 	if not cave:
 		var index := 0
 		for placement in REGIONS.TREES[region]:

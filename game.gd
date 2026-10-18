@@ -54,6 +54,11 @@ var rubies := 0
 var desert_won := false
 var player := Vector2(560, 550)
 const EARTH = preload("res://earth_regions.gd")
+const OUTER = preload("res://outer_regions.gd")
+var world_regions := [EARTH,OUTER.new(1),OUTER.new(2)]
+var outer_region := {1:0,2:0}
+var outer_rocks := {1:{},2:{}}
+var outer_visited := {1:{},2:{}}
 const EARTH_STREAM = preload("res://environment/earth_stream.gd")
 var earth_region := 0
 var earth_rocks: Dictionary = {}
@@ -189,16 +194,31 @@ func _ready() -> void:
 	planet_menu.closed.connect(refresh_ui)
 	refresh_ui()
 
+# The Earth-named transition fields are retained for the existing editor/test
+# API; the same bounded loader now serves all three planets.
+func regions():
+	return world_regions[world]
+
+func current_region() -> int:
+	return earth_region if world == 0 else outer_region[world]
+
+func set_current_region(region: int) -> void:
+	if world == 0: earth_region = region
+	else: outer_region[world] = region
+
+func district_rocks() -> Dictionary:
+	return earth_rocks if world == 0 else outer_rocks[world]
+
+func visited_regions() -> Dictionary:
+	return earth_visited if world == 0 else outer_visited[world]
+
 func reset_rocks() -> void:
-	if world == 0 and earth_region > 0:
-		rocks = EARTH.generate(earth_region,ore_rng)
-		earth_rocks[earth_region] = rocks
-		return
-	var entries: Array[Vector2] = []
-	entries.append([Vector2(560,550),Vector2(390,1120),DESERT_LAYOUT.ARRIVAL][world])
-	entries.append(mine_spawn_position())
-	rocks = ORE_SPAWNS.generate(world, ore_rng, entries, tree_cover(), Vector2(COPPER_SECONDS, CRYSTAL_SECONDS))
-	if world == 0: earth_rocks[0] = rocks
+	if current_region() > 0:
+		rocks = regions().generate(current_region(),ore_rng)
+	else:
+		var entries: Array[Vector2] = [[Vector2(560,550),Vector2(390,1120),DESERT_LAYOUT.ARRIVAL][world],mine_spawn_position()]
+		rocks = ORE_SPAWNS.generate(world,ore_rng,entries,tree_cover(),Vector2(COPPER_SECONDS,CRYSTAL_SECONDS))
+	district_rocks()[current_region()] = rocks
 
 func tree_cover() -> Array[Rect2]:
 	var cover: Array[Rect2] = []
@@ -208,12 +228,10 @@ func tree_cover() -> Array[Rect2]:
 	return cover
 
 func area_id() -> int:
-	if world == 0:
-		return EARTH.MINE_IDS[earth_region] if underground else EARTH.SURFACE_IDS[earth_region]
-	return world * 2 + int(underground)
+	return regions().MINE_IDS[current_region()] if underground else regions().SURFACE_IDS[current_region()]
 
 func has_base() -> bool:
-	return world > 0 or earth_region == 0
+	return current_region() == 0
 
 func update_exploration() -> void:
 	if fog == null:
@@ -229,31 +247,27 @@ func camp_position() -> Vector2:
 	return [CAMP, ICE_CAMP, DESERT_LAYOUT.CAMP][world]
 
 func cave_position() -> Vector2:
-	if world == 0: return EARTH.MINE_ENTRANCES[earth_region]
-	return [CAVE, ICE_CAVE, DESERT_LAYOUT.CAVE][world]
+	return regions().MINE_ENTRANCES[current_region()]
 
 func exit_position() -> Vector2:
-	if world == 0: return EARTH.MINE_EXITS[earth_region]
-	return [MINE_EXIT, ICE_EXIT, DESERT_LAYOUT.MINE_EXIT][world]
+	return regions().MINE_EXITS[current_region()]
 
 func ship_position() -> Vector2:
 	return [SHIP, ICE_SHIP, DESERT_LAYOUT.SHIP][world]
 
 func mine_spawn_position() -> Vector2:
-	if world == 0: return EARTH.MINE_SPAWNS[earth_region]
-	return [MINE_SPAWN, ICE_SPAWN, DESERT_LAYOUT.MINE_SPAWN][world]
+	return regions().MINE_SPAWNS[current_region()]
 
 func surface_arrival_position() -> Vector2:
-	if world == 0 and earth_region > 0: return Vector2(1000,746)
+	if current_region() > 0: return regions().arrival(current_region(),regions().LINKS[current_region()][0].side)
 	return [Vector2(320,500), Vector2(390,1120), DESERT_LAYOUT.ARRIVAL][world]
 
 func surface_exit_position() -> Vector2:
-	if world == 0 and earth_region > 0: return cave_position()+Vector2(0,160)
+	if current_region() > 0: return cave_position()+Vector2(0,160)
 	return [Vector2(1430,520), Vector2(1575,385), DESERT_LAYOUT.OUTSIDE][world]
 
 func mine_name() -> String:
-	if world == 0: return EARTH.MINE_NAMES[earth_region]
-	return ["Moss Mine", "Frost Mine", "Lava Mine"][world]
+	return regions().MINE_NAMES[current_region()]
 
 func material_name(rock: Dictionary) -> String:
 	if world == 2:
@@ -267,8 +281,8 @@ func material_tint(rock: Dictionary) -> Color:
 
 func arrival_message() -> String:
 	return ["Back on Earth! Follow the trails to explore five districts and three mines.",
-		"Frost Canyon! Cross the bridge to the Frost Mine. Collect 3 frost ore and 1 amethyst.",
-		"Ember Dunes! Explore around the mesa and enter the Lava Mine. Collect 3 gold and 1 fire ruby."][world]
+		"Frost Canyon! Follow the snow trails to explore five districts and three mines.",
+		"Ember Dunes! Follow the sand trails to explore five districts and three mines."][world]
 
 func open_planet_menu() -> void:
 	walking = false
@@ -353,14 +367,13 @@ func update_flight_visual() -> void:
 			travel_fade.color.a = 0
 
 func switch_planet() -> void:
-	if world == 0:
-		earth_rocks[earth_region] = rocks
-		planet_rocks[0] = earth_rocks[0]
-	else:
-		planet_rocks[world] = rocks
+	district_rocks()[current_region()] = rocks
+	planet_rocks[world] = district_rocks()[0]
 	earth_stream.deactivate()
 	world = flight_destination
-	if world == 0: earth_region = 0
+	set_current_region(0)
+	earth_stream.REGIONS = regions()
+	visited_regions()[0] = true
 	if planet_rocks.has(world):
 		rocks = planet_rocks[world]
 	else:
@@ -400,8 +413,7 @@ func _process(delta: float) -> void:
 	if earth_transition:
 		advance_earth_transition(delta)
 		return
-	if world == 0:
-		earth_stream.prepare(earth_region,underground,player)
+	earth_stream.prepare(current_region(),underground,player)
 	if flight != Flight.IDLE:
 		advance_flight(delta)
 		return
@@ -452,8 +464,8 @@ func move_player(direction: Vector2, delta: float) -> void:
 	face_direction(direction)
 	var next := player + direction.normalized() * SPEED * delta
 	next = next.clamp(Vector2(90, 180), Vector2(1900, 1290))
-	if world == 0 and earth_region > 0:
-		next = EARTH.move_on_floor(earth_region,underground,player,direction.normalized()*SPEED*delta)
+	if current_region() > 0:
+		next = regions().move_on_floor(current_region(),underground,player,direction.normalized()*SPEED*delta)
 	elif world == 2:
 		next = DESERT_LAYOUT.move_on_floor(player, direction.normalized() * SPEED * delta, underground)
 	elif world == 1:
@@ -479,15 +491,15 @@ func move_player(direction: Vector2, delta: float) -> void:
 func check_mine_transition(previous: Vector2) -> void:
 	if mine_transition_cooldown > 0 or earth_transition:
 		return
-	if world == 0 and not EARTH.has_mine(earth_region):
+	if not regions().has_mine(current_region()):
 		return
 	var doorway := exit_position() if underground else cave_position()
 	var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
 	if closest.distance_to(doorway) >= MINE_TRIGGER_RADIUS:
 		return
-	if world == 0 and earth_region > 0:
+	if current_region() > 0:
 		var entering := not underground
-		begin_earth_transition(earth_region,entering,mine_spawn_position() if entering else surface_exit_position(),surface_exit_position() if entering else mine_spawn_position())
+		begin_earth_transition(current_region(),entering,mine_spawn_position() if entering else surface_exit_position(),surface_exit_position() if entering else mine_spawn_position())
 		return
 	cancel_mining()
 	particles.clear()
@@ -508,20 +520,20 @@ func check_mine_transition(previous: Vector2) -> void:
 	queue_redraw()
 
 func check_earth_trail(previous: Vector2) -> void:
-	if world != 0 or underground or earth_transition or earth_trail_cooldown > 0:
+	if underground or earth_transition or earth_trail_cooldown > 0:
 		return
-	for link in EARTH.LINKS[earth_region]:
-		var point: Vector2 = EARTH.portal(earth_region,link.side)
+	for link in regions().LINKS[current_region()]:
+		var point: Vector2 = regions().portal(current_region(),link.side)
 		var closest := Geometry2D.get_closest_point_to_segment(point,previous,player)
 		if closest.distance_to(point) < 55:
-			begin_earth_transition(link.target,false,EARTH.arrival(link.target,link.arrival),EARTH.arrival(earth_region,link.side))
+			begin_earth_transition(link.target,false,regions().arrival(link.target,link.arrival),regions().arrival(current_region(),link.side))
 			return
 
 func begin_earth_transition(region: int, cave: bool, arrival: Vector2, rollback: Vector2) -> void:
-	if world != 0 or earth_transition or flight != Flight.IDLE or planet_menu.visible:
+	if earth_transition or flight != Flight.IDLE or planet_menu.visible:
 		return
 	if mining_target >= 0: cancel_mining()
-	earth_rocks[earth_region] = rocks
+	district_rocks()[current_region()] = rocks
 	earth_target_region = region
 	earth_target_cave = cave
 	earth_target_player = arrival
@@ -533,8 +545,9 @@ func begin_earth_transition(region: int, cave: bool, arrival: Vector2, rollback:
 	walking = false
 	walk_distance = 0
 	restore_walk_visual()
-	earth_stream.pin_target(EARTH.key(region,cave))
-	message = "Entering "+(EARTH.MINE_NAMES[region] if cave else EARTH.NAMES[region])+"..."
+	earth_stream.REGIONS = regions()
+	earth_stream.pin_target(regions().key(region,cave))
+	message = "Entering "+(regions().MINE_NAMES[region] if cave else regions().NAMES[region])+"..."
 	refresh_ui()
 
 func advance_earth_transition(delta: float) -> void:
@@ -547,18 +560,18 @@ func advance_earth_transition(delta: float) -> void:
 			earth_transition_elapsed = 0
 	elif earth_transition_stage == 1:
 		earth_wait_elapsed += delta
-		var key: String = EARTH.key(earth_target_region,earth_target_cave)
+		var key: String = regions().key(earth_target_region,earth_target_cave)
 		if earth_stream.is_ready(key):
-			earth_region = earth_target_region
+			set_current_region(earth_target_region)
 			underground = earth_target_cave
-			if not earth_rocks.has(earth_region):
+			if not district_rocks().has(current_region()):
 				reset_rocks()
 			else:
-				rocks = earth_rocks[earth_region]
-			earth_visited[earth_region] = true
-			earth_stream.show_area(earth_region,underground)
+				rocks = district_rocks()[current_region()]
+			visited_regions()[current_region()] = true
+			earth_stream.show_area(current_region(),underground)
 			player = earth_target_player
-			message = (mine_name()+" — follow the lanterns to find copper and blue crystal.") if underground else (EARTH.NAMES[earth_region]+" — follow the trail signs to explore Earth.")
+			message = (mine_name()+" — follow the lanterns to find "+CATALOG.MATERIALS[world][0].to_lower()+" and "+CATALOG.MATERIALS[world][1].to_lower()+".") if underground else (regions().NAMES[current_region()]+" — follow the trail signs to keep exploring.")
 			finish_earth_switch()
 		elif earth_stream.failures.has(key) or earth_wait_elapsed > 24:
 			# Retain inventory, ore and discovery on the old map if a download
@@ -586,7 +599,7 @@ func finish_earth_switch() -> void:
 	camera.position = player
 	camera.reset_smoothing()
 	update_exploration()
-	earth_stream.prepare(earth_region,underground,player)
+	earth_stream.prepare(current_region(),underground,player)
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -752,8 +765,8 @@ func update_particles(delta: float) -> void:
 func refresh_ui() -> void:
 	green_surface.visible = world == 0 and earth_region == 0 and not underground
 	green_surface.process_mode = Node.PROCESS_MODE_INHERIT if green_surface.visible else Node.PROCESS_MODE_DISABLED
-	earth_stream.visible = world == 0
-	lava_environment.visible = world == 2 and underground
+	earth_stream.visible = true
+	lava_environment.visible = world == 2 and current_region() == 0 and underground
 	rocket.visible = not underground and has_base()
 	if hud == null:
 		return
@@ -766,7 +779,7 @@ func refresh_ui() -> void:
 	if upgraded:
 		objective = ["Find blue crystal in an Earth mine","Collect 3 frost ore and 1 amethyst","Collect 3 gold and 1 fire ruby"][world]
 		if [won,ice_won,desert_won][world]:
-			objective = "Earth trails: %d / 5 discovered" % earth_visited.size() if world == 0 else "Mission complete — keep exploring!"
+			objective = "%s trails: %d / 5 discovered" % [PLANET_NAMES[world],visited_regions().size()]
 	var context := ""
 	var actionable := true
 	if mining_target >= 0:
@@ -776,7 +789,7 @@ func refresh_ui() -> void:
 		context = "E   Choose a world"
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Hand drill fitted" if upgraded else "E   Build hand drill · 5 copper"
-	elif (not underground and (world > 0 or EARTH.has_mine(earth_region)) and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
+	elif (not underground and regions().has_mine(current_region()) and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
 		context = "Walk to the surface" if underground else "Walk into " + mine_name()
 		actionable = false
 	elif nearest_rock() >= 0:
@@ -785,7 +798,7 @@ func refresh_ui() -> void:
 		if rock.hard and not upgraded:
 			context = "Hand drill needed · build at camp"
 			actionable = false
-	hud.present({"world":world,"place":mine_name() if underground else (EARTH.NAMES[earth_region] if world == 0 else "Surface"), "inventory":inventory,
+	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
 		"upgraded":upgraded,"objective":objective,"context":context,"actionable":actionable,
 		"flying":flying,"menu":planet_menu.visible,"mining":mining_target >= 0,"message":message})
 
@@ -800,25 +813,25 @@ func label_at(pos: Vector2, text: String, color := Color("f6e5b8"), size := 20) 
 	draw_string(UI_STYLE.HEADING, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 func _draw() -> void:
-	if world != 2 and (underground or world == 1) and not (world == 0 and earth_region > 0):
+	if world != 2 and (underground or world == 1) and current_region() == 0:
 		draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
 	if underground:
-		if world != 2 and not (world == 0 and earth_region > 0):
+		if world != 2 and current_region() == 0:
 			draw_texture_rect(FROST_MINE_ART if world == 1 else MINE_ART, Rect2(Vector2.ZERO, MINE_LAYOUT.WORLD_SIZE), false)
 		var lamps: PackedVector2Array = [MINE_LAYOUT.LAMPS, FROST_LAYOUT.LAMPS, DESERT_LAYOUT.LAMPS][world]
-		if world == 0 and earth_region > 0:
-			lamps = PackedVector2Array(EARTH.MINE_LAMPS[earth_region])
+		if current_region() > 0:
+			lamps = PackedVector2Array(regions().MINE_LAMPS[current_region()])
 		for i in lamps.size():
-			var lamp: Vector2 = EARTH.from_art(lamps[i]) if world == 0 and earth_region > 0 else (DESERT_LAYOUT.from_art(lamps[i]) if world == 2 else MINE_LAYOUT.from_art(lamps[i]))
+			var lamp: Vector2 = regions().from_art(lamps[i]) if current_region() > 0 else (DESERT_LAYOUT.from_art(lamps[i]) if world == 2 else MINE_LAYOUT.from_art(lamps[i]))
 			var flicker := 0.012 + sin(elapsed * 4.3 + i * 2.1) * 0.004
 			for radius in [25, 40, 58]:
 				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
 		label_at(exit_position() + Vector2(-85, -95 if world > 0 or earth_region > 0 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
 		draw_arc(exit_position(), 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
-		if world == 1:
+		if world == 1 and current_region() == 0:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
-		elif world == 2:
+		elif world == 2 and current_region() == 0:
 			draw_texture_rect(DESERT_ART, Rect2(0, 0, 2000, 1400), false)
 		if has_base():
 			label_at(camp_position()+Vector2(-70,-110),"CAMP / DRILL",Color("f6e5b8"),14)
@@ -826,14 +839,13 @@ func _draw() -> void:
 				label_at(ship_position()+Vector2(-65,80),"[E] ROCKET",Color("ffe4ac"),14)
 			for point in [camp_position(),ship_position()]:
 				draw_arc(point,36,0,TAU,40,Color(1,0.89,0.63,0.55+sin(elapsed*2)*0.15),2)
-		if world > 0 or EARTH.has_mine(earth_region):
+		if regions().has_mine(current_region()):
 			label_at(cave_position()+Vector2(-65,-140),mine_name().to_upper(),Color("f6e5b8"),14)
 			draw_arc(cave_position()+Vector2(0,85),36,0,TAU,40,Color(1,0.89,0.63,0.6),2)
-		if world == 0:
-			for link in EARTH.LINKS[earth_region]:
-				var point: Vector2 = EARTH.portal(earth_region,link.side)
-				label_at(point+Vector2(-240 if link.side == "east" else -70,-70),"To "+EARTH.NAMES[link.target],Color("fff0cc"),16)
-				draw_arc(point,32,0,TAU,32,Color(0.95,0.83,0.54,0.55),2)
+		for link in regions().LINKS[current_region()]:
+			var point: Vector2 = regions().portal(current_region(),link.side)
+			label_at(point+Vector2(-240 if link.side == "east" else -70,-70),"To "+regions().NAMES[link.target],Color("fff0cc"),16)
+			draw_arc(point,32,0,TAU,32,Color(0.95,0.83,0.54,0.55),2)
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]
