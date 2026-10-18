@@ -1,9 +1,13 @@
 extends Node2D
 
 const SPEED := 235.0
-const CAMP := Vector2(380, 460)
-const CAVE := Vector2(1500, 420)
-var player := Vector2(470, 550)
+const CAMP := Vector2(470, 400)
+const CAVE := Vector2(1480, 340)
+var player := Vector2(560, 550)
+var ground_art: Texture2D = preload("res://assets/green_planet.png")
+var scout_art: Texture2D = preload("res://assets/sunny_scout.png")
+var walking := false
+var facing_left := false
 var underground := false
 var ore := 0
 var total_mined := 0
@@ -40,7 +44,18 @@ func _ready() -> void:
 	var panel := Panel.new()
 	panel.position = Vector2(20, 20)
 	panel.size = Vector2(680, 112)
+	var hud_style := StyleBoxFlat.new()
+	hud_style.bg_color = Color(0.06, 0.13, 0.13, 0.9)
+	hud_style.border_color = Color("b9a475")
+	hud_style.set_border_width_all(1)
+	hud_style.set_corner_radius_all(12)
+	panel.add_theme_stylebox_override("panel", hud_style)
 	layer.add_child(panel)
+	var bottom := Panel.new()
+	bottom.position = Vector2(12, 675)
+	bottom.size = Vector2(1256, 113)
+	bottom.add_theme_stylebox_override("panel", hud_style)
+	layer.add_child(bottom)
 	var title := Label.new()
 	title.text = "SUNNY SCOUT   /   GREEN PLANET"
 	title.position = Vector2(38, 28)
@@ -87,11 +102,14 @@ func _process(delta: float) -> void:
 	cooldown = maxf(0, cooldown - delta)
 	swing = maxf(0, swing - delta)
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
+	walking = direction.length_squared() > 0
+	if direction.x != 0:
+		facing_left = direction.x < 0
 	var next := player + direction.normalized() * SPEED * delta
 	next = next.clamp(Vector2(90, 180), Vector2(1900, 1290))
 	if underground:
 		next = next.clamp(Vector2(260, 350), Vector2(1760, 1050))
-	elif next.distance_to(Vector2(1260, 1060)) < 145:
+	elif ((next - Vector2(1270, 960)) / Vector2(173, 117)).length() < 1.0:
 		next = player
 	player = next
 	camera.position = player
@@ -192,33 +210,11 @@ func _draw() -> void:
 			draw_line(p + Vector2(-30, -70), p + Vector2(75, -70), Color("826747"), 13)
 		label_at(Vector2(270, 690), "EXIT →")
 	else:
-		var path := PackedVector2Array([CAMP, Vector2(670, 620), Vector2(1000, 790), Vector2(1300, 650), CAVE])
-		draw_polyline(path, Color("b3a477"), 100, true)
-		draw_polyline(PackedVector2Array([Vector2(1000, 790), Vector2(850, 1100), Vector2(1450, 1180)]), Color("b3a477"), 60, true)
-		for p in decorations:
-			draw_line(p, p + Vector2(3, -7), Color("86ad62"), 2)
-			if int(p.x) % 7 == 0:
-				draw_circle(p, 3, Color("e6d88d"))
-		ellipse(Vector2(1260, 1060), Vector2(150, 115), Color("4e8177"))
-		ellipse(Vector2(1260, 1060), Vector2(133, 98), Color("65b4ac"))
-		for i in 6:
-			draw_arc(Vector2(1240, 1040), 25 + i * 14, 0.2, 2.6, 20, Color("90c8b8"), 2)
-		for p in [Vector2(180, 800), Vector2(550, 1030), Vector2(900, 280), Vector2(1700, 300), Vector2(1750, 1140), Vector2(300, 1100), Vector2(1100, 250)]:
-			draw_rect(Rect2(p, Vector2(14, 45)), Color("726b45"))
-			for offset in [Vector2(-14, -5), Vector2(22, -18), Vector2(4, -40)]:
-				draw_circle(p + offset, 40, Color("3f7954"))
-				draw_circle(p + offset - Vector2(6, 8), 30, Color("518a58"))
-		ellipse(CAVE + Vector2(0, -30), Vector2(115, 90), Color("667262"))
-		ellipse(CAVE, Vector2(65, 65), Color("172f30"))
-		draw_line(CAVE + Vector2(-65, 45), CAVE + Vector2(-65, -60), Color("b39164"), 15)
-		draw_line(CAVE + Vector2(65, 45), CAVE + Vector2(65, -60), Color("b39164"), 15)
-		draw_line(CAVE + Vector2(-80, -60), CAVE + Vector2(80, -60), Color("b39164"), 18)
-		label_at(CAVE + Vector2(-65, -100), "MOSS MINE")
-		ellipse(Vector2(220, 440), Vector2(52, 65), Color("c5d9c7"))
-		draw_circle(Vector2(220, 415), 23, Color("508c93"))
-		draw_rect(Rect2(CAMP - Vector2(65, 30), Vector2(130, 60)), Color("795d43"))
-		draw_rect(Rect2(CAMP - Vector2(70, 40), Vector2(140, 25)), Color("c79e67"))
-		label_at(CAMP + Vector2(-85, -65), "CAMP / UPGRADE")
+		draw_texture_rect(ground_art, Rect2(0, 0, 2000, 1400), false)
+		label_at(CAMP + Vector2(-95, -110), "CAMP / UPGRADE")
+		label_at(CAVE + Vector2(-65, -140), "MOSS MINE")
+		for point in [CAMP, CAVE + Vector2(0, 85)]:
+			draw_arc(point, 36, 0, TAU, 40, Color(1, 0.89, 0.63, 0.55 + sin(elapsed * 2) * 0.15), 2)
 		var buddy := Vector2(990 + sin(elapsed * 0.5) * 65, 940 + cos(elapsed * 0.5) * 35)
 		ellipse(buddy, Vector2(23, 17), Color("ead9aa"))
 		draw_circle(buddy + Vector2(17, -10), 12, Color("ead9aa"))
@@ -230,20 +226,18 @@ func _draw() -> void:
 		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16))
 		var points := PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)])
 		draw_colored_polygon(points, Color("607579") if rock.hard else Color("747b69"))
+		draw_colored_polygon(PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(-4, 5)]), Color("879697") if rock.hard else Color("9b9c7f"))
+		draw_colored_polygon(PackedVector2Array([p + Vector2(-4, 5), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)]), Color("465e64") if rock.hard else Color("59634e"))
 		for offset in [Vector2(-12, -7), Vector2(9, -15), Vector2(13, 9)]:
 			draw_circle(p + offset, 7, Color("76d9e7") if rock.hard else Color("e6a36a"))
 		if player.distance_to(p) < 100:
 			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
-	ellipse(player + Vector2(0, 20), Vector2(21, 9), Color(0, 0, 0, 0.22))
-	draw_rect(Rect2(player + Vector2(-24, -5), Vector2(16, 27)), Color("307e81"))
-	draw_line(player + Vector2(-9, 12), player + Vector2(-10, 24), Color("3d514b"), 9)
-	draw_line(player + Vector2(9, 12), player + Vector2(10, 24), Color("3d514b"), 9)
-	ellipse(player + Vector2(0, 2), Vector2(17, 20), Color("ed9447"))
-	draw_circle(player + Vector2(0, -22), 22, Color("f1e1ba"))
-	draw_circle(player + Vector2(2, -22), 16, Color("578f9a"))
-	ellipse(player + Vector2(4, -18), Vector2(10, 11), Color("e9b17e"))
-	ellipse(player + Vector2(1, -29), Vector2(11, 6), Color("78523d"))
-	var tool := player + Vector2(27, -5 if swing > 0 else 12)
-	draw_line(player + Vector2(13, 3), tool, Color("ed9447"), 9)
-	draw_line(tool + Vector2(-6, 12), tool + Vector2(8, -18), Color("aa8254"), 5)
-	draw_line(tool + Vector2(-2, -18), tool + Vector2(19, -10), Color("9ee5df") if upgraded else Color("d5d8c5"), 6)
+	ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
+	var bob := sin(elapsed * 15) * 2.0 if walking else sin(elapsed * 2) * 0.6
+	var sprite_rect := Rect2(player + Vector2(-43, -68 + bob), Vector2(86, 98))
+	if facing_left:
+		sprite_rect.position.x += sprite_rect.size.x
+		sprite_rect.size.x = -sprite_rect.size.x
+	draw_texture_rect(scout_art, sprite_rect, false)
+	if swing > 0:
+		draw_arc(player + Vector2(-30 if facing_left else 30, -5), 34, -1.4, 0.7, 16, Color(1, 0.9, 0.65, swing * 4), 4)
