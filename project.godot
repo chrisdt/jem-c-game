@@ -1,6 +1,6 @@
 config_version=5
 [application]
-config/name="Sunny Scout — Green Planet"
+config/name="Sunny Scout — Planet Adventures"
 run/main_scene="res://main.tscn"
 [display]
 window/size/viewport_width=1280
