@@ -5,7 +5,10 @@ const CAMP := Vector2(470, 400)
 const CAVE := Vector2(1480, 340)
 var player := Vector2(560, 550)
 var ground_art: Texture2D = preload("res://assets/green_planet.png")
-var scout_art: Texture2D = preload("res://assets/sunny_scout.png")
+const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
+const WALK_FRAME_DISTANCE := 28.0
+var walk_distance := 0.0
+var scout: AnimatedSprite2D
 var walking := false
 var facing_left := false
 var underground := false
@@ -26,6 +29,14 @@ var action_button: Button
 var decorations: Array[Vector2] = []
 
 func _ready() -> void:
+	scout = AnimatedSprite2D.new()
+	scout.name = "SunnyScout"
+	scout.sprite_frames = SCOUT_FRAMES
+	scout.animation = &"idle"
+	scout.scale = Vector2.ONE * 0.15
+	scout.offset = Vector2(0, -145)
+	scout.position = player
+	add_child(scout)
 	seed(42)
 	for i in range(150):
 		decorations.append(Vector2(randf_range(40, 1920), randf_range(40, 1340)))
@@ -102,7 +113,12 @@ func _process(delta: float) -> void:
 	cooldown = maxf(0, cooldown - delta)
 	swing = maxf(0, swing - delta)
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
-	walking = direction.length_squared() > 0
+	move_player(direction, delta)
+	camera.position = player
+	refresh_ui()
+	queue_redraw()
+
+func move_player(direction: Vector2, delta: float) -> void:
 	if direction.x != 0:
 		facing_left = direction.x < 0
 	var next := player + direction.normalized() * SPEED * delta
@@ -111,10 +127,20 @@ func _process(delta: float) -> void:
 		next = next.clamp(Vector2(260, 350), Vector2(1760, 1050))
 	elif ((next - Vector2(1270, 960)) / Vector2(173, 117)).length() < 1.0:
 		next = player
+	var travelled := player.distance_to(next)
 	player = next
-	camera.position = player
-	refresh_ui()
-	queue_redraw()
+	walking = travelled > 0.001
+	if walking:
+		walk_distance += travelled
+		scout.animation = &"walk"
+		scout.frame = int(walk_distance / WALK_FRAME_DISTANCE) % 4
+	else:
+		walk_distance = 0.0
+		scout.animation = &"idle"
+		scout.frame = 0
+	scout.flip_h = facing_left
+	scout.position = player
+
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_pressed() and not event.is_echo():
@@ -150,6 +176,7 @@ func interact() -> void:
 	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(Vector2(350, 700)) < 120):
 		underground = not underground
 		player = Vector2(460, 700) if underground else Vector2(1430, 520)
+		scout.position = player
 		camera.reset_smoothing()
 		message = "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick." if underground else "Back in the sunshine. The workbench is at the landing camp."
 	else:
@@ -233,11 +260,5 @@ func _draw() -> void:
 		if player.distance_to(p) < 100:
 			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
 	ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
-	var bob := sin(elapsed * 15) * 2.0 if walking else sin(elapsed * 2) * 0.6
-	var sprite_rect := Rect2(player + Vector2(-43, -68 + bob), Vector2(86, 98))
-	if facing_left:
-		sprite_rect.position.x += sprite_rect.size.x
-		sprite_rect.size.x = -sprite_rect.size.x
-	draw_texture_rect(scout_art, sprite_rect, false)
 	if swing > 0:
 		draw_arc(player + Vector2(-30 if facing_left else 30, -5), 34, -1.4, 0.7, 16, Color(1, 0.9, 0.65, swing * 4), 4)

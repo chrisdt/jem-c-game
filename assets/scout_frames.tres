@@ -1,0 +1,32 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sunny_scout_walk.png" id="1"]
+
+[sub_resource type="AtlasTexture" id="contact_a"]
+atlas = ExtResource("1")
+region = Rect2(156, 10, 440, 610)
+
+[sub_resource type="AtlasTexture" id="passing_a"]
+atlas = ExtResource("1")
+region = Rect2(656, 10, 440, 610)
+
+[sub_resource type="AtlasTexture" id="contact_b"]
+atlas = ExtResource("1")
+region = Rect2(149, 627, 440, 610)
+
+[sub_resource type="AtlasTexture" id="passing_b"]
+atlas = ExtResource("1")
+region = Rect2(656, 627, 440, 610)
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("passing_a")}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("contact_a")}, {"duration": 1.0, "texture": SubResource("passing_a")}, {"duration": 1.0, "texture": SubResource("contact_b")}, {"duration": 1.0, "texture": SubResource("passing_b")}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]

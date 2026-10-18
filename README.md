@@ -1,6 +1,6 @@
 # Sunny Scout — Green Planet
 
-A small Godot 4.6.3 prototype for Jeremy. Uses the Compatibility renderer and GDScript, with a painted Green Planet surface and illustrated Sunny Scout inspired by the approved mockups. The wide exploration camera is preserved. Surface art and character are AI-generated original project assets; ore, creature and underground art remain provisional. Walking uses a small bounce and horizontal facing flip, rather than a full directional animation sheet.
+A small Godot 4.6.3 prototype for Jeremy. Uses the Compatibility renderer and GDScript, with a painted Green Planet surface and illustrated Sunny Scout inspired by the approved mockups. The wide exploration camera is preserved. Surface art and character are AI-generated original project assets; ore, creature and underground art remain provisional. Walking uses a four-pose illustrated cycle with alternating arms and legs. The pick is carried on the backpack while walking. Animation advances with distance travelled and returns to a standing pose when stopped or blocked. Left/right facing is mirrored; dedicated rear and side views are not included yet.
 
 ## Play
 
