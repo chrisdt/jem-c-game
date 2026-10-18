@@ -93,6 +93,9 @@ func run() -> void:
 	game.set_process(false)
 	check(EARTH.NAMES.size() == 5 and EARTH.NAMES.size()*EARTH.SIZE.x*EARTH.SIZE.y == 14000000,"Earth is not five original-sized districts")
 	check(game.earth_stream.texture_loads == 0 and game.earth_rocks.size() == 1 and game.fog.maps.size() == 1,"Unvisited districts loaded/generated/revealed at startup")
+	for link in EARTH.LINKS[0]:
+		for cover in game.tree_cover():
+			check(not cover.has_point(EARTH.portal(0,link.side)) and not cover.has_point(EARTH.arrival(0,link.side)),"Home trail or arrival hidden beneath a tree canopy")
 	# The three-way trail loop and quarry spur, including the full bridge deck.
 	route(game,1,false,[Vector2(200,495),Vector2(500,530),Vector2(750,510),Vector2(1090,530),Vector2(1310,510)])
 	route(game,1,false,[Vector2(750,880),Vector2(750,650),Vector2(750,510),Vector2(950,380),Vector2(1085,285)])

@@ -129,10 +129,6 @@ func _ready() -> void:
 	y_sort_enabled = true
 	green_surface = GREEN_ENVIRONMENT.instantiate()
 	add_child(green_surface)
-	# Leave a clear, visible southern trail through the former border trees.
-	for item in green_surface.get_children():
-		if str(item.name).begins_with("Tree") and item.position.y > 1150 and absf(item.position.x-1000) < 160:
-			item.free()
 	earth_stream = EARTH_STREAM.new()
 	earth_stream.y_sort_enabled = true
 	add_child(earth_stream)

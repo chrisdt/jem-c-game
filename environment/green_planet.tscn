@@ -106,21 +106,7 @@ wind_strength = 3.9
 wind_speed = 0.97
 wind_phase = 4.23337
 
-[node name="Tree09" parent="." instance=ExtResource("3")]
-position = Vector2(1707.805, 593.899)
-scale = Vector2(0.33, 0.33)
-tree_style = 2
-wind_strength = 3.0
-wind_speed = 1.03
-wind_phase = 0.35015
 
-[node name="Tree10" parent="." instance=ExtResource("3")]
-position = Vector2(1927.952, 607.245)
-scale = Vector2(0.4, 0.4)
-tree_style = 2
-wind_strength = 3.3
-wind_speed = 1.09
-wind_phase = 2.75011
 
 [node name="Tree12" parent="." instance=ExtResource("3")]
 position = Vector2(20.013, 480.458)
@@ -218,21 +204,7 @@ wind_strength = 3.6
 wind_speed = 0.97
 wind_phase = 2.53371
 
-[node name="Tree24" parent="." instance=ExtResource("3")]
-position = Vector2(867.245, 1367.969)
-scale = Vector2(0.42, 0.42)
-tree_style = 0
-wind_strength = 3.9
-wind_speed = 1.03
-wind_phase = 4.93367
 
-[node name="Tree25" parent="." instance=ExtResource("3")]
-position = Vector2(973.983, 1354.623)
-scale = Vector2(0.42, 0.42)
-tree_style = 1
-wind_strength = 3.0
-wind_speed = 1.09
-wind_phase = 1.05045
 
 [node name="Tree27" parent="." instance=ExtResource("3")]
 position = Vector2(1587.725, 1361.296)
@@ -266,21 +238,7 @@ wind_strength = 3.3
 wind_speed = 1.09
 wind_phase = 0.48390
 
-[node name="Tree31" parent="." instance=ExtResource("3")]
-position = Vector2(1987.992, 673.975)
-scale = Vector2(0.46, 0.46)
-tree_style = 1
-wind_strength = 3.6
-wind_speed = 0.85
-wind_phase = 2.88386
 
-[node name="Tree32" parent="." instance=ExtResource("3")]
-position = Vector2(1921.281, 847.474)
-scale = Vector2(0.43, 0.43)
-tree_style = 2
-wind_strength = 3.9
-wind_speed = 0.91
-wind_phase = 5.28382
 
 [node name="Tree33" parent="." instance=ExtResource("3")]
 position = Vector2(1987.992, 967.588)
