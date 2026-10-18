@@ -8,7 +8,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	assert(game.ore == 0 and not game.upgraded)
-	assert(game.green_surface.visible and game.green_surface.material.shader == game.FOLIAGE_WIND)
+	assert(game.green_surface.visible)
 	# Exercise the movement path used by keyboard input, including diagonal speed
 	# and blocked movement; the visual must settle to idle when motion stops.
 	game.player = Vector2(600, 600)

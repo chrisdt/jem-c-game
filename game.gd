@@ -24,9 +24,8 @@ var amethysts := 0
 var ice_won := false
 var title: Label
 var player := Vector2(560, 550)
-var ground_art: Texture2D = preload("res://assets/green_planet.png")
-var green_surface: Sprite2D
-const FOLIAGE_WIND: Shader = preload("res://shaders/foliage_wind.gdshader")
+const GREEN_ENVIRONMENT: PackedScene = preload("res://environment/green_planet.tscn")
+var green_surface: Node2D
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
@@ -70,15 +69,8 @@ var action_button: Button
 var decorations: Array[Vector2] = []
 
 func _ready() -> void:
-	green_surface = Sprite2D.new()
-	green_surface.name = "GreenPlanetFoliage"
-	green_surface.texture = ground_art
-	green_surface.centered = false
-	green_surface.scale = Vector2(2000, 1400) / ground_art.get_size()
-	green_surface.z_index = -1
-	var wind := ShaderMaterial.new()
-	wind.shader = FOLIAGE_WIND
-	green_surface.material = wind
+	y_sort_enabled = true
+	green_surface = GREEN_ENVIRONMENT.instantiate()
 	add_child(green_surface)
 	scout = AnimatedSprite2D.new()
 	scout.name = "SunnyScout"
@@ -90,6 +82,7 @@ func _ready() -> void:
 	add_child(scout)
 	mining_fx = Node2D.new()
 	mining_fx.name = "MiningEffects"
+	mining_fx.z_index = 1
 	mining_fx.draw.connect(draw_mining_effects)
 	add_child(mining_fx)
 	seed(42)
