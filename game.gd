@@ -5,6 +5,7 @@ const CAMP := Vector2(470, 400)
 const CAVE := Vector2(1480, 340)
 var player := Vector2(560, 550)
 var ground_art: Texture2D = preload("res://assets/green_planet.png")
+const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
 const WALK_FRAME_DISTANCE := 28.0
 var walk_distance := 0.0
@@ -215,7 +216,7 @@ func refresh_ui() -> void:
 	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(Vector2(350, 700)) < 120):
 		prompt.text = "[E] Leave mine" if underground else "[E] Enter Moss Mine"
 	elif nearest_rock() >= 0:
-		prompt.text = "[E / Space] Mine this deposit"
+		prompt.text = "[E / Space] Mine blue crystal" if rocks[nearest_rock()].hard else "[E / Space] Mine copper"
 
 func ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := PackedVector2Array()
@@ -258,12 +259,15 @@ func _draw() -> void:
 			continue
 		var p: Vector2 = rock.pos
 		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16))
-		var points := PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)])
-		draw_colored_polygon(points, Color("607579") if rock.hard else Color("747b69"))
-		draw_colored_polygon(PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(-4, 5)]), Color("879697") if rock.hard else Color("9b9c7f"))
-		draw_colored_polygon(PackedVector2Array([p + Vector2(-4, 5), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)]), Color("465e64") if rock.hard else Color("59634e"))
-		for offset in [Vector2(-12, -7), Vector2(9, -15), Vector2(13, 9)]:
-			draw_circle(p + offset, 7, Color("76d9e7") if rock.hard else Color("e6a36a"))
+		if rock.hard:
+			var points := PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)])
+			draw_colored_polygon(points, Color("607579"))
+			draw_colored_polygon(PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(-4, 5)]), Color("879697"))
+			draw_colored_polygon(PackedVector2Array([p + Vector2(-4, 5), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)]), Color("465e64"))
+			for offset in [Vector2(-12, -7), Vector2(9, -15), Vector2(13, 9)]:
+				draw_circle(p + offset, 7, Color("76d9e7"))
+		else:
+			draw_texture_rect(COPPER_ART, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false)
 		if player.distance_to(p) < 100:
 			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
 	ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
