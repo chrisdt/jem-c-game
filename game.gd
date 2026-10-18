@@ -9,6 +9,8 @@ const MINE_LAYOUT = preload("res://mine_layout.gd")
 const MINE_ART: Texture2D = preload("res://assets/moss_mine.png")
 const SHIP := Vector2(240, 400)
 const FROST_LAYOUT = preload("res://frost_layout.gd")
+const ORE_SPAWNS = preload("res://ore_spawns.gd")
+const EXPLORATION_FOG = preload("res://exploration_fog.gd")
 const ICE_ART: Texture2D = preload("res://assets/ice_planet.png")
 const FROST_MINE_ART: Texture2D = preload("res://assets/frost_mine.png")
 const AMETHYST_ART: Texture2D = preload("res://assets/amethyst_ore.png")
@@ -60,7 +62,9 @@ var total_mined := 0
 var upgraded := false
 var won := false
 var rocks: Array[Dictionary] = []
-var message := "New destination! Visit the rocket for Frost Canyon, or collect 5 copper for a stronger pick."
+var ore_rng := RandomNumberGenerator.new()
+var fog: EXPLORATION_FOG
+var message := "Explore through the mist to find 5 copper. Cleared areas stay revealed; the rocket leads to Frost Canyon."
 var cooldown := 0.0
 var elapsed := 0.0
 var camera: Camera2D
@@ -68,7 +72,6 @@ var status: Label
 var prompt: Label
 var note: Label
 var action_button: Button
-var decorations: Array[Vector2] = []
 
 func _ready() -> void:
 	y_sort_enabled = true
@@ -87,9 +90,7 @@ func _ready() -> void:
 	mining_fx.z_index = 1
 	mining_fx.draw.connect(draw_mining_effects)
 	add_child(mining_fx)
-	seed(42)
-	for i in range(150):
-		decorations.append(Vector2(randf_range(40, 1920), randf_range(40, 1340)))
+	ore_rng.randomize()
 	reset_rocks()
 	planet_rocks[world] = rocks
 	camera = Camera2D.new()
@@ -101,6 +102,9 @@ func _ready() -> void:
 	camera.limit_right = 2000
 	camera.limit_bottom = 1400
 	add_child(camera)
+	fog = EXPLORATION_FOG.new()
+	add_child(fog)
+	update_exploration()
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	var panel := Panel.new()
@@ -128,7 +132,7 @@ func _ready() -> void:
 	status.add_theme_font_size_override("font_size", 19)
 	layer.add_child(status)
 	var controls := Label.new()
-	controls.text = "WASD / arrows: walk    E / Space: mine or cancel    R: restart"
+	controls.text = "WASD / arrows: walk    E / Space: mine or cancel    R: new game"
 	controls.position = Vector2(38, 102)
 	controls.add_theme_font_size_override("font_size", 14)
 	layer.add_child(controls)
@@ -151,21 +155,28 @@ func _ready() -> void:
 	refresh_ui()
 
 func reset_rocks() -> void:
-	rocks.clear()
-	if world == 1:
-		for point in [Vector2(350,665),Vector2(465,500),Vector2(360,350),Vector2(1000,475),Vector2(1100,365),Vector2(1180,690)]:
-			rocks.append({"pos":FROST_LAYOUT.from_art(point),"hp":2,"seconds":3.0,"hard":false,"cave":false})
-		for point in [Vector2(725,740),Vector2(500,420),Vector2(1050,400)]:
-			rocks.append({"pos":FROST_LAYOUT.from_art(point),"hp":2,"seconds":3.0,"hard":false,"cave":true})
-		for point in [Vector2(320,320),Vector2(1210,280),Vector2(1240,160)]:
-			rocks.append({"pos":FROST_LAYOUT.from_art(point),"hp":4,"seconds":10.0,"hard":true,"cave":true})
+	var entries: Array[Vector2] = []
+	entries.append(Vector2(390,1120) if world == 1 else Vector2(560,550))
+	entries.append(ICE_SPAWN if world == 1 else MINE_SPAWN)
+	rocks = ORE_SPAWNS.generate(world, ore_rng, entries, tree_cover(), Vector2(COPPER_SECONDS, CRYSTAL_SECONDS))
+
+func tree_cover() -> Array[Rect2]:
+	var cover: Array[Rect2] = []
+	for tree in green_surface.get_children():
+		if str(tree.name).begins_with("Tree"):
+			cover.append(Rect2(tree.position + Vector2(-256,-532) * tree.scale, Vector2(512,532) * tree.scale).grow(45))
+	return cover
+
+func area_id() -> int:
+	return world * 2 + int(underground)
+
+func update_exploration() -> void:
+	if fog == null:
 		return
-	for pos in [Vector2(700, 500), Vector2(850, 650), Vector2(1060, 580), Vector2(1120, 870), Vector2(720, 980), Vector2(1530, 960), Vector2(1670, 690)]:
-		rocks.append({"pos": pos, "hp": 2, "seconds": COPPER_SECONDS, "hard": false, "cave": false})
-	for pos in [Vector2(630, 640), Vector2(850, 560), Vector2(1050, 730), Vector2(1290, 580)]:
-		rocks.append({"pos": pos, "hp": 2, "seconds": COPPER_SECONDS, "hard": false, "cave": true})
-	for pos in [Vector2(1180, 450), Vector2(1450, 860), Vector2(1610, 640)]:
-		rocks.append({"pos": pos, "hp": 4, "seconds": CRYSTAL_SECONDS, "hard": true, "cave": true})
+	fog.observe(area_id(), player)
+	for rock in rocks:
+		if rock.cave == underground and not rock.discovered and fog.is_revealed(area_id(), rock.pos):
+			rock.discovered = true
 
 func camp_position() -> Vector2:
 	return ICE_CAMP if world == 1 else CAMP
@@ -206,6 +217,7 @@ func travel_to_other_planet() -> void:
 	camera.position = player
 	camera.reset_smoothing()
 	message = "Frost Canyon! Cross the bridge to the Frost Mine. Collect 3 frost ore and 1 amethyst." if world == 1 else "Back on Green Planet! Your ore and mining progress are still here."
+	update_exploration()
 	refresh_ui()
 	queue_redraw()
 
@@ -268,6 +280,8 @@ func move_player(direction: Vector2, delta: float) -> void:
 		scout.frame = 0
 	scout.flip_h = facing_left
 	scout.position = player
+	fog.reveal_motion(area_id(), previous, player)
+	update_exploration()
 	check_mine_transition(previous)
 
 func check_mine_transition(previous: Vector2) -> void:
@@ -290,6 +304,7 @@ func check_mine_transition(previous: Vector2) -> void:
 	camera.reset_smoothing()
 	mine_transition_cooldown = 0.6
 	message = ("Frost Mine: follow either branch to find amethyst. A stronger pick is required." if world == 1 else "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick.") if underground else "Back outside. The rocket and workbench are at your landing camp."
+	update_exploration()
 	refresh_ui()
 	queue_redraw()
 
@@ -305,7 +320,7 @@ func nearest_rock() -> int:
 	var best := -1
 	var distance := 100.0
 	for i in rocks.size():
-		if rocks[i].cave == underground and rocks[i].hp > 0:
+		if rocks[i].cave == underground and rocks[i].hp > 0 and rocks[i].discovered:
 			var d := player.distance_to(rocks[i].pos)
 			if d < distance:
 				best = i
@@ -344,7 +359,7 @@ func start_mining(index: int) -> void:
 	if index < 0 or index >= rocks.size():
 		return
 	var rock: Dictionary = rocks[index]
-	if rock.hp <= 0 or rock.cave != underground or player.distance_to(rock.pos) >= 100:
+	if rock.hp <= 0 or rock.cave != underground or not rock.discovered or player.distance_to(rock.pos) >= 100:
 		return
 	if rock.hard and not upgraded:
 		message = "Too tough! Bring 5 copper from Green Planet to a workbench for a stronger pick." if world == 1 else "Too tough! Build a stronger pick at camp with 5 copper."
@@ -452,7 +467,7 @@ func refresh_ui() -> void:
 		var rock: Dictionary = rocks[mining_target]
 		prompt.text = "%s — %.1fs left   •   Walk or press E to cancel" % [material_name(rock).capitalize(), maxf(0, rock.seconds - mining_elapsed)]
 		return
-	prompt.text = "Explore the paths and look for ore."
+	prompt.text = "Walk to reveal the map and discover ore."
 	if not underground and player.distance_to(ship_position()) < 95:
 		prompt.text = "[E] Fly to Green Planet" if world == 1 else "[E] Fly to Frost Canyon — second planet"
 	elif not underground and player.distance_to(camp_position()) < 140:
@@ -497,7 +512,7 @@ func _draw() -> void:
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]
-		if rock.cave != underground or rock.hp <= 0:
+		if rock.cave != underground or rock.hp <= 0 or not rock.discovered:
 			continue
 		var p: Vector2 = rock.pos
 		if rock_index == mining_target and impact_flash > 0:

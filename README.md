@@ -22,6 +22,14 @@ Frost Canyon has its own snowy canyon map: a southern landing camp, a single bri
 
 The second mission is to collect **3 frost ore (3 seconds each)** and **1 amethyst (10 seconds)**. Amethyst needs the stronger pick built with 5 copper from Green Planet. Return to Green Planet for copper if needed; workbenches on either planet accept it. Both worlds share the same walking, mining animations and impact effects.
 
+## Exploration and random ore
+
+A softly moving mist covers unexplored ground on both planets and in both mines. Sunny Scout reveals a circle as he walks, and visited areas remain clear for the rest of the current game. Ore stays hidden and cannot be selected or mined until its location is explored. Each of the four maps remembers its own discovery; travelling through a doorway or rocket does not reveal a line between arrival and departure points.
+
+Every new game creates new ore locations. Returning to a map keeps its existing layout and depleted deposits. **R** starts a fresh game with new ore and fresh mist. There is no disk persistence. `ore_spawns.gd` selects separated deposits on connected walkable floor, leaves space around doors/camp/rocket, and keeps Green Planet deposits off the pond, painted boulders, cliff and tree canopies. Deposit counts, upgrades and mining times are unchanged.
+
+The mist radius is controlled by `CLEAR_RADIUS` and `REVEAL_RADIUS` in `exploration_fog.gd`. Discovery uses small reusable texture masks, with the mist drawn above the world and below the HUD. Run `tests/exploration.gd` and `tests/ore_spawns.gd` with the same headless command as the other gameplay checks to verify discovery/travel/reset behaviour and 100 seeded ore layouts.
+
 ## Browser build
 
 Install the matching Godot 4.6.3 export templates. Export using the **Web** preset, or:

@@ -35,10 +35,12 @@ func run() -> void:
 	await process_frame
 	game.set_process(false)
 	game.player = game.rocks[0].pos
+	game.update_exploration()
 	game.start_mining(0)
 	game.advance_mining(2)
 	assert(game.ore == 1)
 	game.player = game.SHIP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 1 and not game.underground and game.ore == 1)
@@ -68,43 +70,53 @@ func run() -> void:
 	# New material timing, cancellation and upgrade gate.
 	for i in range(3):
 		game.player = game.rocks[i].pos
+		game.update_exploration()
 		game.start_mining(i)
 		game.advance_mining(2.5)
 		assert(game.frost_ore == i)
 		game.advance_mining(0.5)
 		assert(game.frost_ore == i+1)
 	game.player = game.ICE_CAVE
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and game.player == game.ICE_SPAWN)
 	game.player = game.rocks[9].pos
+	game.update_exploration()
 	game.start_mining(9)
 	assert(game.mining_target == -1 and not game.ice_won)
 	game.player = game.ICE_EXIT
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground and layout.can_walk(game.player))
 	game.player = game.ICE_SHIP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 0 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	assert(game.green_surface.visible)
 	for i in range(1,5):
 		game.player = game.rocks[i].pos
+		game.update_exploration()
 		game.start_mining(i)
 		game.advance_mining(2)
 	game.player = game.CAMP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.upgraded and game.ore == 0)
 	game.player = game.SHIP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 1 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	game.player = game.ICE_CAVE
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	game.player = game.rocks[9].pos
+	game.update_exploration()
 	game.start_mining(9)
 	game.advance_mining(9.5)
 	assert(game.amethysts == 0 and not game.ice_won)
@@ -114,12 +126,15 @@ func run() -> void:
 	game.travel_to_other_planet()
 	assert(game.world == 1 and game.underground)
 	game.player = game.ICE_EXIT
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	game.player = game.ICE_SHIP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	game.player = game.SHIP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.world == 1 and game.ice_won and game.rocks[9].hp == 0)

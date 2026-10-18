@@ -12,6 +12,7 @@ func run() -> void:
 	# Exercise the movement path used by keyboard input, including diagonal speed
 	# and blocked movement; the visual must settle to idle when motion stops.
 	game.player = Vector2(600, 600)
+	game.update_exploration()
 	game.move_player(Vector2.RIGHT, 0.1)
 	assert(is_equal_approx(game.player.x, 623.5))
 	assert(game.walking and game.scout.animation == &"walk_side")
@@ -40,9 +41,11 @@ func run() -> void:
 	game.move_player(Vector2.ZERO, 0.1)
 	assert(not game.walking and str(game.scout.animation).begins_with("idle_"))
 	game.player = Vector2(1900, 1290)
+	game.update_exploration()
 	game.move_player(Vector2.ONE, 0.1)
 	assert(not game.walking and str(game.scout.animation).begins_with("idle_"))
 	game.player = Vector2(1090, 960)
+	game.update_exploration()
 	game.move_player(Vector2.RIGHT, 0.1)
 	assert(game.player == Vector2(1090, 960))
 	assert(not game.walking and str(game.scout.animation).begins_with("idle_"))
@@ -50,6 +53,7 @@ func run() -> void:
 	# Timed copper collection; the first click starts work and cannot award early.
 	for i in range(5):
 		game.player = game.rocks[i].pos
+		game.update_exploration()
 		game.cooldown = 0
 		game.interact()
 		assert(game.mining_target == i)
@@ -59,14 +63,17 @@ func run() -> void:
 		assert(game.ore == i + 1)
 	assert(game.ore == 5)
 	game.player = game.CAMP
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	assert(game.upgraded and game.ore == 0)
 	game.player = game.CAVE
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and not game.green_surface.visible)
-	game.player = Vector2(1180, 450)
+	game.player = game.rocks[11].pos
+	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
 	game.advance_mining(8.5)
@@ -74,6 +81,7 @@ func run() -> void:
 	game.advance_mining(0.5)
 	assert(game.won)
 	game.player = game.MINE_EXIT
+	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground and game.green_surface.visible)

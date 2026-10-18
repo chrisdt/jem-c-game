@@ -1,0 +1,76 @@
+extends SceneTree
+
+var failures := 0
+
+func _initialize() -> void:
+	call_deferred("run")
+
+func check(condition: bool, description: String) -> void:
+	if not condition:
+		failures += 1
+		push_error(description)
+
+func reachable(layout, entry: Vector2, frost: bool, cave: bool) -> Dictionary:
+	var first := Vector2i((entry / 16.0).round())
+	var cells := {first:true}
+	var queue: Array[Vector2i] = [first]
+	var head := 0
+	while head < queue.size():
+		var at := queue[head]
+		head += 1
+		for direction in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var next: Vector2i = at + direction
+			if cells.has(next): continue
+			var point := Vector2(next) * 16
+			if point.x < 0 or point.y < 0 or point.x > 2000 or point.y > 1400: continue
+			if layout.can_walk(point,cave) if frost else layout.can_walk(point):
+				cells[next] = true
+				queue.append(next)
+	return cells
+
+func run() -> void:
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
+	await process_frame
+	game.set_process(false)
+	var connected := {
+		1:reachable(game.MINE_LAYOUT,game.MINE_SPAWN,false,true),
+		2:reachable(game.FROST_LAYOUT,Vector2(390,1120),true,false),
+		3:reachable(game.FROST_LAYOUT,game.ICE_SPAWN,true,true)
+	}
+	var seen := {}
+	for painted_rock in [Vector2(430,575),Vector2(555,890),Vector2(1340,340)]:
+		check(not game.ORE_SPAWNS.footprint_fits(1,false,game.FROST_LAYOUT.from_art(painted_rock)),"Frost ore can overlap a painted rock outcrop")
+	check(not game.ORE_SPAWNS.clear_of_landmarks(1,false,game.FROST_LAYOUT.from_art(Vector2(290,690)),game.tree_cover()),"Frost ore can overlap the camp dome roof")
+	for world in [0,1]:
+		game.world = world
+		for trial in 50:
+			game.ore_rng.seed = trial * 1009 + 17
+			game.reset_rocks()
+			check(game.rocks.size() == (12 if world == 1 else 14),"Random generation lost a required deposit")
+			var signature := str(game.rocks.map(func(rock): return rock.pos))
+			check(not seen.has(signature),"Different seeds produced the same layout")
+			seen[signature] = true
+			var surface_count := 0
+			var hard_count := 0
+			for i in game.rocks.size():
+				var rock: Dictionary = game.rocks[i]
+				check(not rock.discovered,"Random generation pre-discovered ore")
+				check(rock.seconds == ((10.0 if rock.hard else 3.0) if world == 1 else (9.0 if rock.hard else 2.0)),"Random generation changed mining times")
+				surface_count += 0 if rock.cave else 1
+				hard_count += 1 if rock.hard else 0
+				var area: int = world * 2 + int(rock.cave)
+				if area != 0:
+					var cell := Vector2i((rock.pos / 16).round())
+					check(connected[area].has(cell),"Ore spawned outside connected walkable floor: %s" % rock.pos)
+				else:
+					check(((rock.pos - Vector2(1270,960)) / Vector2(215,150)).length() > 1,"Copper spawned in the pond or its rocky rim")
+					for cover in game.tree_cover():
+						check(not cover.has_point(rock.pos),"Copper spawned under a tree canopy")
+				for j in i:
+					if game.rocks[j].cave == rock.cave:
+						check(game.rocks[j].pos.distance_to(rock.pos) >= 149.9,"Ore deposits overlap")
+			check(surface_count == (6 if world == 1 else 7) and hard_count == 3,"Layout cannot support its mining mission")
+	if failures == 0:
+		print("PASS: 100 distinct seeded layouts, connected reachable ore, complete mission supplies, correct mining times, hidden initial state and separated deposits clear of pond/tree cover")
+	quit(1 if failures else 0)
