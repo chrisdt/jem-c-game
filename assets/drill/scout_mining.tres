@@ -1,0 +1,53 @@
+[gd_resource type="SpriteFrames" load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/drill/scout_mining.png" id="1"]
+
+[sub_resource type="AtlasTexture" id="down_0"]
+atlas = ExtResource("1")
+region = Rect2(79, 17, 310, 388)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="down_1"]
+atlas = ExtResource("1")
+region = Rect2(471, 20, 309, 386)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="down_2"]
+atlas = ExtResource("1")
+region = Rect2(874, 20, 309, 385)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="side_0"]
+atlas = ExtResource("1")
+region = Rect2(57, 435, 349, 371)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="side_1"]
+atlas = ExtResource("1")
+region = Rect2(472, 435, 350, 371)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="side_2"]
+atlas = ExtResource("1")
+region = Rect2(879, 434, 356, 373)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="up_0"]
+atlas = ExtResource("1")
+region = Rect2(54, 830, 329, 393)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="up_1"]
+atlas = ExtResource("1")
+region = Rect2(474, 829, 337, 392)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="up_2"]
+atlas = ExtResource("1")
+region = Rect2(891, 828, 327, 395)
+filter_clip = true
+
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("down_0")}, {"duration": 1.0, "texture": SubResource("down_1")}, {"duration": 1.0, "texture": SubResource("down_2")}], "loop": true, "name": &"mine_down", "speed": 8.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("side_0")}, {"duration": 1.0, "texture": SubResource("side_1")}, {"duration": 1.0, "texture": SubResource("side_2")}], "loop": true, "name": &"mine_side", "speed": 8.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("up_0")}, {"duration": 1.0, "texture": SubResource("up_1")}, {"duration": 1.0, "texture": SubResource("up_2")}], "loop": true, "name": &"mine_up", "speed": 8.0}]

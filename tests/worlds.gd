@@ -128,7 +128,7 @@ func run() -> void:
 	game.update_exploration()
 	game.start_mining(9)
 	game.advance_mining(9.5)
-	assert(game.scout.sprite_frames == game.MINE_FRAMES)
+	assert(game.scout.sprite_frames == game.DRILL_VISUAL.MINING[1])
 	assert(game.amethysts == 0 and not game.ice_won)
 	game.advance_mining(0.5)
 	assert(game.amethysts == 1 and game.ice_won)
