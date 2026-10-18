@@ -11,6 +11,7 @@ var walk_distance := 0.0
 var scout: AnimatedSprite2D
 var walking := false
 var facing_left := false
+var facing: StringName = &"down"
 var underground := false
 var ore := 0
 var total_mined := 0
@@ -32,7 +33,7 @@ func _ready() -> void:
 	scout = AnimatedSprite2D.new()
 	scout.name = "SunnyScout"
 	scout.sprite_frames = SCOUT_FRAMES
-	scout.animation = &"idle"
+	scout.animation = &"idle_down"
 	scout.scale = Vector2.ONE * 0.15
 	scout.offset = Vector2(0, -145)
 	scout.position = player
@@ -119,8 +120,14 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func move_player(direction: Vector2, delta: float) -> void:
-	if direction.x != 0:
-		facing_left = direction.x < 0
+	if not direction.is_zero_approx():
+		# Diagonals use their stronger axis; ties face up/down consistently.
+		if absf(direction.x) > absf(direction.y):
+			facing = &"side"
+			facing_left = direction.x < 0
+		else:
+			facing = &"up" if direction.y < 0 else &"down"
+			facing_left = false
 	var next := player + direction.normalized() * SPEED * delta
 	next = next.clamp(Vector2(90, 180), Vector2(1900, 1290))
 	if underground:
@@ -132,11 +139,11 @@ func move_player(direction: Vector2, delta: float) -> void:
 	walking = travelled > 0.001
 	if walking:
 		walk_distance += travelled
-		scout.animation = &"walk"
+		scout.animation = StringName("walk_" + str(facing))
 		scout.frame = int(walk_distance / WALK_FRAME_DISTANCE) % 4
 	else:
 		walk_distance = 0.0
-		scout.animation = &"idle"
+		scout.animation = StringName("idle_" + str(facing))
 		scout.frame = 0
 	scout.flip_h = facing_left
 	scout.position = player
