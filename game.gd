@@ -6,6 +6,7 @@ const CAVE := Vector2(1480, 340)
 var player := Vector2(560, 550)
 var ground_art: Texture2D = preload("res://assets/green_planet.png")
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
+const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
 const MINE_FRAMES: SpriteFrames = preload("res://assets/scout_mining_frames.tres")
 const COPPER_SECONDS := 2.0
@@ -392,15 +393,8 @@ func _draw() -> void:
 		if rock_index == mining_target and impact_flash > 0:
 			p.x += sin(impact_flash * 110) * 2.5
 		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16))
-		if rock.hard:
-			var points := PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)])
-			draw_colored_polygon(points, Color("607579"))
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-32, 8), p + Vector2(-24, -22), p + Vector2(0, -35), p + Vector2(-4, 5)]), Color("879697"))
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-4, 5), p + Vector2(25, -18), p + Vector2(34, 12), p + Vector2(0, 24)]), Color("465e64"))
-			for offset in [Vector2(-12, -7), Vector2(9, -15), Vector2(13, 9)]:
-				draw_circle(p + offset, 7, Color("76d9e7"))
-		else:
-			draw_texture_rect(COPPER_ART, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false)
+		var ore_art: Texture2D = BLUE_ORE_ART if rock.hard else COPPER_ART
+		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false)
 		if player.distance_to(p) < 100:
 			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
 	ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
