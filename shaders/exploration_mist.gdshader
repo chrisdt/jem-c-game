@@ -6,6 +6,8 @@ uniform vec2 scout_position;
 uniform float clear_radius = 210.0;
 uniform float reveal_radius = 265.0;
 uniform vec4 mist_colour : source_color = vec4(0.55, 0.64, 0.61, 1.0);
+uniform float mist_opacity : hint_range(0.0, 1.0) = 0.5;
+uniform float blur_level : hint_range(0.0, 6.0) = 4.2;
 
 float hash(vec2 point) {
 	return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
@@ -29,8 +31,8 @@ void fragment() {
 	clouds += 0.45 * cloud_noise(UV * vec2(20.0, 14.0) - drift * 1.5);
 	// Filtered screen mipmaps soften fine details without offset silhouettes.
 	vec3 sharp = texture(landscape, SCREEN_UV).rgb;
-	vec3 blurred = textureLod(landscape, SCREEN_UV, 2.4).rgb;
-	vec3 misty_landscape = mix(blurred, mist_colour.rgb, 0.17 + clouds * 0.045);
+	vec3 blurred = textureLod(landscape, SCREEN_UV, blur_level).rgb;
+	vec3 misty_landscape = mix(blurred, mist_colour.rgb, clamp(mist_opacity + clouds * 0.08, 0.0, 1.0));
 	// Ore is withheld by discovery logic, so translucency reveals only scenery.
 	COLOR = vec4(mix(sharp, misty_landscape, 1.0 - revealed), 1.0);
 }
