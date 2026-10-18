@@ -3,6 +3,10 @@ extends Node2D
 const SPEED := 235.0
 const CAMP := Vector2(470, 400)
 const CAVE := Vector2(1480, 340)
+const MINE_EXIT := Vector2(150, 610)
+const MINE_SPAWN := Vector2(420, 620)
+const MINE_LAYOUT = preload("res://mine_layout.gd")
+const MINE_ART: Texture2D = preload("res://assets/moss_mine.png")
 var player := Vector2(560, 550)
 var ground_art: Texture2D = preload("res://assets/green_planet.png")
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
@@ -126,7 +130,7 @@ func reset_rocks() -> void:
 	rocks.clear()
 	for pos in [Vector2(700, 500), Vector2(850, 650), Vector2(1060, 580), Vector2(1120, 870), Vector2(720, 980), Vector2(1530, 960), Vector2(1670, 690)]:
 		rocks.append({"pos": pos, "hp": 2, "seconds": COPPER_SECONDS, "hard": false, "cave": false})
-	for pos in [Vector2(630, 640), Vector2(850, 470), Vector2(1050, 730), Vector2(1390, 610)]:
+	for pos in [Vector2(630, 640), Vector2(850, 560), Vector2(1050, 730), Vector2(1290, 580)]:
 		rocks.append({"pos": pos, "hp": 2, "seconds": COPPER_SECONDS, "hard": false, "cave": true})
 	for pos in [Vector2(1180, 450), Vector2(1450, 860), Vector2(1610, 640)]:
 		rocks.append({"pos": pos, "hp": 4, "seconds": CRYSTAL_SECONDS, "hard": true, "cave": true})
@@ -170,7 +174,7 @@ func move_player(direction: Vector2, delta: float) -> void:
 	var next := player + direction.normalized() * SPEED * delta
 	next = next.clamp(Vector2(90, 180), Vector2(1900, 1290))
 	if underground:
-		next = next.clamp(Vector2(260, 350), Vector2(1760, 1050))
+		next = MINE_LAYOUT.move_on_floor(player, direction.normalized() * SPEED * delta)
 	elif ((next - Vector2(1270, 960)) / Vector2(173, 117)).length() < 1.0:
 		next = player
 	var travelled := player.distance_to(next)
@@ -223,10 +227,10 @@ func interact() -> void:
 			message = "Your stronger pick is ready. Blue crystals are inside the mine!"
 		else:
 			message = "Workbench: collect 5 copper from the orange rocks nearby."
-	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(Vector2(350, 700)) < 120):
+	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(MINE_EXIT) < 120):
 		particles.clear()
 		underground = not underground
-		player = Vector2(460, 700) if underground else Vector2(1430, 520)
+		player = MINE_SPAWN if underground else Vector2(1430, 520)
 		scout.position = player
 		camera.reset_smoothing()
 		message = "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick." if underground else "Back in the sunshine. The workbench is at the landing camp."
@@ -344,7 +348,7 @@ func refresh_ui() -> void:
 	prompt.text = "Explore the paths and look for ore."
 	if not underground and player.distance_to(CAMP) < 140:
 		prompt.text = "[E] Workbench — stronger pick costs 5 copper"
-	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(Vector2(350, 700)) < 120):
+	elif (not underground and player.distance_to(CAVE) < 130) or (underground and player.distance_to(MINE_EXIT) < 120):
 		prompt.text = "[E] Leave mine" if underground else "[E] Enter Moss Mine"
 	elif nearest_rock() >= 0:
 		prompt.text = "[E / Space] Mine blue crystal — 9 seconds" if rocks[nearest_rock()].hard else "[E / Space] Mine copper — 2 seconds"
@@ -362,19 +366,14 @@ func label_at(pos: Vector2, text: String, color := Color("f6e5b8"), size := 20) 
 func _draw() -> void:
 	draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
 	if underground:
-		draw_rect(Rect2(220, 300, 1580, 810), Color("354342"))
-		for p in decorations:
-			if p.x > 250 and p.x < 1780 and p.y > 330 and p.y < 1080:
-				ellipse(p, Vector2(10, 5), Color("424e46"))
-		for p in [Vector2(700, 340), Vector2(1050, 1000), Vector2(1360, 340), Vector2(1700, 980)]:
-			ellipse(p, Vector2(100, 65), Color("263638"))
-		for p in [Vector2(440, 550), Vector2(800, 850), Vector2(1100, 560), Vector2(1530, 1000)]:
-			for j in range(5, 0, -1):
-				draw_circle(p, j * 22, Color(1, 0.65, 0.2, 0.018))
-			draw_rect(Rect2(p - Vector2(7, 15), Vector2(14, 24)), Color("ffc56b"))
-			draw_line(p + Vector2(-20, 30), p + Vector2(-20, -70), Color("826747"), 13)
-			draw_line(p + Vector2(-30, -70), p + Vector2(75, -70), Color("826747"), 13)
-		label_at(Vector2(270, 690), "EXIT →")
+		draw_texture_rect(MINE_ART, Rect2(Vector2.ZERO, MINE_LAYOUT.WORLD_SIZE), false)
+		for i in MINE_LAYOUT.LAMPS.size():
+			var lamp := MINE_LAYOUT.from_art(MINE_LAYOUT.LAMPS[i])
+			var flicker := 0.012 + sin(elapsed * 4.3 + i * 2.1) * 0.004
+			for radius in [25, 40, 58]:
+				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
+		label_at(MINE_EXIT + Vector2(-85, 80), "[E] SURFACE", Color("ffe4ac"), 18)
+		draw_arc(MINE_EXIT, 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
 		draw_texture_rect(ground_art, Rect2(0, 0, 2000, 1400), false)
 		label_at(CAMP + Vector2(-95, -110), "CAMP / UPGRADE")

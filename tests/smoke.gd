@@ -72,7 +72,7 @@ func run() -> void:
 	assert(not game.won)
 	game.advance_mining(0.5)
 	assert(game.won)
-	game.player = Vector2(350, 700)
+	game.player = game.MINE_EXIT
 	game.cooldown = 0
 	game.interact()
 	assert(not game.underground)
