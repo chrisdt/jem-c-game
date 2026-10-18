@@ -832,8 +832,7 @@ func _draw() -> void:
 		if world == 0:
 			for link in EARTH.LINKS[earth_region]:
 				var point: Vector2 = EARTH.portal(earth_region,link.side)
-				var direction: String = {"east":"→","west":"←","north":"↑","south":"↓"}[link.side]
-				label_at(point+Vector2(-240 if link.side == "east" else -70,-70),direction+" "+EARTH.NAMES[link.target],Color("fff0cc"),16)
+				label_at(point+Vector2(-240 if link.side == "east" else -70,-70),"To "+EARTH.NAMES[link.target],Color("fff0cc"),16)
 				draw_arc(point,32,0,TAU,32,Color(0.95,0.83,0.54,0.55),2)
 
 	for rock_index in rocks.size():
