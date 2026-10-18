@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/green_planet_ground.png" id="1"]
 [ext_resource type="Shader" path="res://shaders/foliage_wind.gdshader" id="2"]
@@ -7,12 +7,33 @@
 [ext_resource type="PackedScene" path="res://environment/wind_plant.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://environment/pond.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://environment/duck.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://environment/goat.tscn" id="7"]
 
 [sub_resource type="ShaderMaterial" id="GroundPlants"]
 shader = ExtResource("2")
 
 [node name="GreenPlanetEnvironment" type="Node2D"]
 y_sort_enabled = true
+
+[node name="MountainGoat01" parent="." instance=ExtResource("7")]
+position = Vector2(680, 630)
+walk_speed = 21.0
+body_scale = 0.15
+
+[node name="MountainGoat02" parent="." instance=ExtResource("7")]
+position = Vector2(1040, 820)
+walk_speed = 19.0
+body_scale = 0.14
+
+[node name="MountainGoat03" parent="." instance=ExtResource("7")]
+position = Vector2(1670, 800)
+walk_speed = 25.0
+body_scale = 0.17
+
+[node name="MountainGoat04" parent="." instance=ExtResource("7")]
+position = Vector2(650, 1020)
+walk_speed = 22.0
+body_scale = 0.15
 
 [node name="Ground" type="Sprite2D" parent="."]
 z_index = -1

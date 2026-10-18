@@ -43,8 +43,11 @@ const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
 const MINE_FRAMES: SpriteFrames = preload("res://assets/scout_mining_frames.tres")
+const MINER_FRAMES: SpriteFrames = preload("res://assets/miner_frames.tres")
+const MINER_MINE_FRAMES: SpriteFrames = preload("res://assets/miner_mining_frames.tres")
 const COPPER_SECONDS := 2.0
 const CRYSTAL_SECONDS := 9.0
+const ORE_REVEAL_SECONDS := 0.75
 const STRIKE_SECONDS := 0.66
 const IMPACT_PHASE := 0.22
 # Pixel anchors keep boots planted across the painted poses.
@@ -94,7 +97,7 @@ func _ready() -> void:
 	rocket.reset_pad(ship_position(), world == 1)
 	scout = AnimatedSprite2D.new()
 	scout.name = "SunnyScout"
-	scout.sprite_frames = SCOUT_FRAMES
+	scout.sprite_frames = MINER_FRAMES if world == 0 else SCOUT_FRAMES
 	scout.animation = &"idle_down"
 	scout.scale = Vector2.ONE * 0.15
 	scout.offset = Vector2(0, -145)
@@ -213,6 +216,8 @@ func update_exploration() -> void:
 	for rock in rocks:
 		if rock.cave == underground and not rock.discovered and fog.is_revealed(area_id(), rock.pos):
 			rock.discovered = true
+			# Remember the first discovery so revisiting an area cannot restart it.
+			rock.revealed_at = elapsed
 
 func camp_position() -> Vector2:
 	return ICE_CAMP if world == 1 else CAMP
@@ -362,7 +367,7 @@ func face_direction(direction: Vector2) -> void:
 			facing_left = false
 
 func restore_walk_visual() -> void:
-	scout.sprite_frames = SCOUT_FRAMES
+	scout.sprite_frames = MINER_FRAMES if world == 0 else SCOUT_FRAMES
 	scout.scale = Vector2.ONE * 0.15
 	scout.offset = Vector2(0, -145)
 	scout.rotation = 0.0
@@ -509,7 +514,7 @@ func cancel_mining() -> void:
 func update_mining_visual() -> void:
 	var phase := fmod(mining_elapsed, STRIKE_SECONDS)
 	var pose := mini(2, int(phase / (STRIKE_SECONDS / 3.0)))
-	scout.sprite_frames = MINE_FRAMES
+	scout.sprite_frames = MINER_MINE_FRAMES if world == 0 else MINE_FRAMES
 	scout.animation = StringName("mine_" + str(facing))
 	scout.frame = pose
 	scout.scale = Vector2.ONE * 0.22
@@ -648,14 +653,17 @@ func _draw() -> void:
 		var rock: Dictionary = rocks[rock_index]
 		if rock.cave != underground or rock.hp <= 0 or not rock.discovered:
 			continue
+		var reveal_alpha := smoothstep(0.0, ORE_REVEAL_SECONDS, elapsed - float(rock.get("revealed_at", -ORE_REVEAL_SECONDS)))
 		var p: Vector2 = rock.pos
 		if rock_index == mining_target and impact_flash > 0:
 			p.x += sin(impact_flash * 110) * 2.5
-		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16))
+		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16 * reveal_alpha))
 		var ore_art: Texture2D = (AMETHYST_ART if rock.hard else BLUE_ORE_ART) if world == 1 else (BLUE_ORE_ART if rock.hard else COPPER_ART)
-		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false)
+		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false, Color(1, 1, 1, reveal_alpha))
 		if player.distance_to(p) < 100:
-			draw_arc(p, 43, 0, TAU, 40, Color("ffe4a0"), 2)
+			var highlight := Color("ffe4a0")
+			highlight.a = reveal_alpha
+			draw_arc(p, 43, 0, TAU, 40, highlight, 2)
 	if flight == Flight.IDLE:
 		ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
 	if mining_target >= 0:

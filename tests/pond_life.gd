@@ -11,11 +11,21 @@ func check(condition: bool, description: String) -> void:
 		push_error(description)
 
 func run() -> void:
-	var environment = load("res://environment/green_planet.tscn").instantiate()
-	root.add_child(environment)
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
 	await process_frame
+	game.set_process(false)
+	var environment = game.green_surface
 	var pond = environment.get_node("PondLife")
 	var duck = environment.get_node("Duck")
+	var goats: Array = []
+	for child in environment.get_children():
+		if str(child.name).begins_with("MountainGoat"):
+			goats.append(child)
+	check(goats.size() == 4,"First level does not have four mountain goats")
+	for i in goats.size():
+		goats[i].set_process(false)
+		goats[i].rng.seed = 900 + i
 	pond.set_process(false)
 	duck.set_process(false)
 	pond.rng.seed = 12345
@@ -30,6 +40,13 @@ func run() -> void:
 	for i in 2400:
 		pond.advance(0.05)
 		duck.advance(0.05)
+		for goat in goats:
+			goat.advance(0.05)
+			check(goat.position.distance_to(goat.home) <= goat.wander_radius + 0.01,"Goat left its grazing area")
+			check(((goat.position - Vector2(1270,960)) / Vector2(173,117)).length() > 1,"Goat walked into the pond")
+			for rock in game.rocks:
+				if not rock.cave and rock.hp > 0:
+					check(goat.position.distance_to(rock.pos) >= 80,"Goat walked through a mining deposit")
 		check(pond.water_contains(pond.fish_position),"Fish left the water during swimming or landing")
 		check(duck.WANDER_AREA.has_point(duck.position),"Duck left its grassy wandering area")
 		check(((duck.position - Vector2(1270,960)) / Vector2(173,117)).length() > 1,"Duck walked into the pond")
@@ -54,14 +71,20 @@ func run() -> void:
 		check(interval >= 9 and interval <= 19.5,"Fish jumped too frequently or stopped jumping")
 	check(longest - shortest > 2,"Fish jump timing is repetitive rather than random")
 	check(duck.peck_count >= 4 and duck.walk_distance > 200,"Duck did not wander and stop to peck")
+	for goat in goats:
+		check(goat.graze_count >= 4 and goat.walk_distance > 150,"A goat did not alternate between walking and grazing")
 	# Leaving the surface pauses ambient actors instead of accumulating a burst
 	# of unseen jumps and pecks to play when the player returns.
 	environment.visible = false
 	var phase_before: float = pond.phase
 	var position_before: Vector2 = duck.position
+	var goat_positions: Array = goats.map(func(goat): return goat.position)
 	pond._process(5)
 	duck._process(5)
+	for i in goats.size():
+		goats[i]._process(5)
+		check(goats[i].position == goat_positions[i],"Hidden goat kept moving")
 	check(pond.phase == phase_before and duck.position == position_before,"Hidden surface wildlife kept advancing")
 	if failures == 0:
-		print("PASS: fish stays in water, jumps at varied intervals, lands and resumes swimming; bounded effects; duck wanders/pecks on land; hidden actors pause")
+		print("PASS: fish swims/jumps/lands with bounded effects; duck wanders/pecks; four goats wander and graze away from water and deposits; hidden wildlife pauses")
 	quit(1 if failures else 0)

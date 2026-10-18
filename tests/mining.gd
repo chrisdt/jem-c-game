@@ -13,6 +13,7 @@ func run() -> void:
 		game.player = game.rocks[0].pos + sample[0]
 		game.update_exploration()
 		game.start_mining(0)
+		assert(game.scout.sprite_frames == game.MINER_MINE_FRAMES)
 		assert(game.scout.animation == StringName("mine_" + str(sample[1])))
 		assert(game.scout.flip_h == sample[2] and game.scout.frame == 0)
 		game.move_player(Vector2.ZERO, 0.1)
@@ -22,6 +23,7 @@ func run() -> void:
 		game.advance_mining(0.23)
 		assert(game.scout.frame == 2)
 		game.cancel_mining()
+		assert(game.scout.sprite_frames == game.MINER_FRAMES)
 		assert(str(game.scout.animation).begins_with("idle_"))
 		assert(game.scout.scale == Vector2.ONE * 0.15)
 	game.update_particles(1.0)

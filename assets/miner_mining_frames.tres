@@ -1,0 +1,42 @@
+[gd_resource type="SpriteFrames" load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/miner_mining.png" id="1"]
+
+[sub_resource type="AtlasTexture" id="down_0"]
+atlas = ExtResource("1")
+region = Rect2(0, 0, 418, 430)
+
+[sub_resource type="AtlasTexture" id="down_1"]
+atlas = ExtResource("1")
+region = Rect2(418, 0, 418, 440)
+
+[sub_resource type="AtlasTexture" id="down_2"]
+atlas = ExtResource("1")
+region = Rect2(836, 0, 418, 440)
+
+[sub_resource type="AtlasTexture" id="side_0"]
+atlas = ExtResource("1")
+region = Rect2(0, 430, 418, 400)
+
+[sub_resource type="AtlasTexture" id="side_1"]
+atlas = ExtResource("1")
+region = Rect2(418, 465, 418, 370)
+
+[sub_resource type="AtlasTexture" id="side_2"]
+atlas = ExtResource("1")
+region = Rect2(836, 460, 418, 370)
+
+[sub_resource type="AtlasTexture" id="up_0"]
+atlas = ExtResource("1")
+region = Rect2(0, 830, 418, 405)
+
+[sub_resource type="AtlasTexture" id="up_1"]
+atlas = ExtResource("1")
+region = Rect2(418, 830, 418, 405)
+
+[sub_resource type="AtlasTexture" id="up_2"]
+atlas = ExtResource("1")
+region = Rect2(836, 830, 418, 405)
+
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("down_0")}, {"duration": 1.0, "texture": SubResource("down_1")}, {"duration": 1.0, "texture": SubResource("down_2")}], "loop": true, "name": &"mine_down", "speed": 4.5454545}, {"frames": [{"duration": 1.0, "texture": SubResource("side_0")}, {"duration": 1.0, "texture": SubResource("side_1")}, {"duration": 1.0, "texture": SubResource("side_2")}], "loop": true, "name": &"mine_side", "speed": 4.5454545}, {"frames": [{"duration": 1.0, "texture": SubResource("up_0")}, {"duration": 1.0, "texture": SubResource("up_1")}, {"duration": 1.0, "texture": SubResource("up_2")}], "loop": true, "name": &"mine_up", "speed": 4.5454545}]

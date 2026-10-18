@@ -34,6 +34,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	assert(game.scout.sprite_frames == game.MINER_FRAMES)
 	game.player = game.rocks[0].pos
 	game.update_exploration()
 	game.start_mining(0)
@@ -45,6 +46,7 @@ func run() -> void:
 	game.interact()
 	game.advance_flight(10)
 	assert(game.world == 1 and not game.underground and game.ore == 1)
+	assert(game.scout.sprite_frames == game.SCOUT_FRAMES)
 	assert(not game.green_surface.visible)
 	var layout = game.FROST_LAYOUT
 	assert(layout.can_walk(game.player))
@@ -97,6 +99,7 @@ func run() -> void:
 	game.interact()
 	game.advance_flight(10)
 	assert(game.world == 0 and game.rocks[0].hp == 0 and game.frost_ore == 3)
+	assert(game.scout.sprite_frames == game.MINER_FRAMES)
 	assert(game.green_surface.visible)
 	for i in range(1,5):
 		game.player = game.rocks[i].pos
@@ -122,6 +125,7 @@ func run() -> void:
 	game.update_exploration()
 	game.start_mining(9)
 	game.advance_mining(9.5)
+	assert(game.scout.sprite_frames == game.MINE_FRAMES)
 	assert(game.amethysts == 0 and not game.ice_won)
 	game.advance_mining(0.5)
 	assert(game.amethysts == 1 and game.ice_won)
