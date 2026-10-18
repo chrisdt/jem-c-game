@@ -37,7 +37,8 @@ func observe(map_id: int, point: Vector2) -> void:
 	if switched:
 		active_map = map_id
 		mist.set_shader_parameter("revealed_mask", maps[map_id].texture)
-		var colours := [Color("8ca29c"), Color("455754"), Color("a1bac2"), Color("4f6575"), Color("b39a78"), Color("55413a")]
+		var colours := [Color("8ca29c"),Color("455754"),Color("a1bac2"),Color("4f6575"),Color("b39a78"),Color("55413a"),
+			Color("759885"),Color("635246"),Color("859b88"),Color("a5a58b"),Color("91978a"),Color("485e6c")]
 		mist.set_shader_parameter("mist_colour", colours[map_id])
 	mist.set_shader_parameter("scout_position", point)
 	if switched or point.distance_to(maps[map_id].last_stamp) >= STAMP_DISTANCE:
