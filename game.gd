@@ -9,6 +9,13 @@ const MINE_LAYOUT = preload("res://mine_layout.gd")
 const MINE_ART: Texture2D = preload("res://assets/moss_mine.png")
 const SHIP := Vector2(240, 400)
 const FROST_LAYOUT = preload("res://frost_layout.gd")
+const DESERT_LAYOUT = preload("res://desert_layout.gd")
+const PLANET_MENU = preload("res://planet_menu.gd")
+const PLANET_NAMES := ["Green Planet", "Frost Canyon", "Ember Dunes"]
+const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
+const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
+const GOLD_ART: Texture2D = preload("res://assets/gold_ore.png")
+const RUBY_ART: Texture2D = preload("res://assets/ruby_ore.png")
 const ORE_SPAWNS = preload("res://ore_spawns.gd")
 const EXPLORATION_FOG = preload("res://exploration_fog.gd")
 const ROCKET = preload("res://environment/rocket.gd")
@@ -18,6 +25,9 @@ const FLIGHT_HEIGHT := 920.0
 var flight: Flight = Flight.IDLE
 var flight_elapsed := 0.0
 var flight_camera_smoothing := true
+var flight_destination := 1
+var planet_menu: PLANET_MENU
+var lava_environment: Node2D
 var rocket: ROCKET
 var travel_fade: ColorRect
 const ICE_ART: Texture2D = preload("res://assets/ice_planet.png")
@@ -35,6 +45,9 @@ var planet_rocks: Dictionary = {}
 var frost_ore := 0
 var amethysts := 0
 var ice_won := false
+var gold_ore := 0
+var rubies := 0
+var desert_won := false
 var title: Label
 var player := Vector2(560, 550)
 const GREEN_ENVIRONMENT: PackedScene = preload("res://environment/green_planet.tscn")
@@ -92,6 +105,9 @@ func _ready() -> void:
 	y_sort_enabled = true
 	green_surface = GREEN_ENVIRONMENT.instantiate()
 	add_child(green_surface)
+	lava_environment = LAVA_ENVIRONMENT.instantiate()
+	add_child(lava_environment)
+	lava_environment.visible = false
 	rocket = ROCKET.new()
 	add_child(rocket)
 	rocket.reset_pad(ship_position(), world == 1)
@@ -191,12 +207,15 @@ func _ready() -> void:
 	travel_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	travel_fade.color = Color(0.025, 0.045, 0.08, 0)
 	travel_layer.add_child(travel_fade)
+	planet_menu = PLANET_MENU.new()
+	add_child(planet_menu)
+	planet_menu.destination_selected.connect(travel_to_other_planet)
 	refresh_ui()
 
 func reset_rocks() -> void:
 	var entries: Array[Vector2] = []
-	entries.append(Vector2(390,1120) if world == 1 else Vector2(560,550))
-	entries.append(ICE_SPAWN if world == 1 else MINE_SPAWN)
+	entries.append([Vector2(560,550),Vector2(390,1120),DESERT_LAYOUT.ARRIVAL][world])
+	entries.append(mine_spawn_position())
 	rocks = ORE_SPAWNS.generate(world, ore_rng, entries, tree_cover(), Vector2(COPPER_SECONDS, CRYSTAL_SECONDS))
 
 func tree_cover() -> Array[Rect2]:
@@ -220,28 +239,61 @@ func update_exploration() -> void:
 			rock.revealed_at = elapsed
 
 func camp_position() -> Vector2:
-	return ICE_CAMP if world == 1 else CAMP
+	return [CAMP, ICE_CAMP, DESERT_LAYOUT.CAMP][world]
 
 func cave_position() -> Vector2:
-	return ICE_CAVE if world == 1 else CAVE
+	return [CAVE, ICE_CAVE, DESERT_LAYOUT.CAVE][world]
 
 func exit_position() -> Vector2:
-	return ICE_EXIT if world == 1 else MINE_EXIT
+	return [MINE_EXIT, ICE_EXIT, DESERT_LAYOUT.MINE_EXIT][world]
 
 func ship_position() -> Vector2:
-	return ICE_SHIP if world == 1 else SHIP
+	return [SHIP, ICE_SHIP, DESERT_LAYOUT.SHIP][world]
+
+func mine_spawn_position() -> Vector2:
+	return [MINE_SPAWN, ICE_SPAWN, DESERT_LAYOUT.MINE_SPAWN][world]
+
+func surface_arrival_position() -> Vector2:
+	return [Vector2(320,500), Vector2(390,1120), DESERT_LAYOUT.ARRIVAL][world]
+
+func surface_exit_position() -> Vector2:
+	return [Vector2(1430,520), Vector2(1575,385), DESERT_LAYOUT.OUTSIDE][world]
 
 func mine_name() -> String:
-	return "Frost Mine" if world == 1 else "Moss Mine"
+	return ["Moss Mine", "Frost Mine", "Lava Mine"][world]
 
 func material_name(rock: Dictionary) -> String:
+	if world == 2:
+		return "fire ruby" if rock.hard else "gold"
 	if world == 1:
 		return "amethyst" if rock.hard else "frost ore"
 	return "blue crystal" if rock.hard else "copper"
 
-func travel_to_other_planet() -> void:
+func material_tint(rock: Dictionary) -> Color:
+	return [[Color("ffc16f"),Color("92e8f4")],[Color("92e8f4"),Color("d4a5ff")],[Color("ffd659"),Color("ff6b81")]][world][int(rock.hard)]
+
+func arrival_message() -> String:
+	return ["Back on Green Planet! Your discoveries and mining progress are still here.",
+		"Frost Canyon! Cross the bridge to the Frost Mine. Collect 3 frost ore and 1 amethyst.",
+		"Ember Dunes! Explore around the mesa and enter the Lava Mine. Collect 3 gold and 1 fire ruby."][world]
+
+func open_planet_menu() -> void:
+	walking = false
+	walk_distance = 0
+	restore_walk_visual()
+	scout.animation = StringName("idle_" + str(facing))
+	planet_menu.open(world)
+	refresh_ui()
+
+func travel_to_other_planet(destination: int = -1) -> void:
 	if flight != Flight.IDLE or underground or mining_target >= 0:
 		return
+	if destination < 0:
+		destination = 0 if world == 1 else 1
+	if destination == world or destination >= PLANET_NAMES.size():
+		return
+	planet_menu.visible = false
+	flight_destination = destination
 	flight = Flight.IGNITION
 	flight_elapsed = 0
 	walking = false
@@ -274,14 +326,14 @@ func advance_flight(delta: float) -> void:
 			match flight:
 				Flight.IGNITION:
 					flight = Flight.ASCENT
-					message = "Blastoff! Next stop: " + ("Green Planet!" if world == 1 else "Frost Canyon!")
+					message = "Blastoff! Next stop: " + PLANET_NAMES[flight_destination] + "!"
 				Flight.ASCENT:
 					switch_planet()
 					flight = Flight.DESCENT
 					message = "Boosters on! Slowing down for a gentle landing..."
 				Flight.DESCENT:
 					flight = Flight.TOUCHDOWN
-					message = "Touchdown! Welcome to " + ("Frost Canyon." if world == 1 else "Green Planet.")
+					message = "Touchdown! Welcome to " + PLANET_NAMES[world] + "."
 				Flight.TOUCHDOWN:
 					finish_flight()
 			update_flight_visual()
@@ -309,7 +361,7 @@ func update_flight_visual() -> void:
 
 func switch_planet() -> void:
 	planet_rocks[world] = rocks
-	world = 1 - world
+	world = flight_destination
 	if planet_rocks.has(world):
 		rocks = planet_rocks[world]
 	else:
@@ -317,7 +369,7 @@ func switch_planet() -> void:
 		reset_rocks()
 		planet_rocks[world] = rocks
 	particles.clear()
-	player = Vector2(390,1120) if world == 1 else Vector2(320,500)
+	player = surface_arrival_position()
 	rocket.reset_pad(ship_position(), world == 1)
 	camera.position = ship_position() + Vector2(180, -60)
 	camera.reset_smoothing()
@@ -336,7 +388,7 @@ func finish_flight() -> void:
 	camera.reset_smoothing()
 	cooldown = 0.3
 	mine_transition_cooldown = 0.6
-	message = "Frost Canyon! Cross the bridge to the Frost Mine. Collect 3 frost ore and 1 amethyst." if world == 1 else "Back on Green Planet! Your ore and mining progress are still here."
+	message = arrival_message()
 	update_exploration()
 	refresh_ui()
 	queue_redraw()
@@ -348,6 +400,10 @@ func _process(delta: float) -> void:
 	mining_fx.queue_redraw()
 	if flight != Flight.IDLE:
 		advance_flight(delta)
+		return
+	if planet_menu.visible:
+		refresh_ui()
+		queue_redraw()
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
 	move_player(direction, delta)
@@ -373,7 +429,7 @@ func restore_walk_visual() -> void:
 	scout.rotation = 0.0
 
 func move_player(direction: Vector2, delta: float) -> void:
-	if flight != Flight.IDLE:
+	if flight != Flight.IDLE or planet_menu.visible:
 		return
 	mine_transition_cooldown = maxf(0, mine_transition_cooldown - delta)
 	var previous := player
@@ -386,7 +442,9 @@ func move_player(direction: Vector2, delta: float) -> void:
 	restore_walk_visual()
 	var next := player + direction.normalized() * SPEED * delta
 	next = next.clamp(Vector2(90, 180), Vector2(1900, 1290))
-	if world == 1:
+	if world == 2:
+		next = DESERT_LAYOUT.move_on_floor(player, direction.normalized() * SPEED * delta, underground)
+	elif world == 1:
 		next = FROST_LAYOUT.move_on_floor(player,direction.normalized() * SPEED * delta,underground)
 	elif underground:
 		next = MINE_LAYOUT.move_on_floor(player, direction.normalized() * SPEED * delta)
@@ -419,7 +477,7 @@ func check_mine_transition(previous: Vector2) -> void:
 	cancel_mining()
 	particles.clear()
 	underground = not underground
-	player = (ICE_SPAWN if world == 1 else MINE_SPAWN) if underground else (Vector2(1575,385) if world == 1 else Vector2(1430,520))
+	player = mine_spawn_position() if underground else surface_exit_position()
 	walking = false
 	walk_distance = 0
 	scout.animation = StringName("idle_" + str(facing))
@@ -429,6 +487,8 @@ func check_mine_transition(previous: Vector2) -> void:
 	camera.reset_smoothing()
 	mine_transition_cooldown = 0.6
 	message = ("Frost Mine: follow either branch to find amethyst. A stronger pick is required." if world == 1 else "The Moss Mine. Follow the lanterns. Blue crystal needs a stronger pick.") if underground else "Back outside. The rocket and workbench are at your landing camp."
+	if world == 2 and underground:
+		message = "The Lava Mine! Stay on the stone ledges and bridge. Fire ruby needs a stronger pick."
 	update_exploration()
 	refresh_ui()
 	queue_redraw()
@@ -436,10 +496,10 @@ func check_mine_transition(previous: Vector2) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_pressed() and not event.is_echo():
-		if event.keycode == KEY_E or event.keycode == KEY_SPACE:
-			interact()
-		elif event.keycode == KEY_R:
+		if event.keycode == KEY_R:
 			get_tree().reload_current_scene()
+		elif not planet_menu.visible and (event.keycode == KEY_E or event.keycode == KEY_SPACE):
+			interact()
 
 func nearest_rock() -> int:
 	var best := -1
@@ -453,7 +513,7 @@ func nearest_rock() -> int:
 	return best
 
 func interact() -> void:
-	if flight != Flight.IDLE:
+	if flight != Flight.IDLE or planet_menu.visible:
 		return
 	if mining_target >= 0:
 		cancel_mining()
@@ -463,27 +523,27 @@ func interact() -> void:
 		return
 	cooldown = 0.3
 	if not underground and player.distance_to(ship_position()) < 95:
-		travel_to_other_planet()
+		open_planet_menu()
 	elif not underground and player.distance_to(camp_position()) < 140:
 		if not upgraded and ore >= 5:
 			ore -= 5
 			upgraded = true
-			message = "Stronger pick built! Find amethyst in the Frost Mine." if world == 1 else "Stronger pick built! Enter the mine and break a glowing blue crystal."
+			message = "Stronger pick built! Explore the " + mine_name() + " to find rare minerals."
 		elif upgraded:
-			message = "Your stronger pick is ready. Find amethyst in the Frost Mine!" if world == 1 else "Your stronger pick is ready. Blue crystals are inside the mine!"
+			message = "Your stronger pick is ready. Find rare minerals in the " + mine_name() + "!"
 		else:
-			message = "Workbench: bring 5 copper from Green Planet to build a stronger pick." if world == 1 else "Workbench: collect 5 copper from the orange rocks nearby."
+			message = "Workbench: bring 5 copper from Green Planet to build a stronger pick." if world > 0 else "Workbench: collect 5 copper from the orange rocks nearby."
 	else:
 		var i := nearest_rock()
 		if i >= 0:
 			if rocks[i].hard and not upgraded:
-				message = "Too tough! Bring 5 copper from Green Planet to a workbench for a stronger pick." if world == 1 else "Too tough! Build a stronger pick at camp with 5 copper."
+				message = "Too tough! Bring 5 copper from Green Planet to a workbench for a stronger pick."
 			else:
 				start_mining(i)
 	refresh_ui()
 
 func start_mining(index: int) -> void:
-	if flight != Flight.IDLE:
+	if flight != Flight.IDLE or planet_menu.visible:
 		return
 	if index < 0 or index >= rocks.size():
 		return
@@ -491,7 +551,7 @@ func start_mining(index: int) -> void:
 	if rock.hp <= 0 or rock.cave != underground or not rock.discovered or player.distance_to(rock.pos) >= 100:
 		return
 	if rock.hard and not upgraded:
-		message = "Too tough! Bring 5 copper from Green Planet to a workbench for a stronger pick." if world == 1 else "Too tough! Build a stronger pick at camp with 5 copper."
+		message = "Too tough! Bring 5 copper from Green Planet to a workbench for a stronger pick."
 		return
 	mining_target = index
 	mining_elapsed = 0.0
@@ -547,7 +607,12 @@ func advance_mining(delta: float) -> void:
 		impact_flash = 0.0
 		restore_walk_visual()
 		scout.animation = StringName("idle_" + str(facing))
-		if world == 1:
+		if world == 2:
+			if rock.hard: rubies += 1
+			else: gold_ore += 1
+			desert_won = gold_ore >= 3 and rubies >= 1
+			message = "DESERT MISSION COMPLETE! You found gold and fire ruby!" if desert_won else "Desert mission: %d / 3 gold, %d / 1 fire ruby." % [gold_ore,rubies]
+		elif world == 1:
 			if rock.hard: amethysts += 1
 			else: frost_ore += 1
 			ice_won = frost_ore >= 3 and amethysts >= 1
@@ -565,7 +630,7 @@ func emit_impact(rock: Dictionary, finished: bool) -> void:
 	for i in (18 if finished else 9):
 		var spark := i % 3 == 0
 		var life := randf_range(0.4, 0.8)
-		var tint := (Color("d4a5ff") if rock.hard else Color("92e8f4")) if world == 1 else (Color("92e8f4") if rock.hard else Color("ffc16f"))
+		var tint := material_tint(rock)
 		particles.append({"pos": origin, "velocity": Vector2(randf_range(-65, 65), randf_range(-100, -30)), "life": life, "max_life": life, "spark": spark, "tint": tint if spark else Color("c8b79b"), "size": randf_range(2.5, 4.0)})
 	while particles.size() > 96:
 		particles.pop_front()
@@ -583,17 +648,20 @@ func update_particles(delta: float) -> void:
 
 func refresh_ui() -> void:
 	green_surface.visible = world == 0 and not underground
+	lava_environment.visible = world == 2 and underground
 	rocket.visible = not underground
 	if status == null:
 		return
 	hud_layer.visible = flight == Flight.IDLE
 	flight_caption_panel.visible = flight != Flight.IDLE
 	flight_caption.text = message
-	title.text = "SUNNY SCOUT   /   " + ("FROST CANYON" if world == 1 else "GREEN PLANET")
+	title.text = "SUNNY SCOUT   /   " + PLANET_NAMES[world].to_upper()
 	var place := mine_name().to_upper() if underground else "SURFACE"
 	status.text = "%s   •   Copper: %d   •   %s" % [place, ore, "STRONG PICK" if upgraded else "STARTER PICK"]
 	if world == 1:
 		status.text = "%s   •   Frost: %d/3   •   Amethyst: %d/1" % [place,frost_ore,amethysts]
+	elif world == 2:
+		status.text = "%s   •   Gold: %d/3   •   Fire ruby: %d/1" % [place,gold_ore,rubies]
 	note.text = message
 	action_button.disabled = flight != Flight.IDLE
 	if flight != Flight.IDLE:
@@ -607,7 +675,7 @@ func refresh_ui() -> void:
 		return
 	prompt.text = "Walk to reveal the map and discover ore."
 	if not underground and player.distance_to(ship_position()) < 95:
-		prompt.text = "[E] Fly to Green Planet" if world == 1 else "[E] Fly to Frost Canyon — second planet"
+		prompt.text = "[E] Rocket — choose Green Planet, Frost Canyon or Ember Dunes"
 	elif not underground and player.distance_to(camp_position()) < 140:
 		prompt.text = "[E] Workbench — stronger pick costs 5 copper"
 	elif (not underground and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
@@ -627,21 +695,24 @@ func label_at(pos: Vector2, text: String, color := Color("f6e5b8"), size := 20) 
 	draw_string(ThemeDB.fallback_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 func _draw() -> void:
-	if underground or world == 1:
+	if world != 2 and (underground or world == 1):
 		draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
 	if underground:
-		draw_texture_rect(FROST_MINE_ART if world == 1 else MINE_ART, Rect2(Vector2.ZERO, MINE_LAYOUT.WORLD_SIZE), false)
-		var lamps: PackedVector2Array = FROST_LAYOUT.LAMPS if world == 1 else MINE_LAYOUT.LAMPS
+		if world != 2:
+			draw_texture_rect(FROST_MINE_ART if world == 1 else MINE_ART, Rect2(Vector2.ZERO, MINE_LAYOUT.WORLD_SIZE), false)
+		var lamps: PackedVector2Array = [MINE_LAYOUT.LAMPS, FROST_LAYOUT.LAMPS, DESERT_LAYOUT.LAMPS][world]
 		for i in lamps.size():
-			var lamp := MINE_LAYOUT.from_art(lamps[i])
+			var lamp: Vector2 = DESERT_LAYOUT.from_art(lamps[i]) if world == 2 else MINE_LAYOUT.from_art(lamps[i])
 			var flicker := 0.012 + sin(elapsed * 4.3 + i * 2.1) * 0.004
 			for radius in [25, 40, 58]:
 				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
-		label_at(exit_position() + Vector2(-85, -95 if world == 1 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
+		label_at(exit_position() + Vector2(-85, -95 if world > 0 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
 		draw_arc(exit_position(), 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
 		if world == 1:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
+		elif world == 2:
+			draw_texture_rect(DESERT_ART, Rect2(0, 0, 2000, 1400), false)
 		label_at(camp_position() + Vector2(-95, -110), "CAMP / UPGRADE")
 		label_at(cave_position() + Vector2(-65, -140), mine_name().to_upper())
 		if flight == Flight.IDLE:
@@ -659,6 +730,8 @@ func _draw() -> void:
 			p.x += sin(impact_flash * 110) * 2.5
 		ellipse(p + Vector2(0, 13), Vector2(35, 20), Color(0, 0, 0, 0.16 * reveal_alpha))
 		var ore_art: Texture2D = (AMETHYST_ART if rock.hard else BLUE_ORE_ART) if world == 1 else (BLUE_ORE_ART if rock.hard else COPPER_ART)
+		if world == 2:
+			ore_art = RUBY_ART if rock.hard else GOLD_ART
 		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false, Color(1, 1, 1, reveal_alpha))
 		if player.distance_to(p) < 100:
 			var highlight := Color("ffe4a0")
@@ -670,7 +743,7 @@ func _draw() -> void:
 		var target: Dictionary = rocks[mining_target]
 		var bar_pos: Vector2 = target.pos + Vector2(-48, -72)
 		draw_rect(Rect2(bar_pos, Vector2(96, 10)), Color("182c2a"))
-		draw_rect(Rect2(bar_pos + Vector2(2, 2), Vector2(92 * mining_elapsed / target.seconds, 6)), (Color("cb8af7") if target.hard else Color("82ddec")) if world == 1 else (Color("82ddec") if target.hard else Color("efa15a")))
+		draw_rect(Rect2(bar_pos + Vector2(2, 2), Vector2(92 * mining_elapsed / target.seconds, 6)), material_tint(target))
 
 func draw_mining_effects() -> void:
 	for particle in particles:

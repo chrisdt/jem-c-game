@@ -16,6 +16,7 @@ func board(game) -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.planet_menu.choose(0 if game.world == 1 else 1)
 
 func run() -> void:
 	var scene = load("res://main.tscn")

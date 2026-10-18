@@ -2,6 +2,7 @@ extends RefCounted
 
 const MINE = preload("res://mine_layout.gd")
 const FROST = preload("res://frost_layout.gd")
+const DESERT = preload("res://desert_layout.gd")
 const GRID := 16.0
 const SPACING := 150.0
 const FOOTPRINT := [Vector2.ZERO, Vector2(-38,0), Vector2(38,0), Vector2(0,-20), Vector2(0,20)]
@@ -54,17 +55,19 @@ static func generate(world: int, rng: RandomNumberGenerator, entries: Array[Vect
 	var deposits: Array[Dictionary] = []
 	for cave in [false, true]:
 		var candidates := candidate_points(world, cave, entries[int(cave)])
-		var basic_count := (3 if cave else 6) if world == 1 else (4 if cave else 7)
+		var basic_count := (3 if cave else 6) if world > 0 else (4 if cave else 7)
 		var count := basic_count + (3 if cave else 0)
 		for i in count:
 			var hard := i >= basic_count
 			var point := choose_point(candidates, world, cave, hard, deposits, rng, entries[int(cave)], tree_cover, i == 0 and world == 0 and not cave)
 			assert(point.is_finite(), "No reachable space for a required ore deposit")
-			var seconds := (10.0 if hard else 3.0) if world == 1 else (green_times.y if hard else green_times.x)
+			var seconds := (10.0 if hard else 3.0) if world > 0 else (green_times.y if hard else green_times.x)
 			deposits.append({"pos":point, "hp":4 if hard else 2, "seconds":seconds, "hard":hard, "cave":cave, "discovered":false})
 	return deposits
 
 static func can_walk(world: int, cave: bool, point: Vector2) -> bool:
+	if world == 2:
+		return DESERT.can_walk(point, cave)
 	if world == 1:
 		return FROST.can_walk(point, cave)
 	if cave:
@@ -75,6 +78,8 @@ static func footprint_fits(world: int, cave: bool, point: Vector2) -> bool:
 	for offset in FOOTPRINT:
 		if not can_walk(world, cave, point + offset):
 			return false
+		if world == 2 and not cave and not DESERT.deposit_floor_clear(point + offset, cave):
+			return false
 		if world == 0 and not cave and not green_ground(point + offset):
 			return false
 		if world == 1 and not cave:
@@ -82,6 +87,9 @@ static func footprint_fits(world: int, cave: bool, point: Vector2) -> bool:
 			for outcrop in FROST_OUTCROPS:
 				if ((art - Vector2(outcrop.x,outcrop.y)) / Vector2(outcrop.z,outcrop.w)).length_squared() < 1:
 					return false
+	if world == 2:
+		if not DESERT.deposit_floor_clear(point, cave) or not DESERT.deposit_floor_clear(point + Vector2(0,-30 if cave else -50), cave):
+			return false
 	return true
 
 static func green_ground(point: Vector2) -> bool:
@@ -144,6 +152,14 @@ static func choose_point(points: PackedVector2Array, world: int, cave: bool, har
 	return Vector2.INF
 
 static func clear_of_landmarks(world: int, cave: bool, point: Vector2, tree_cover: Array[Rect2]) -> bool:
+	if world == 2:
+		if cave:
+			var art := point / DESERT.WORLD_SIZE * DESERT.ART_SIZE
+			return point.distance_to(DESERT.MINE_EXIT) >= 180 and not Rect2(600,375,590,160).has_point(art)
+		if point.distance_to(DESERT.CAMP) < 225 or point.distance_to(DESERT.SHIP) < 190 or point.distance_to(DESERT.CAVE) < 180:
+			return false
+		var art := point / DESERT.WORLD_SIZE * DESERT.ART_SIZE
+		return not Rect2(925,675,235,155).grow(30).has_point(art)
 	if cave:
 		return point.distance_to(Vector2(968,1230) if world == 1 else Vector2(150,610)) >= 180
 	var camp := Vector2(570,1060) if world == 1 else Vector2(470,400)

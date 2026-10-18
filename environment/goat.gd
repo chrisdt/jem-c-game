@@ -16,6 +16,7 @@ var rng := RandomNumberGenerator.new()
 var sprite: Sprite2D
 var home := Vector2.ZERO
 var target := Vector2.ZERO
+var previous_stop := Vector2.ZERO
 var state := "graze"
 var state_time := 0.0
 var rest_seconds := 2.0
@@ -53,6 +54,7 @@ func can_stand(point: Vector2) -> bool:
 		return false
 	# Check the painted ground beneath the feet, including a small footprint.
 	# The ore terrain mask also excludes the pond, cliff and mossy boulders.
+	var grass_samples := 0
 	for offset in [Vector2.ZERO, Vector2(-18,0), Vector2(18,0), Vector2(0,-8), Vector2(0,8)]:
 		var foot: Vector2 = point + offset
 		if not TERRAIN.green_ground(foot):
@@ -60,8 +62,12 @@ func can_stand(point: Vector2) -> bool:
 		var pixel := Vector2i(foot / Vector2(2000,1400) * Vector2(ground_image.get_size()))
 		pixel = pixel.clamp(Vector2i.ZERO, ground_image.get_size() - Vector2i.ONE)
 		var colour := ground_image.get_pixelv(pixel)
-		if colour.g < colour.r * 1.035 or colour.g < colour.b * 1.2:
-			return false
+		if colour.g >= colour.r * 1.035 and colour.g >= colour.b * 1.2:
+			grass_samples += 1
+	# Painted flowers and dry flecks should not split one grassy meadow into
+	# tiny isolated pixels. Sand paths still fail the footprint majority.
+	if grass_samples < 3:
+		return false
 	for root in tree_roots:
 		if point.distance_to(root) < 38:
 			return false
@@ -73,30 +79,51 @@ func can_stand(point: Vector2) -> bool:
 	return true
 
 func find_grass() -> Vector2:
-	if can_stand(home):
+	if room_to_wander(home):
 		return home
 	for ring in range(1, 9):
 		for ray in 24:
 			var point := home + Vector2.from_angle(TAU * ray / 24.0) * wander_radius * ring / 8.0
-			if can_stand(point):
+			if room_to_wander(point):
 				return point
 	return home
 
+func room_to_wander(point: Vector2) -> bool:
+	if not can_stand(point):
+		return false
+	for ray in 12:
+		var direction := Vector2.from_angle(TAU * ray / 12.0)
+		if can_stand(point + direction * 12) and can_stand(point + direction * 24) and can_stand(point + direction * 36):
+			return true
+	return false
+
 func clear_route(finish: Vector2) -> bool:
-	var steps := maxi(1, ceili(position.distance_to(finish) / 8.0))
+	var steps := maxi(1, ceili(position.distance_to(finish) / 1.5))
 	for i in range(1, steps + 1):
 		if not can_stand(position.lerp(finish, float(i) / steps)):
 			return false
 	return true
 
 func choose_target() -> void:
-	for attempt in 32:
-		var point := home + Vector2.from_angle(rng.randf() * TAU) * sqrt(rng.randf()) * wander_radius
-		if position.distance_to(point) > 25 and clear_route(point):
+	for attempt in 48:
+		# Nearby grazing spots remain reachable when random ore or a painted
+		# path divides the larger meadow into smaller grassy patches.
+		var angle := Vector2.from_angle(rng.randf() * TAU)
+		var point := position + angle * rng.randf_range(18, 70) if attempt < 32 else home + angle * sqrt(rng.randf()) * wander_radius
+		if position.distance_to(point) > 16 and clear_route(point):
+			previous_stop = position
 			target = point
 			state = "walk"
 			state_time = 0
 			return
+	# A narrow patch always has the same clear route back to its last stop.
+	# Use it if random destinations all fall across sand, water or deposits.
+	if position.distance_to(previous_stop) > 16 and clear_route(previous_stop):
+		target = previous_stop
+		previous_stop = position
+		state = "walk"
+		state_time = 0
+		return
 	state = "graze"
 	state_time = 0
 	rest_seconds = rng.randf_range(2, 5)
@@ -107,6 +134,7 @@ func advance(delta: float) -> void:
 		# Ore is generated after the environment is added. Settle on a clear
 		# grassy patch before the first visible frame, avoiding those deposits.
 		position = find_grass()
+		previous_stop = position
 		settled = true
 	var remaining := maxf(0, delta)
 	while remaining > 0.00001:

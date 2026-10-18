@@ -15,7 +15,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
-	for world in [0, 1]:
+	for world in [0, 1, 2]:
 		game.world = world
 		game.underground = false
 		game.mine_transition_cooldown = 0
@@ -27,13 +27,13 @@ func run() -> void:
 		game.cooldown = 10
 		game.move_player(Vector2.UP, 0.25)
 		check(game.underground,"Walking into planet %d mine did not enter" % world)
-		var spawn: Vector2 = game.ICE_SPAWN if world == 1 else game.MINE_SPAWN
+		var spawn: Vector2 = game.mine_spawn_position()
 		check(game.player == spawn,"Mine arrival did not use its safe spawn")
 		game.move_player(Vector2.UP, 0.15)
 		check(game.underground,"Holding movement bounced straight back outside")
 		game.move_player(Vector2.ZERO, 0.6)
-		game.player = game.exit_position() + (Vector2(0, -110) if world == 1 else Vector2(110, 0))
-		game.move_player(Vector2.DOWN if world == 1 else Vector2.LEFT, 0.25)
+		game.player = game.exit_position() + (Vector2(0, -110) if world > 0 else Vector2(110, 0))
+		game.move_player(Vector2.DOWN if world > 0 else Vector2.LEFT, 0.25)
 		check(not game.underground,"Walking to planet %d exit did not leave" % world)
 		game.move_player(Vector2.ZERO, 1)
 		check(not game.underground,"Standing at the outdoor arrival point re-entered the mine")
@@ -47,5 +47,5 @@ func run() -> void:
 	game.move_player(Vector2.UP, 1)
 	check(game.underground,"A slow frame skipped the automatic doorway")
 	if failures == 0:
-		print("PASS: walk into both mines and exits without E, safe arrivals, held input, independent use cooldown and slow-frame crossing")
+		print("PASS: walk into all three mines and exits without E, safe arrivals, held input, independent use cooldown and slow-frame crossing")
 	quit(1 if failures else 0)

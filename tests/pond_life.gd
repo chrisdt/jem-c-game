@@ -72,7 +72,7 @@ func run() -> void:
 	check(longest - shortest > 2,"Fish jump timing is repetitive rather than random")
 	check(duck.peck_count >= 4 and duck.walk_distance > 200,"Duck did not wander and stop to peck")
 	for goat in goats:
-		check(goat.graze_count >= 4 and goat.walk_distance > 150,"A goat did not alternate between walking and grazing")
+		check(goat.graze_count >= 4 and goat.walk_distance > 150,"%s did not alternate walking/grazing: %s distance, %s grazes" % [goat.name,goat.walk_distance,goat.graze_count])
 	# Leaving the surface pauses ambient actors instead of accumulating a burst
 	# of unseen jumps and pecks to play when the player returns.
 	environment.visible = false
