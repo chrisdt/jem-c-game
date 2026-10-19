@@ -64,12 +64,8 @@ const EXIT_ANGLES := [
 	{0:0.0, 1:0.0},
 	{0:0.0, 1:0.0, 4:0.0},
 ]
-const BASE_SIGNS := [
-	{"camp":Vector2(485,280), "rocket":Vector2(235,345)},
-	{"camp":Vector2(535,710), "rocket":Vector2(300,830)},
-	{"camp":Vector2(1160,785), "rocket":Vector2(1390,830)},
-]
-# Base labels sit beside the props; keep these smaller than trail wayfinding.
+const CAMP_SIGNS := [Vector2(485,280), Vector2(535,710), Vector2(1160,785)]
+# Camp markers stay smaller than trail wayfinding.
 const BASE_SIGN_SCALE := 0.64
 const DIRECTIONS := {
 	"west":Vector2.LEFT, "east":Vector2.RIGHT, "north":Vector2.UP,
@@ -86,8 +82,7 @@ static func draw_map(canvas: Node2D, world: int, region: int, cave: bool, catalo
 			post(canvas, Vector2(305,930), "SURFACE", Vector2(-1,-1).normalized())
 		return
 	if region == 0:
-		post(canvas, BASE_SIGNS[world].camp, "CAMP", Vector2.ZERO, BASE_SIGN_SCALE)
-		post(canvas, BASE_SIGNS[world].rocket, "ROCKET", Vector2.ZERO, BASE_SIGN_SCALE)
+		post(canvas, CAMP_SIGNS[world], "CAMP", Vector2.ZERO, BASE_SIGN_SCALE)
 	if catalog.has_mine(region):
 		inscribe_beam(canvas, ENTRANCES[world][region], ENTRANCE_ANGLES[world][region], catalog.MINE_NAMES[region])
 	for link in catalog.LINKS[region]:
