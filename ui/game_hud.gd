@@ -31,6 +31,7 @@ var health_hearts: Array[TextureRect] = []
 var mission_panel: Panel
 var mission_labels: Array[Label] = []
 var mission_checks: Array[Line2D] = []
+var rowan_progress: Label
 var equip_slots: Array[Button] = []
 var equip_icons: Array[TextureRect] = []
 var equip_marks: Array[Panel] = []
@@ -93,6 +94,8 @@ func make_trial_hud() -> void:
 			mark.antialiased = true
 			mission_panel.add_child(mark)
 			mission_checks.append(mark)
+	rowan_progress = STYLE.label(mission_panel,"",Vector2(13,74),Vector2(250,22),13)
+	rowan_progress.hide()
 	for i in 2:
 		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
 		button.focus_mode = Control.FOCUS_NONE
@@ -203,9 +206,14 @@ func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)
 	mission_labels[0].text = "Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % mini(state.inventory.x,5)
 	var owned: bool = state.get("sword_owned",false)
-	mission_labels[1].text = "Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)]
+	var rowan_started: bool = state.get("rowan_mission",false)
+	mission_labels[1].text = state.rowan_title if rowan_started else ("Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)])
+	rowan_progress.visible = rowan_started
+	rowan_progress.text = state.get("rowan_progress","")
+	mission_panel.size.y = 128 if rowan_started else 106
+	mission_labels[2].position.y = 96 if rowan_started else 74
 	for i in 2:
-		mission_checks[i].visible = state.upgraded if i == 0 else owned
+		mission_checks[i].visible = state.upgraded if i == 0 else (state.get("rowan_complete",false) if rowan_started else owned)
 		mission_labels[i].position.x = 32 if mission_checks[i].visible else 13
 		mission_labels[i].size.x = 231 if mission_checks[i].visible else 250
 	mission_labels[2].text = "Earth explored · %d / 5" % state.get("earth_explored",1)

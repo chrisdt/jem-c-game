@@ -304,8 +304,9 @@ func talk_to_rowan() -> void:
 	if menu_open() or earth_transition or flight != Flight.IDLE or hud.help.visible or not rowan.can_talk(): return
 	if trial.jab_time >= 0 or mining_target >= 0: return
 	character_bubble.set_touch_mode(hud.touch_mode)
-	if character_bubble.show_dialogue("Rowan",rowan.pages(),rowan,Vector2(0,-rowan.height),"Done"):
+	if character_bubble.show_dialogue("Rowan",rowan.pages(),rowan,Vector2(0,-rowan.height),rowan.final_action()):
 		rowan.greeted = true
+		rowan.conversation_started()
 
 func conversation_opened() -> void:
 	clear_touch_gestures()
@@ -318,7 +319,7 @@ func conversation_opened() -> void:
 func conversation_closed(completed: bool) -> void:
 	# Scene teardown can close an active bubble after siblings have been freed.
 	if is_queued_for_deletion() or not is_inside_tree() or not is_instance_valid(hud) or not is_instance_valid(planet_menu): return
-	if completed and is_instance_valid(rowan): rowan.introduced = true
+	if is_instance_valid(rowan): rowan.conversation_finished(completed)
 	clear_touch_gestures()
 	cooldown = 0.3
 	companion.queue_redraw()
@@ -942,7 +943,9 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
-	if is_instance_valid(rowan): rowan.sync_area()
+	if is_instance_valid(rowan):
+		rowan.sync_area()
+		rowan.sync_mission()
 	if is_instance_valid(gardens): gardens.sync_area()
 	if is_instance_valid(wood_supplies): wood_supplies.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
@@ -1003,6 +1006,8 @@ func refresh_ui() -> void:
 		"flying":flying,"menu":menu_open(),"mining":mining_target >= 0,"message":message,
 		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
 		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
+		"rowan_mission":rowan.mission != ROWAN.Mission.NOT_STARTED,"rowan_complete":rowan.mission == ROWAN.Mission.COMPLETE,
+		"rowan_title":ROWAN.MISSION_TITLE,"rowan_progress":rowan.progress_text(),
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})

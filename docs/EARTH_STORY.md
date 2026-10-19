@@ -2,7 +2,7 @@
 
 Build Earth's story one character and mission at a time. For each character, make a character mockup and an in-world dialogue mockup, write the mission, implement it, then playtest that complete interaction before starting the next character. Names and dialogue are working choices.
 
-Rowan's character, scale and position between the crafting hut and CAMP sign have been reviewed. **R05, Rowan in the main game**, is ready for review: press **F5**, choose **Start exploring**, walk toward Rowan and use **E / Talk to Rowan**. Future character placements will be shown as screenshots for approval. Test all gameplay in the main game; separate preview scenes are developer fixtures.
+Rowan's character, scale, camp position and main-game interaction have been reviewed. **R06, Ready for the Trail**, is ready for review: press **F5**, choose **Start exploring**, talk to Rowan and choose **Accept mission** after her introduction. Gather 3 copper and 2 fallen wood, then craft a sword at camp. Future character placements will be shown as screenshots for approval. Test all gameplay in the main game; separate preview scenes are developer fixtures.
 
 ## Story direction
 
@@ -14,7 +14,7 @@ Each landmark introduces a person with a practical problem. Helping them teaches
 
 | Order | Character and location | Mission | Result | Current task |
 | --- | --- | --- | --- | --- |
-| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R05 camp interaction ready in the main game |
+| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R06 mission ready in the main game |
 | 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | Mock up after Rowan's mission is playable |
 | 3 | Otis, quarry foreman; on the Pinewood side of the blocked quarry trail | Clear the Way: craft the hand drill for 5 copper and clear the rockfall | Old Quarry becomes accessible | Initial character exploration only |
 | 4 | Mara, quarry mechanic; beside the quarry rails and mine cart | Better Tools: use quarry minerals to upgrade both drill and sword | Equipment for hard rock and the ruins encounter | Design after Otis |
@@ -43,8 +43,8 @@ The concept images are visual targets, not production sprite atlases or evidence
 | R02 | Camp dialogue concept | Rowan stands beside camp at Scout's scale; a readable bubble points to her; the long instruction banner is absent | Revised and reviewed |
 | R03 | Mission and dialogue | The recipe, objective, reminders, completion and next destination are written | Script below |
 | R04 | Reusable speech bubble | One speaker, short text pages, keyboard/touch advance, close, screen-edge fitting and priority rules work | Reviewed; shared component |
-| R05 | Rowan in camp | A fitted sprite, discovery, greeting and talk interaction work without obstructing the workbench | Implemented; main-game review |
-| R06 | Rowan's crafting objective | Gathering and the existing sword craft update the mission; already-crafted swords are recognized | Pending |
+| R05 | Rowan in camp | A fitted sprite, discovery, greeting and talk interaction work without obstructing the workbench | Reviewed in the main game |
+| R06 | Rowan's crafting objective | Gathering and the existing sword craft update the mission; already-crafted swords are recognized | Implemented; main-game review |
 | R07 | Reopenable mission log | Rowan's objective can be recalled after dialogue closes; desktop and touch can open/close it | Pending |
 | R08 | Rowan playtest | The checks below pass and the implemented desktop/touch views are captured | Pending |
 
@@ -56,11 +56,11 @@ Rowan stands on the approved clear ground between the crafting hut and the CAMP 
 
 ### Ready for the Trail
 
-**Start:** interact with Rowan. Accepting the mission records it in the mission log. The player keeps access to the existing crafting recipes.
+**Start:** interact with Rowan and choose **Accept mission** on her introduction's final page. Closing with Escape / × leaves it unaccepted. R06 records the mission for the current session and shows its title/progress in the existing mission panel. R07 will add the reopenable log. The player keeps access to the existing crafting recipes.
 
 **Objective:** gather 3 copper and 2 fallen wood, then craft the copper sword at the camp workbench. Crafting uses the existing exact recipe and grants the existing sword. Rowan's mission does not charge for the ingredients a second time.
 
-**Completion:** recognize sword ownership, including a sword crafted before speaking to Rowan. Keep the completed objective after materials are spent. Rowan acknowledges the result and introduces Bea. Until Bea is implemented, this remains a conversational lead rather than an active objective with a missing NPC.
+**Completion:** an accepted mission completes as soon as the existing sword craft succeeds. A sword crafted before speaking to Rowan is recognized immediately in her dialogue; finish with **Complete mission** to record completion without another charge. The completed objective survives spent materials, equipment selection and travel. Rowan acknowledges the result and introduces Bea once after you finish the closing conversation; closing early leaves that ending available. Until Bea is implemented, this remains a conversational lead rather than an active objective with a missing NPC.
 
 **Reward:** the crafted sword is the progression reward. No additional consumable reward is needed for this first mission.
 
@@ -68,7 +68,7 @@ Rowan stands on the approved clear ground between the crafting hut and the CAMP 
 | --- | --- |
 | First page, shown in the concept | “Let's get you ready for the trail. Find 3 copper and 2 fallen wood.” |
 | Second page | “Bring them to this workbench to craft a sword. It'll help with the snakes along the trails.” |
-| Accept action | “I'll gather the materials.” |
+| Accept action | “Accept mission” (or “Complete mission” when the sword is already owned) |
 | Copper still needed | “Copper is hiding along Earth's trails. Your pick can mine it.” |
 | Wood still needed | “Look for fallen branches and logs. You can gather those by hand.” |
 | All materials held | “You've got what you need. Craft your sword at the workbench.” |
@@ -125,8 +125,8 @@ Use the current session-memory scope for this rollout. Area unloading, mine visi
 
 ## Next handoff
 
-Review **R05 in the main game**: F5 → Start exploring. Rowan greets once near camp; walk toward her until **Talk to Rowan** appears, then press E or tap the action. E / Enter / Next advances, and Escape / × closes. Movement, combat, travel and other gameplay keys stop during her conversation; touch gestures are cleared on open and close. Temporary messages now appear above Scout instead of in the old bottom banner. Buddy's bark cannot interrupt dialogue. Recipes remain available at the workbench, and Rowan recognizes an already-crafted sword. No mission acceptance/tracking or rewards are added in this step.
+Review **R06 in the main game**: F5 → Start exploring → Talk to Rowan → Next → Accept mission. Watch **Ready for the Trail** in the existing mission panel while gathering copper and fallen wood. Return to Rowan for a reminder, then use the separate workbench to craft the sword. Crafting completes the mission and spends only the existing recipe's 3 copper + 2 wood. Talk to Rowan again for her acknowledgement and conversational introduction to Bea. Also try closing the offer before accepting, crafting the drill first, and crafting the sword before talking to her. Completion and dialogue progress last for the current session; a confirmed reset clears them.
 
-Run `godot --headless --path . --script tests/rowan_camp.gd` for the actual startup-to-camp integration, including keyboard/touch controls, placement/scale, notification priority, crafting access, area scope and session reset. `tests/character_bubble.gd` retains component edge and lifecycle checks.
+Run `godot --headless --path . --script tests/rowan_mission.gd` for real mining/pickups, keyboard/touch acceptance and cancellation, drill-first resource availability, exact crafting costs, early-sword recognition, one-time ending, district/mine/planet memory and a confirmed reset. `tests/rowan_camp.gd` checks startup, camp placement and dialogue controls; `tests/character_bubble.gd` retains component edge and lifecycle checks.
 
-After this interaction is reviewed, **R06** adds her crafting objective. R07 adds the reopenable mission log, then R08 tests the complete first mission. Make Bea's character and landmark screenshots after Rowan's mission has been reviewed. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks.
+After this mission step is reviewed, **R07** adds the reopenable mission log, then R08 tests the complete first mission. Make Bea's character and landmark screenshots after Rowan's mission has been reviewed. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks.
