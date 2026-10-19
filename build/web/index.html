@@ -1,220 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>Sunny Scout — Planet Adventures</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
-
-body {
-	color: white;
-	background-color: black;
-	overflow: hidden;
-	touch-action: none;
-}
-
-#canvas {
-	display: block;
-}
-
-#canvas:focus {
-	outline: none;
-}
-
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
-
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
-
-#status {
-	background-color: #242424;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	visibility: hidden;
-}
-
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
-
-#status-splash.show-image--false {
-	display: none;
-}
-
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
-}
-		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta name="theme-color" content="#09242a">
+	<title>Sunny Scout — Planet Adventures</title>
+	<style>
+		* { box-sizing: border-box; }
+		[hidden] { display: none !important; }
+		html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #061b22; overscroll-behavior: none; }
+		body { color: #fff0cc; font-family: Georgia, 'Times New Roman', serif; }
+		#canvas { display: block; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+		#canvas:focus { outline: none; }
+		#status { position: fixed; inset: 0; background: #061b22; z-index: 10; }
+		#stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 800px; transform: translate(-50%, -50%) scale(var(--stage-scale, 1)); visibility: hidden; background: url('index.png') center / cover no-repeat; }
+		#game-title { position: absolute; left: 76px; top: 88px; margin: 0; font-size: 64px; line-height: 1.3; font-weight: 700; color: #fff0c8; text-shadow: 0 3px 3px #10272b; }
+		#game-title span { display: block; }
+		#subtitle { position: absolute; left: 82px; top: 272px; margin: 0; color: #d6ad58; font-size: 22px; font-weight: 700; letter-spacing: 1px; text-shadow: -1px -1px #10272b, 1px -1px #10272b, -1px 1px #10272b, 1px 2px 2px #10272b; }
+		#loading-card { position: absolute; left: 676px; top: 226px; width: 544px; padding: 36px 34px 32px; border: 2px solid #cba354; border-radius: 16px; background: linear-gradient(145deg, rgba(21,63,61,.96), rgba(8,33,39,.97)); box-shadow: inset 0 0 0 4px #172e2b, inset 0 0 0 5px #6c713e, 0 12px 32px #03191d80; }
+		#loading-card::before, #loading-card::after { content: ''; position: absolute; top: 11px; width: 7px; height: 7px; border-radius: 50%; background: #cda253; border: 1px solid #f4d88e; box-shadow: 0 2px 2px #03191d; }
+		#loading-card::before { left: 11px; }
+		#loading-card::after { right: 11px; }
+		.eyebrow { margin: 0 0 12px; color: #d6ad58; font-size: 14px; letter-spacing: 1.5px; }
+		h2 { margin: 0 0 18px; font-size: 30px; line-height: 1.3; font-weight: 700; }
+		#status-message, #first-mission, #retry { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; }
+		#status-message { margin: 0 0 18px; min-height: 48px; color: #e4e5cd; }
+		.progress-row { display: flex; align-items: center; gap: 14px; }
+		progress { appearance: none; -webkit-appearance: none; width: 100%; height: 12px; overflow: hidden; border: 1px solid #857647; border-radius: 6px; background: #061f26; }
+		progress::-webkit-progress-bar { background: #061f26; }
+		progress::-webkit-progress-value { background: linear-gradient(90deg, #ab7937, #e9c676); border-radius: 5px; transition: width .15s; }
+		progress::-moz-progress-bar { background: #d6ad58; border-radius: 5px; }
+		progress:indeterminate { animation: breathe 1.8s ease-in-out infinite alternate; }
+		#progress-label { min-width: 44px; text-align: right; font: 15px Arial, sans-serif; color: #e9cf94; }
+		#first-mission { margin: 24px 0 0; padding-top: 20px; border-top: 1px solid #8b7b4259; color: #c6ccb7; font-size: 14px; }
+		#first-mission strong { color: #fff0cc; font-weight: 400; }
+		#retry { display: block; width: 100%; min-height: 54px; margin-top: 20px; border: 1px solid #d6ad58; border-radius: 9px; background: #234b45; color: #fff0cc; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+		#retry[hidden] { display: none; }
+		#retry:focus-visible { outline: 3px solid #ffe4a0; outline-offset: 3px; }
+		#retry:hover { background: #315f51; }
+		noscript { position: fixed; inset: 0; z-index: 20; padding: 20vh 10vw; background: #09242a; font: 20px/1.6 Georgia, serif; text-align: center; }
+		@keyframes breathe { to { opacity: .45; } }
+		@media (prefers-reduced-motion: reduce) { progress { animation: none !important; } }
+	</style>
+	<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <style>html, body { overscroll-behavior: none; } #canvas { touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }</style>
-	</head>
-	<body>
-		<canvas id="canvas">
-			Your browser does not support the canvas tag.
-		</canvas>
-
-		<noscript>
-			Your browser does not support JavaScript.
-		</noscript>
-
-		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
-			<progress id="status-progress"></progress>
-			<div id="status-notice"></div>
+</head>
+<body>
+	<canvas id="canvas" tabindex="0">Your browser needs canvas support to play Sunny Scout.</canvas>
+	<div id="status" role="region" aria-label="Loading Sunny Scout">
+		<div id="stage">
+			<h1 id="game-title"><span>SUNNY</span><span>SCOUT</span></h1>
+			<p id="subtitle">PLANET ADVENTURES</p>
+			<section id="loading-card">
+				<p class="eyebrow">YOUR ADVENTURE AWAITS</p>
+				<h2 id="loading-heading">Getting ready to explore…</h2>
+				<p id="status-message" role="status" aria-live="polite">Gathering the worlds, tools and treasures for your expedition.</p>
+				<div class="progress-row">
+					<progress id="status-progress" aria-label="Game download progress"></progress>
+					<span id="progress-label" aria-hidden="true">…</span>
+				</div>
+				<p id="first-mission"><strong>Your first mission</strong><br>Find five copper on Earth, then build your hand drill at camp.</p>
+				<button id="retry" type="button" hidden>Try again</button>
+			</section>
 		</div>
-
-		<script src="index.js"></script>
-		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":50744100,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-const GODOT_THREADS_ENABLED = false;
-const engine = new Engine(GODOT_CONFIG);
-
-(function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice = document.getElementById('status-notice');
-
-	let initializing = true;
-	let statusMode = '';
-
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
+	</div>
+	<noscript>Sunny Scout — Planet Adventures<br>Turn on JavaScript in your browser to begin exploring.</noscript>
+	<script>
+	(function () {
+		const stage = document.getElementById('stage');
+		function fit() {
+			stage.style.setProperty('--stage-scale', Math.min(window.innerWidth / 1280, window.innerHeight / 800));
+			stage.style.visibility = 'visible';
 		}
-		if (mode === 'hidden') {
-			statusOverlay.remove();
-			initializing = false;
-			return;
+		window.addEventListener('resize', fit);
+		fit();
+		const overlay = document.getElementById('status');
+		const message = document.getElementById('status-message');
+		const progress = document.getElementById('status-progress');
+		const amount = document.getElementById('progress-label');
+		const retry = document.getElementById('retry');
+		let started = false;
+		let ready = false;
+		let failed = false;
+		let watchdog;
+		function finish() {
+			if (!started || !ready || failed) return;
+			clearTimeout(watchdog);
+			// Keep the illustration over the canvas until its guide can paint.
+			requestAnimationFrame(() => requestAnimationFrame(() => {
+				overlay.remove();
+				window.removeEventListener('resize', fit);
+				document.getElementById('canvas').focus();
+			}));
 		}
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
-		statusMode = mode;
-	}
-
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
-		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
-		});
-	}
-
-	function displayFailureNotice(err) {
-		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
-		}
-		setStatusMode('notice');
-		initializing = false;
-	}
-
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
-	});
-
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let serviceWorkerRegistrationPromise;
-			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
-			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
-			}
-			// There's a chance that installing the service worker would fix the issue
-			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
-			});
-		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
-		}
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
+		window.addEventListener('scout-startup-ready', () => { ready = true; finish(); }, { once: true });
+		window.scoutLoading = {
+			progress(current, total) {
+				if (failed) return;
 				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
+					const percent = Math.min(100, Math.floor(current / total * 100));
+					progress.max = total;
+					progress.value = current;
+					amount.textContent = percent + '%';
+					if (percent === 100) message.textContent = "Opening your explorer's guide…";
 				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
+					progress.removeAttribute('value');
+					amount.textContent = '…';
 				}
 			},
-		}).then(() => {
-			setStatusMode('hidden');
-		}, displayFailureNotice);
-	}
-}());
-		</script>
-	</body>
+			started() {
+				started = true;
+				finish();
+				if (!ready) watchdog = setTimeout(() => this.fail(new Error('The welcome screen did not become ready.')), 30000);
+			},
+			fail(error, unsupported = false) {
+				if (failed) return;
+				failed = true;
+				clearTimeout(watchdog);
+				console.error(error);
+				document.getElementById('loading-heading').textContent = 'A little bump on the trail';
+				message.textContent = unsupported ? "This browser can't run the game yet. Try updating Safari or Chrome." : "We couldn't load the game. Check your connection, then try again.";
+				progress.parentElement.hidden = true;
+				retry.hidden = false;
+				retry.focus();
+			}
+		};
+		retry.addEventListener('click', () => window.location.reload());
+	}());
+	</script>
+	<script src="index.js" onerror="window.scoutLoading.fail(new Error('The game engine could not be downloaded.'))"></script>
+	<script>
+	(function () {
+		if (typeof Engine === 'undefined') return;
+		try {
+			const config = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":57367628,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+			const missing = Engine.getMissingFeatures({ threads: false });
+			if (missing.length) {
+				window.scoutLoading.fail(new Error('Missing browser features: ' + missing.join(', ')), true);
+				return;
+			}
+			const engine = new Engine(config);
+			engine.startGame({ onProgress: (current, total) => window.scoutLoading.progress(current, total) })
+				.then(() => window.scoutLoading.started(), error => window.scoutLoading.fail(error));
+		} catch (error) {
+			window.scoutLoading.fail(error);
+		}
+	}());
+	</script>
+</body>
 </html>
 
