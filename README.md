@@ -6,7 +6,7 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 ## Play
 
-Import `project.godot` in Godot 4.6.3 and press **F6** with `main.tscn` open, or **F5** to play the project.
+Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the illustrated explorer's guide, then choose **Start exploring**. **Enter / Space** also starts. Running `main.tscn` directly with **F6** skips the welcome screen for development.
 
 - **WASD / arrow keys:** move
 - **E / Space / MINE button:** start mining, use workbench or rocket
@@ -14,6 +14,8 @@ Import `project.godot` in Godot 4.6.3 and press **F6** with `main.tscn` open, or
 - **iPad / touch:** drag the pad at bottom left to walk; tap the action at bottom right to mine, cancel, upgrade or open the rocket. Tap a world card's **Fly here** button to travel.
 - While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.
 - **R:** restart
+
+The browser loading screen uses the same illustrated miner, camp, rocket and mine as the welcome screen, with actual download progress and a retry button if a download fails. `web/loading.html` is the custom Web export shell; the project's boot image and browser icon also use game artwork. The welcome guide explains walking, mining, the five-copper drill upgrade, exploration and rocket travel. It switches to touch instructions on iPad and other touch devices. Earth loads after **Start exploring**, while the guide stays visible with landing feedback. Progress lasts for the current play session.
 
 Explore Earth’s signed trails to collect five copper deposits (2 seconds each), return to the camp workbench for a hand drill, then enter the Moss Mine at the northeast and mine a blue crystal (9 seconds; requires the hand drill). Press once to start: mining continues automatically until complete or cancelled. Directional pick-swing poses show starter mining; the upgrade fits a teal-and-brass drill gauntlet and switches to a braced, vibrating drill animation with more frequent dust and sparks. Rock tremors and the progress bar remain visible. The upgrade unlocks crystal mining; copper remains 2 seconds. Durations are set by `COPPER_SECONDS` and `CRYSTAL_SECONDS` in `game.gd`. You can continue exploring after completing the mission. The original meadow pond blocks movement; its trees and small decorative rocks currently do not. New districts also block their ponds, stream, cliffs and solid outcrops. Underground, walls, pillars and water block movement; small decorative props are part of the background. No enemies, saving, sound, or spaceflight minigame yet.
 

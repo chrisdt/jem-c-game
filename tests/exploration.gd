@@ -20,13 +20,14 @@ func run() -> void:
 	check(game.fog.is_revealed(0,start),"Starting position is covered by mist")
 	check(not game.fog.is_revealed(0,untouched),"Unvisited map started revealed")
 	# A hidden deposit cannot leak through prompts or a direct mining request.
-	var hidden := -1
-	for i in game.rocks.size():
-		if not game.rocks[i].cave and not game.rocks[i].discovered:
-			hidden = i
-			break
-	check(hidden >= 0,"Random layout left no ore to discover")
+	# With two surface deposits, both may legitimately start in view. Put one
+	# common deposit on known unvisited floor so this tests discovery rather
+	# than depending on a randomly chosen layout (covered by ore_spawns.gd).
+	var hidden: int = game.rocks.find_custom(func(rock): return not rock.cave)
+	check(hidden >= 0,"Surface layout has no common ore")
 	if hidden >= 0:
+		game.rocks[hidden].pos = untouched
+		game.rocks[hidden].discovered = false
 		game.player = game.rocks[hidden].pos
 		check(game.nearest_rock() == -1,"Undiscovered ore appeared in a mining prompt")
 		game.start_mining(hidden)

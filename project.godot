@@ -1,7 +1,12 @@
 config_version=5
 [application]
 config/name="Sunny Scout — Planet Adventures"
-run/main_scene="res://main.tscn"
+config/icon="res://assets/copper_ore.png"
+run/main_scene="res://startup.tscn"
+boot_splash/image="res://assets/ui/title_landscape.png"
+boot_splash/bg_color=Color(0.025, 0.075, 0.09, 1)
+boot_splash/fullsize=true
+boot_splash/use_filter=true
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=800
