@@ -12,16 +12,16 @@ Bea is a warm, practical woodland ranger. Auburn hair in a braid, a green soft
 ranger hat with a leaf pin, a green jacket, rust scarf, tan trousers and a brown
 supply satchel distinguish her from Scout, Rowan and Otis.
 
-Place her on the clear trail to the right of Pinewood Trail's **southeast fallen
-tree**, matching the user's fallen-tree reference. Proposed world foot position:
-`(1760, 1093.33)`, corresponding to art position `(1320, 820)`. Keep the trail and
-both approaches around the log usable. This is a proposal until screenshot
-approval; any final collision, ore, foliage and encounter clearance is part of
-B04.
+Place her on the clear ground **below Pinewood Trail's southeast fallen tree,
+beside the small stump**, in the area the user circled in red. Requested world
+foot position: `(1632, 1138)`, corresponding to art position `(1224, 853.5)`.
+This moves her down and left from the initial position to the right of the log.
+Keep both approaches around the log usable; final ore, foliage and encounter
+clearance is part of B04.
 
 Fit the character's visible alpha bounds to Scout's **87.45 world-unit** idle
-height, excluding transparent padding. Put Scout beside her on the same ground
-line at the same camera zoom for the scale check. Her compact head/body
+height, excluding transparent padding. Keep Scout visible at the same camera
+zoom for the scale check. Her compact head/body
 proportions follow Scout's miner artwork. Store the character source and review
 captures in [the concept folder](concepts/bea-v1/README.md).
 
@@ -43,7 +43,7 @@ by a persistent world pickup and a return conversation.
   its mutable home after floor fitting, or the total number of enemies defeated.
   This adds no extra snake to the district.
 - **Supply box:** add a small distinct tied wooden box near the encounter,
-  provisionally around world `(1440, 1000)`, southwest of Bea and beside the
+  provisionally around world `(1440, 1000)`, northwest of Bea and beside the
   fallen-tree clearing. Verify the final spot against the painted ground,
   randomized ore and existing plants before implementation. The box is a unique
   mission item; it is not one of the wood pickups needed for crafting.

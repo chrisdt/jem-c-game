@@ -14,8 +14,10 @@ in-game size.
 The placement captures use the current main-game Pinewood scenery and HUD, with
 a proposed Bea sprite and shared character bubble added for the screenshot.
 Both characters use the normal camera zoom and an equal 87.45-world-unit visible
-height measured from their alpha bounds. Bea stands to the right of the
-southeast fallen tree; Scout stands beside her on the same ground line.
+height measured from their alpha bounds. Bea now stands on the clear ground
+below the southeast fallen tree, beside the small stump, where the user circled
+in red. Her world foot position is `(1632, 1138)`. Scout stays to the right as a
+size reference; the camera and character scale stay the same.
 Fog is hidden in this screenshot arrangement to show the landmark clearly.
 
 ![Proposed placement beside the fallen tree](bea-pinewood-placement.png)
