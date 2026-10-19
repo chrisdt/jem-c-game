@@ -1,6 +1,6 @@
 # Sunny Scout — browser testing build
 
-This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `61eae00`.
+This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `db36a02`.
 
 ## Download and upload
 
@@ -41,3 +41,5 @@ The build retains the illustrated viewport-filling loading screen and welcome gu
 Native checks cover real resource gathering and randomized wood availability, exact one-time recipes, lasting missions, directional attacks, walls/terrain, safe arrivals, warned damage/recovery, persistent enemy damage/removal, Buddy's scare interruption, Earth-only food/enemies, mining timing and E/Space cross-cancellation, drill gates, touch crafting, reset, startup and planet travel. Browser review covers the actual rendered workbench purchases and wood pickup, Space mining, Pinewood sword attacks, hostile rat/bat warning/damage/smoke in all three mines, off-world exclusion and two-finger tablet crafting. The final production build passes normal welcome/start, locked sword, camp and Pinewood streaming under `/jem/`, with desktop and tablet emulation and no script/download errors. A physical iPad Safari playtest is still needed.
 
 Camp spawn update: native checks cover guide starts, confirmed reset, safe recovery, 150 random mineral layouts and Earth wood/crafting progression. The production browser build was reviewed on desktop and tablet emulation for the new camp position, opening the workbench without walking and returning there after reset.
+
+Equipment thumbnails now show only 1 and 2 on desktop and touch layouts. The selected equipment name stays above the slots; the uncrafted sword keeps its disabled, dimmed icon and recipe tooltip. Native HUD/drill checks and rendered desktop/tablet equipment review pass.
