@@ -181,7 +181,9 @@ func run() -> void:
 			for seed_value in 50:
 				rng.seed = seed_value*1009+17
 				var deposits: Array[Dictionary] = data.generate(region,rng)
-				check(deposits.size() == (15 if data.has_mine(region) else 8),"New district lost its ore supplies")
+				check(deposits.size() == (4 if data.has_mine(region) else 2),"New district did not retain sparse supplies")
+				check(deposits.filter(func(rock): return not rock.cave).size() == 2,"Off-world surface contains too many deposits")
+				check(deposits.filter(func(rock): return rock.hard).size() == (1 if data.has_mine(region) else 0),"Off-world mine must retain one rare deposit")
 				var signature := str(deposits.map(func(rock):return rock.pos))
 				check(not seen.has(signature),"Off-world ore did not randomize between games")
 				seen[signature] = true

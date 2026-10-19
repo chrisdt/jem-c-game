@@ -129,7 +129,9 @@ func run() -> void:
 		for seed_value in 50:
 			rng.seed = seed_value*1009+17
 			var deposits := EARTH.generate(region,rng)
-			check(deposits.size() == (15 if EARTH.has_mine(region) else 8),"Earth district lost deposits")
+			check(deposits.size() == (4 if EARTH.has_mine(region) else 2),"Earth district did not retain sparse supplies")
+			check(deposits.filter(func(rock): return not rock.cave).size() == 2,"Earth surface contains too many deposits")
+			check(deposits.filter(func(rock): return rock.hard).size() == (1 if EARTH.has_mine(region) else 0),"Earth mine must retain one rare deposit")
 			var signature := str(deposits.map(func(rock): return rock.pos))
 			check(not seen.has(signature),"District did not randomize ore")
 			seen[signature] = true

@@ -67,7 +67,7 @@ func run() -> void:
 	game.advance_mining(3.0)
 	assert(game.mining_target == -1 and game.ore == 1)
 	# Crystal stays locked until the upgrade, and does not award at copper timing.
-	var crystal := 11
+	var crystal: int = game.rocks.find_custom(func(rock): return rock.hard)
 	game.player = game.rocks[crystal].pos + Vector2(-70, 0)
 	game.update_exploration()
 	game.start_mining(crystal)

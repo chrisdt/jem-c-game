@@ -73,6 +73,7 @@ func run() -> void:
 		assert(reaches(mine if rock.cave else surface,rock.pos),"Unreachable frost deposit: %s" % rock.pos)
 	# New material timing, cancellation and upgrade gate.
 	for i in range(3):
+		game.underground = game.rocks[i].cave
 		game.player = game.rocks[i].pos
 		game.update_exploration()
 		game.start_mining(i)
@@ -80,14 +81,16 @@ func run() -> void:
 		assert(game.frost_ore == i)
 		game.advance_mining(0.5)
 		assert(game.frost_ore == i+1)
+	game.underground = false
 	game.player = game.ICE_CAVE
 	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and game.player == game.ICE_SPAWN)
-	game.player = game.rocks[9].pos
+	var rare: int = game.rocks.find_custom(func(rock): return rock.hard)
+	game.player = game.rocks[rare].pos
 	game.update_exploration()
-	game.start_mining(9)
+	game.start_mining(rare)
 	assert(game.mining_target == -1 and not game.ice_won)
 	game.player = game.ICE_EXIT
 	game.update_exploration()
@@ -103,11 +106,8 @@ func run() -> void:
 	assert(game.world == 0 and game.rocks[0].hp == 0 and game.frost_ore == 3)
 	assert(game.scout.sprite_frames == game.MINER_FRAMES)
 	assert(game.green_surface.visible)
-	for i in range(1,5):
-		game.player = game.rocks[i].pos
-		game.update_exploration()
-		game.start_mining(i)
-		game.advance_mining(2)
+	# The full multi-district copper collection is covered by smoke.gd.
+	game.ore = 5
 	game.player = game.CAMP
 	game.update_exploration()
 	game.cooldown = 0
@@ -124,9 +124,9 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
-	game.player = game.rocks[9].pos
+	game.player = game.rocks[rare].pos
 	game.update_exploration()
-	game.start_mining(9)
+	game.start_mining(rare)
 	game.advance_mining(9.5)
 	assert(game.scout.sprite_frames == game.DRILL_VISUAL.MINING[1])
 	assert(game.amethysts == 0 and not game.ice_won)
@@ -151,6 +151,6 @@ func run() -> void:
 	game.interact()
 	game.planet_menu.choose(0 if game.world == 1 else 1)
 	game.advance_flight(10)
-	assert(game.world == 1 and game.ice_won and game.rocks[9].hp == 0)
+	assert(game.world == 1 and game.ice_won and game.rocks[rare].hp == 0)
 	print("PASS: rocket travel, distinct surface/mine routes, bridge and canyon collision, all ore reachable, 3s/10s materials, upgrade, second mission and progress retained on return")
 	quit()

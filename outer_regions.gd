@@ -6,6 +6,7 @@ const SIZE := Vector2(2000,1400)
 const ART_SIZE := Vector2(1500,1050)
 const FOOT_OFFSET := Vector2(0,20)
 const MOTION = preload("res://floor_motion.gd")
+const DENSITY = preload("res://ore_density.gd")
 var world: int
 var NAMES: Array
 var SURFACE_IDS: Array
@@ -178,8 +179,8 @@ func generate(region: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	for cave in [false,true]:
 		if cave and not has_mine(region): continue
 		var zones: Array = MINE_ORE_ZONES[region] if cave else ORE_ZONES[region]
-		for i in (7 if cave else 8):
-			var hard: bool = cave and i < 3
+		for i in DENSITY.count(cave):
+			var hard: bool = cave and i < DENSITY.MINE_RARE
 			var chosen := Vector2.INF
 			for attempt in 4000:
 				var zone: Rect2 = zones[rng.randi_range(0,zones.size()-1)]

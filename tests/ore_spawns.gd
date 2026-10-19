@@ -47,7 +47,7 @@ func run() -> void:
 		for trial in 50:
 			game.ore_rng.seed = trial * 1009 + 17
 			game.reset_rocks()
-			check(game.rocks.size() == (12 if world == 1 else 14),"Random generation lost a required deposit")
+			check(game.rocks.size() == 4,"Landing district should contain two surface and two mine deposits")
 			var signature := str(game.rocks.map(func(rock): return rock.pos))
 			check(not seen.has(signature),"Different seeds produced the same layout")
 			seen[signature] = true
@@ -70,7 +70,23 @@ func run() -> void:
 				for j in i:
 					if game.rocks[j].cave == rock.cave:
 						check(game.rocks[j].pos.distance_to(rock.pos) >= 149.9,"Ore deposits overlap")
-			check(surface_count == (6 if world == 1 else 7) and hard_count == 3,"Layout cannot support its mining mission")
+			check(surface_count == 2 and hard_count == 1,"Sparse layout should have two common surface deposits and one common/one rare mine deposit")
+	# The landing district cannot fund the drill by itself, while every planet
+	# retains enough reachable starter-tool supplies to finish its objective.
+	for world in 3:
+		game.world = world
+		game.reset_rocks()
+		var total: Array[Dictionary] = game.rocks.duplicate()
+		var home_common := total.filter(func(rock): return not rock.hard).size()
+		check(home_common == 3 and home_common < 5,"The first district alone can fund the Earth drill")
+		var surface_common := total.filter(func(rock): return not rock.cave).size()
+		for region in range(1,5):
+			var deposits: Array[Dictionary] = game.regions().generate(region,game.ore_rng)
+			total.append_array(deposits)
+			surface_common += deposits.filter(func(rock): return not rock.cave).size()
+		check(total.size() == 16,"A planet no longer has the intended sparse supply budget")
+		check(surface_common == 10 and surface_common >= 5,"Surface exploration cannot fund the starter drill")
+		check(total.filter(func(rock): return rock.hard).size() == 3,"A planet lost its three rare mine deposits")
 	if failures == 0:
-		print("PASS: 100 distinct seeded layouts, connected reachable ore, complete mission supplies, correct mining times, hidden initial state and separated deposits clear of pond/tree cover")
+		print("PASS: 100 distinct seeded layouts, connected reachable ore, sparse mineral supplies, correct mining times, hidden initial state and separated deposits clear of pond/tree cover")
 	quit(1 if failures else 0)

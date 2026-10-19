@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 var failures := 0
 
 func _initialize() -> void:
@@ -89,7 +91,10 @@ func run() -> void:
 		check(game.hud.location_subtitle.text == game.mine_name(),"Mine name is missing from the compact location badge")
 	# Collect more than one crystal: the icon counter tracks the actual total,
 	# rather than turning the old mission-complete boolean into a fake count.
-	for i in [11,12]:
+	for region in [0,1]:
+		if region > 0:
+			await TRAVEL.enter(game,region,true)
+		var i: int = game.rocks.find_custom(func(rock): return rock.hard)
 		game.player = game.rocks[i].pos
 		game.update_exploration()
 		game.start_mining(i)
@@ -98,6 +103,7 @@ func run() -> void:
 		game.advance_mining(0.02)
 	game.refresh_ui()
 	check(game.blue_crystals == 2 and game.hud.counts[1].text == "2","Blue crystal counter lost collected materials")
+	await TRAVEL.enter(game,0,false)
 	game.underground = false
 	game.player = game.SHIP
 	game.update_exploration()

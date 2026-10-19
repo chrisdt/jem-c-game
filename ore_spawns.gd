@@ -3,6 +3,7 @@ extends RefCounted
 const MINE = preload("res://mine_layout.gd")
 const FROST = preload("res://frost_layout.gd")
 const DESERT = preload("res://desert_layout.gd")
+const DENSITY = preload("res://ore_density.gd")
 const GRID := 16.0
 const SPACING := 150.0
 const FOOTPRINT := [Vector2.ZERO, Vector2(-38,0), Vector2(38,0), Vector2(0,-20), Vector2(0,20)]
@@ -55,9 +56,8 @@ static func generate(world: int, rng: RandomNumberGenerator, entries: Array[Vect
 	var deposits: Array[Dictionary] = []
 	for cave in [false, true]:
 		var candidates := candidate_points(world, cave, entries[int(cave)])
-		var basic_count := (3 if cave else 6) if world > 0 else (4 if cave else 7)
-		var count := basic_count + (3 if cave else 0)
-		for i in count:
+		var basic_count: int = DENSITY.MINE_COMMON if cave else DENSITY.SURFACE_COMMON
+		for i in DENSITY.count(cave):
 			var hard := i >= basic_count
 			var point := choose_point(candidates, world, cave, hard, deposits, rng, entries[int(cave)], tree_cover, i == 0 and world == 0 and not cave)
 			assert(point.is_finite(), "No reachable space for a required ore deposit")

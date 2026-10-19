@@ -81,8 +81,8 @@ func run() -> void:
 	for trial in 50:
 		game.ore_rng.seed = trial * 1013 + 29
 		game.reset_rocks()
-		check(game.rocks.size() == 12,"Desert is missing mission supplies")
-		if game.rocks.size() != 12:
+		check(game.rocks.size() == 4,"Desert should have two surface and two mine deposits")
+		if game.rocks.size() != 4:
 			quit(1)
 			return
 		for rock in game.rocks:
@@ -96,6 +96,7 @@ func run() -> void:
 	walk_route(game,[Vector2(1220,840),Vector2(1270,710),Vector2(1240,570),Vector2(1220,440),Vector2(1220,330),Vector2(1100,270),Vector2(970,240),Vector2(850,235),Vector2(720,230),Vector2(590,230),Vector2(470,270),Vector2(350,290),Vector2(300,300)],false)
 	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(780,500))),"Player can walk onto the central sandstone mesa")
 	for i in 3:
+		game.underground = game.rocks[i].cave
 		game.player = game.rocks[i].pos
 		game.update_exploration()
 		game.start_mining(i)
@@ -103,6 +104,7 @@ func run() -> void:
 		check(game.gold_ore == i,"Gold mining completed early")
 		game.advance_mining(0.02)
 	check(game.gold_ore == 3,"Gold mining did not award the third-world material")
+	game.underground = false
 	game.player = LAYOUT.CAVE + Vector2(0,110)
 	game.mine_transition_cooldown = 0
 	game.move_player(Vector2.UP,0.3)
@@ -116,12 +118,13 @@ func run() -> void:
 	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(164,471)) - LAYOUT.FOOT_OFFSET,true),"Player can stand on the painted western rock wall")
 	for x in [665,880,1120]:
 		check(LAYOUT.can_walk(LAYOUT.from_art(Vector2(x,451)) - LAYOUT.FOOT_OFFSET,true),"Stone bridge deck is blocked")
-	game.player = game.rocks[9].pos
+	var rare: int = game.rocks.find_custom(func(rock): return rock.hard)
+	game.player = game.rocks[rare].pos
 	game.update_exploration()
-	game.start_mining(9)
+	game.start_mining(rare)
 	check(game.mining_target == -1,"Fire ruby bypassed the stronger-pick upgrade")
 	game.upgraded = true
-	game.start_mining(9)
+	game.start_mining(rare)
 	game.advance_mining(9.9)
 	check(game.rubies == 0 and not game.desert_won,"Ruby mining completed early")
 	game.advance_mining(0.11)
@@ -140,7 +143,7 @@ func run() -> void:
 	fly(game,1)
 	fly(game,0)
 	fly(game,2)
-	check(game.gold_ore == 3 and game.rubies == 1 and game.desert_won and game.rocks[9].hp == 0,"Three-planet trips lost desert mission progress")
+	check(game.gold_ore == 3 and game.rubies == 1 and game.desert_won and game.rocks[rare].hp == 0,"Three-planet trips lost desert mission progress")
 	check(game.rocks.map(func(rock): return rock.pos) == locations and game.fog.is_revealed(5,LAYOUT.MINE_SPAWN),"Three-planet travel reset ore locations or discoveries")
 	if failures == 0:
 		print("PASS: destination picker, all three planets, desert loop routes, lava/mesa collision, bridge and galleries, 50 reachable layouts, 3s/10s mining, mission and session progress")

@@ -39,6 +39,7 @@ const MINE_ENTRANCES := [Vector2(1480,340),Vector2(1090,245) / ART_SIZE * SIZE,V
 const MINE_EXITS := [Vector2(150,610),Vector2(750,875) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(160,835) / ART_SIZE * SIZE]
 const MINE_SPAWNS := [Vector2(420,620),Vector2(750,745) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(290,790) / ART_SIZE * SIZE]
 const MOTION = preload("res://floor_motion.gd")
+const DENSITY = preload("res://ore_density.gd")
 const FOOT_OFFSET := Vector2(0,20)
 
 # Only solid side features are excluded; broad grassy clearings remain open.
@@ -160,8 +161,8 @@ static func generate(region: int, rng: RandomNumberGenerator) -> Array[Dictionar
 		if cave and not has_mine(region):
 			continue
 		var zones: Array = MINE_ORE_ZONES[region] if cave else ORE_ZONES[region]
-		for i in (7 if cave else 8):
-			var hard: bool = cave and i < 3
+		for i in DENSITY.count(cave):
+			var hard: bool = cave and i < DENSITY.MINE_RARE
 			var chosen := Vector2.INF
 			for attempt in 3000:
 				var zone: Rect2 = zones[rng.randi_range(0,zones.size()-1)]

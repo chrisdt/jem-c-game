@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -7,6 +9,7 @@ func run() -> void:
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
+	game.set_process(false)
 	assert(game.ore == 0 and not game.upgraded)
 	assert(game.green_surface.visible)
 	# Exercise the movement path used by keyboard input, including diagonal speed
@@ -51,17 +54,30 @@ func run() -> void:
 	assert(not game.walking and str(game.scout.animation).begins_with("idle_"))
 	print("PASS: directional walk cycle, retained idle facing, diagonal speed, pond and map boundaries")
 	# Timed copper collection; the first click starts work and cannot award early.
-	for i in range(5):
-		game.player = game.rocks[i].pos
-		game.update_exploration()
-		game.cooldown = 0
-		game.interact()
-		assert(game.mining_target == i)
-		game.advance_mining(1.5)
-		assert(game.ore == i)
-		game.advance_mining(0.5)
-		assert(game.ore == i + 1)
+	for region in 3:
+		if region > 0:
+			await TRAVEL.enter(game,region,false)
+		for i in game.rocks.size():
+			if game.rocks[i].cave or game.ore == 5: continue
+			game.player = game.rocks[i].pos
+			game.update_exploration()
+			game.cooldown = 0
+			var collected: int = game.ore
+			game.interact()
+			assert(game.mining_target == i)
+			game.advance_mining(1.5)
+			assert(game.ore == collected)
+			game.advance_mining(0.5)
+			assert(game.ore == collected+1)
+		if region == 0:
+			game.player = game.CAMP
+			game.update_exploration()
+			game.cooldown = 0
+			game.interact()
+			assert(game.ore == 2 and not game.upgraded,"Starting area should require more exploration for the drill")
 	assert(game.ore == 5)
+	assert(game.earth_visited.size() == 3)
+	await TRAVEL.enter(game,0,false)
 	game.player = game.CAMP
 	game.update_exploration()
 	game.cooldown = 0
@@ -70,9 +86,11 @@ func run() -> void:
 	game.player = game.CAVE
 	game.update_exploration()
 	game.cooldown = 0
+	game.mine_transition_cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(game.underground and not game.green_surface.visible)
-	game.player = game.rocks[11].pos
+	var crystal: int = game.rocks.find_custom(func(rock): return rock.hard)
+	game.player = game.rocks[crystal].pos
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
@@ -85,5 +103,5 @@ func run() -> void:
 	game.cooldown = 0
 	game.move_player(Vector2.ZERO, 0.61)
 	assert(not game.underground and game.green_surface.visible)
-	print("PASS: mining, inventory, upgrade, mine entry, crystal mission and exit")
+	print("PASS: collect five copper across three surface districts; mining, inventory, drill purchase, home return, crystal mission and exit")
 	quit()

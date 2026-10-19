@@ -120,7 +120,7 @@ var blue_crystals := 0
 var rocks: Array[Dictionary] = []
 var ore_rng := RandomNumberGenerator.new()
 var fog: EXPLORATION_FOG
-var message := "WASD / arrows to walk. E to mine. Collect 5 copper to build your hand drill at camp."
+var message := "WASD / arrows to walk. E to mine. Follow trails to find 5 copper, then build your hand drill at camp."
 var cooldown := 0.0
 var elapsed := 0.0
 var camera: Camera2D
