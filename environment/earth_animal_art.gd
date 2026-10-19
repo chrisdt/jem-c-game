@@ -1,7 +1,7 @@
 extends RefCounted
 
 enum Species { SHEEP, COW, DOG }
-const SHEETS := [preload("res://assets/creatures/sheep.png"),preload("res://assets/creatures/cow.png"),preload("res://assets/creatures/dog.png"),preload("res://assets/creatures/dog_sitting.png")]
+const SHEETS := [preload("res://assets/creatures/sheep.png"),preload("res://assets/creatures/cow.png"),preload("res://assets/creatures/dog.png"),preload("res://assets/creatures/dog_sitting.png"),preload("res://assets/creatures/dog_barking.png")]
 const COLUMNS := [0,390,780,1160,1536]
 const ROWS := [Vector2(0,350),Vector2(350,325),Vector2(675,349)]
 # Per-pose hoof/paw anchors compensate for the paintings' different padding.
@@ -18,18 +18,22 @@ const ANCHORS := [
 	[[Vector2(255,328),Vector2(620,328),Vector2(1005,328),Vector2(1388,328)],
 	 [Vector2(223,664),Vector2(590,664),Vector2(973,664),Vector2(1356,664)],
 	 [Vector2(207,983),Vector2(590,983),Vector2(975,983),Vector2(1357,983)]],
+	[[Vector2(205,320),Vector2(588,318),Vector2(975,320),Vector2(1359,320)],
+	 [Vector2(200,646),Vector2(584,646),Vector2(966,646),Vector2(1352,646)],
+	 [Vector2(197,988),Vector2(586,988),Vector2(970,988),Vector2(1356,988)]],
 ]
-const SCALES := [[0.17,0.18,0.17],[0.22,0.22,0.22],[0.145,0.17,0.14],[0.12,0.125,0.12]]
+const SCALES := [[0.17,0.18,0.17],[0.22,0.22,0.22],[0.145,0.17,0.14],[0.12,0.125,0.12],[0.145,0.17,0.14]]
 static var poses: Dictionary = {}
 
-static func pose(species: int, facing: Vector2, frame: int, sitting := false) -> Dictionary:
-	var sheet := 3 if sitting else species
+static func pose(species: int, facing: Vector2, frame: int, sitting := false, barking := false) -> Dictionary:
+	var sheet := 4 if barking else (3 if sitting else species)
 	var row := 0 if facing.y == 0 else (1 if facing.y > 0 else 2)
 	var key := Vector3i(sheet,row,frame)
 	if not poses.has(key):
 		var texture := AtlasTexture.new()
 		texture.atlas = SHEETS[sheet]
-		texture.region = Rect2(COLUMNS[frame],ROWS[row].x,COLUMNS[frame+1]-COLUMNS[frame],ROWS[row].y)
+		var rows: Array = [Vector2(0,335),Vector2(335,320),Vector2(655,369)] if barking else ROWS
+		texture.region = Rect2(COLUMNS[frame],rows[row].x,COLUMNS[frame+1]-COLUMNS[frame],rows[row].y)
 		texture.filter_clip = true
 		poses[key] = {"texture":texture,"anchor":ANCHORS[sheet][row][frame],"scale":SCALES[sheet][row],"row":row}
 	return poses[key]

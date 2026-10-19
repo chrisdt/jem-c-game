@@ -82,7 +82,11 @@ func run() -> void:
 			parent.free()
 			check(previous.get_ref() == null,"Herd remained after unloading")
 		print("Pastures: region %d, four ore layouts" % region)
-	# Find the sitting dog by exploring Pinewood; no keyboard-only action.
+	# Keep this movement fixture in Pinewood; randomized starts have their own
+	# checks. Finding the dog still requires only approach, never a key press.
+	for seed_value in 30:
+		game.companion.choose_discovery(seed_value)
+		if game.companion.discovery_region == 1: break
 	game.earth_region = 1
 	game.underground = false
 	game.reset_rocks()

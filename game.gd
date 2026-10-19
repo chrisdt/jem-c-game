@@ -79,6 +79,7 @@ const EARTH_WATER = preload("res://environment/earth_water.gd")
 const AMBIENT_LIFE = preload("res://environment/ambient_life.gd")
 const DOG_COMPANION = preload("res://environment/dog_companion.gd")
 var companion: Node2D
+var scared_wildlife: Dictionary = {}
 var green_surface: Node2D
 var moss_water: Node2D
 var local_life: Node2D

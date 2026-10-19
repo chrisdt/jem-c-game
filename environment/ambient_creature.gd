@@ -42,6 +42,11 @@ var facing := Vector2.RIGHT
 var size_variation := 1.0
 var speed := 23.0
 var current_frame := -1
+const FLEE_SECONDS := 0.75
+const PUFF_SECONDS := 0.6
+var scare_id := -1
+var scare_area := -1
+var smoke_centre := Vector2.ZERO
 
 func _ready() -> void:
 	rng.randomize()
@@ -128,6 +133,10 @@ func rest() -> void:
 	rest_seconds = rng.randf_range(0.7,1.8) if kind == Kind.BAT else rng.randf_range(1.5,4.0)
 
 func advance(delta: float) -> void:
+	if state == "gone": return
+	if state in ["flee","puff"]:
+		advance_escape(delta)
+		return
 	if not settled:
 		position = find_start()
 		previous_stop = position
@@ -158,10 +167,10 @@ func update_pose() -> void:
 	var bob := 0.0
 	var tilt := 0.0
 	if kind == Kind.BAT:
-		frame = int((elapsed+flight_phase)*9) % 4
-		bob = 48 + sin(elapsed*2.1+flight_phase)*7
+		frame = int((elapsed+flight_phase)*(14 if state == "flee" else 9)) % 4
+		bob = 48 + sin(elapsed*2.1+flight_phase)*7 + (state_time*25 if state == "flee" else 0.0)
 		tilt = sin(elapsed*1.7+flight_phase)*0.04
-	elif state == "walk":
+	elif state in ["walk","flee"]:
 		var stride := 6.0 if kind == Kind.RAT else 9.0
 		frame = int(walk_distance/stride) % 4
 		bob = absf(sin(walk_distance/stride*PI)) * (1.0 if kind == Kind.RAT else 1.8)
@@ -182,10 +191,76 @@ func update_pose() -> void:
 		sprite.scale = Vector2.ONE*base_scale
 	sprite.position.y = -bob
 	sprite.rotation = tilt
-	var breathing := 1.0 if state == "walk" or kind == Kind.BAT else 1.0+sin(elapsed*2+flight_phase)*0.012
+	var breathing := 1.0 if state in ["walk","flee"] or kind == Kind.BAT else 1.0+sin(elapsed*2+flight_phase)*0.012
 	sprite.scale.y *= breathing
 
+func scare_from(origin: Vector2) -> bool:
+	if kind not in [Kind.RAT,Kind.BAT] or state in ["flee","puff","gone"]: return false
+	advance(0)
+	var away := (position-origin).normalized()
+	if away.is_zero_approx(): away = Vector2.RIGHT
+	var score := 0.0
+	target = position
+	for ray in 16:
+		var direction := away.rotated(ray*TAU/16)
+		if direction.dot(away) < -0.001: continue
+		for distance in [90.0,60.0,30.0]:
+			var candidate: Vector2 = position+direction*distance
+			var candidate_score: float = (candidate-position).dot(away)+distance*0.15
+			if candidate_score > score and clear_route(candidate):
+				score = candidate_score
+				target = candidate
+	state = "flee"
+	state_time = 0
+	if is_instance_valid(game) and game.has_method("area_id") and scare_area >= 0 and scare_id >= 0:
+		if not game.scared_wildlife.has(scare_area): game.scared_wildlife[scare_area] = {}
+		game.scared_wildlife[scare_area][scare_id] = true
+	if position.distance_to(target) < 1: begin_puff()
+	return true
+
+func begin_puff() -> void:
+	state = "puff"
+	state_time = 0
+	smoke_centre = sprite.position+Vector2(0,-7)
+	sprite.hide()
+	queue_redraw()
+
+func advance_escape(delta: float) -> void:
+	var remaining := maxf(0,delta)
+	while remaining > 0.00001 and state != "gone":
+		var duration := FLEE_SECONDS if state == "flee" else PUFF_SECONDS
+		var step := minf(minf(remaining,0.05),duration-state_time)
+		state_time += step
+		elapsed += step
+		remaining -= step
+		if state == "flee":
+			var next := position.move_toward(target,step*(145.0 if kind == Kind.RAT else 165.0))
+			if not clear_route(next):
+				begin_puff()
+				continue
+			walk_distance += position.distance_to(next)
+			facing = FACING.from_movement(next-position,facing)
+			position = next
+			update_pose()
+			if state_time >= FLEE_SECONDS or position.distance_to(target) < 0.5: begin_puff()
+		elif state_time >= PUFF_SECONDS:
+			state = "gone"
+			hide()
+			set_process(false)
+	queue_redraw()
+
 func _draw() -> void:
+	if state == "gone": return
+	if state == "puff":
+		var t := clampf(state_time/PUFF_SECONDS,0,1)
+		for i in 8:
+			var direction := Vector2.from_angle(i*TAU/8+0.2)
+			var point := smoke_centre+direction*(4+19*t)+Vector2(0,-13*t)
+			var radius := (6.0+i%3)*(1+0.7*t)
+			draw_circle(point,radius,Color(0.62,0.67,0.64,(1-t)*0.65))
+			draw_circle(point+Vector2(-1,-2),radius*0.8,Color(0.88,0.9,0.84,(1-t)*0.8))
+		draw_circle(smoke_centre+Vector2(-2,-13*t),9+12*t,Color(0.86,0.88,0.82,(1-t)*0.8))
+		return
 	var width := 11.0 if kind == Kind.RAT else (13.0 if kind == Kind.BAT else 18.0)
 	draw_set_transform(Vector2(0,-1),0,Vector2(1,0.3))
 	draw_circle(Vector2.ZERO,width*size_variation,Color(0.08,0.11,0.13,0.1 if kind == Kind.BAT else 0.16))

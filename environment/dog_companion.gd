@@ -7,14 +7,28 @@ const TAIL = preload("res://shaders/dog_tail.gdshader")
 const EARTH = preload("res://earth_regions.gd")
 const MOSS = preload("res://mine_layout.gd")
 const GROUND = preload("res://ore_spawns.gd")
-const HOME := Vector2(610,400) / EARTH.ART_SIZE * EARTH.SIZE
+const DISCOVERY_HOMES := {
+	1:[Vector2(610,400),Vector2(425,625),Vector2(1130,700)],
+	2:[Vector2(650,330),Vector2(790,390),Vector2(1260,755)],
+	3:[Vector2(500,400),Vector2(750,700),Vector2(1050,470)],
+	4:[Vector2(700,550),Vector2(900,920),Vector2(1220,840)],
+}
 const GRID := 24.0
 const FOLLOW_DISTANCE := 76.0
 const FIND_DISTANCE := 95.0
 const SIT_DELAY := 0.65
+const CREATURE = preload("res://environment/ambient_creature.gd")
+const BARK_SOUND: AudioStream = preload("res://assets/audio/buddy_bark.wav")
+const BARK_FONT: Font = preload("res://assets/ui/heading.ttf")
+const BARK_RADIUS := 145.0
+const BARK_SECONDS := 0.72
+const BARK_COOLDOWN := 3.2
 
 var game: Node
 var recruited := false
+var discovery_region := 1
+var discovery_home := Vector2.ZERO
+var waiting_position := Vector2.INF
 var area_key := ""
 var facing := Vector2.DOWN
 var state := "sit"
@@ -32,9 +46,16 @@ var pivot: Node2D
 var illustration: MeshInstance2D
 var tail: ShaderMaterial
 var current_frame := 0
+var bark_remaining := 0.0
+var bark_cooldown := 0.0
+var bark_check_seconds := 0.0
+var bark_count := 0
+var bark_audio: AudioStreamPlayer
+var bark_bubble: StyleBoxFlat
 
 func _ready() -> void:
 	name = "Buddy"
+	choose_discovery()
 	pivot = Node2D.new()
 	add_child(pivot)
 	illustration = MeshInstance2D.new()
@@ -43,23 +64,59 @@ func _ready() -> void:
 	tail = ShaderMaterial.new()
 	tail.shader = TAIL
 	illustration.material = tail
+	bark_audio = AudioStreamPlayer.new()
+	bark_audio.name = "FriendlyBark"
+	bark_audio.stream = BARK_SOUND
+	bark_audio.volume_db = -11.0
+	add_child(bark_audio)
+	bark_bubble = StyleBoxFlat.new()
+	bark_bubble.bg_color = Color("fff0cc")
+	bark_bubble.border_color = Color("a7803e")
+	bark_bubble.set_border_width_all(1)
+	bark_bubble.set_corner_radius_all(9)
 	update_pose()
 	hide()
 
+func choose_discovery(seed_value: int = -1) -> void:
+	if recruited: return
+	var rng := RandomNumberGenerator.new()
+	if seed_value < 0: rng.randomize()
+	else: rng.seed = seed_value
+	discovery_region = rng.randi_range(1,4)
+	var homes: Array = DISCOVERY_HOMES[discovery_region]
+	discovery_home = EARTH.from_art(homes[rng.randi_range(0,homes.size()-1)])+Vector2.from_angle(rng.randf()*TAU)*sqrt(rng.randf())*52
+	waiting_position = Vector2.INF
+	area_key = ""
+
+func find_waiting_spot() -> Vector2:
+	if waiting_position.is_finite(): return waiting_position
+	for ring in range(12):
+		for ray in 24:
+			var point := discovery_home+Vector2.from_angle(ray*TAU/24)*ring*12
+			if can_stand(point) and EARTH.spawn_clear(discovery_region,false,point,false):
+				waiting_position = point
+				return point
+	return Vector2.INF
+
 func sync_area() -> void:
-	visible = game.world == 0 and game.flight == 0 and not game.earth_transition and (recruited or (game.earth_region == 1 and not game.underground))
+	visible = game.world == 0 and game.flight == 0 and not game.earth_transition and (recruited or (game.earth_region == discovery_region and not game.underground))
 	if game.world != 0:
 		area_key = ""
 		navigation = null
 		path.clear()
-	if not visible: return
+	if not visible:
+		bark_remaining = 0
+		bark_audio.stop()
+		return
 	var key := "%d/%s" % [game.earth_region,game.underground]
 	if key == area_key: return
-	var point: Vector2 = HOME
+	bark_remaining = 0
+	bark_audio.stop()
+	var point := find_waiting_spot() if not recruited else Vector2.ZERO
 	if recruited:
 		var direction := Vector2.UP if game.facing == &"up" else (Vector2.DOWN if game.facing == &"down" else (Vector2.LEFT if game.facing_left else Vector2.RIGHT))
 		point = game.player-direction*60
-	point = nearest_clear(point)
+	if recruited: point = nearest_clear(point)
 	if not point.is_finite():
 		hide()
 		return
@@ -146,10 +203,16 @@ func plan_route(goal: Vector2) -> void:
 
 func advance(delta: float) -> void:
 	sync_area()
-	if not is_visible_in_tree() or game.planet_menu.visible: return
+	if not is_visible_in_tree():
+		bark_audio.stop()
+		return
+	bark_audio.stream_paused = game.planet_menu.visible
+	if game.planet_menu.visible: return
 	delta = maxf(0,delta)
 	elapsed += delta
 	excitement = maxf(0,excitement-delta)
+	bark_cooldown = maxf(0,bark_cooldown-delta)
+	bark_check_seconds = maxf(0,bark_check_seconds-delta)
 	if not recruited:
 		state = "sit"
 		if position.distance_to(game.player) <= FIND_DISTANCE and clear_route(position,game.player,false) and game.fog.is_revealed(game.area_id(),position):
@@ -159,6 +222,19 @@ func advance(delta: float) -> void:
 		update_pose()
 		queue_redraw()
 		return
+	if bark_remaining > 0:
+		bark_remaining = maxf(0,bark_remaining-delta)
+		if bark_remaining > 0:
+			state = "bark"
+			update_pose()
+			queue_redraw()
+			return
+	if bark_check_seconds <= 0 and bark_cooldown <= 0:
+		bark_check_seconds = 0.15
+		if try_bark():
+			update_pose()
+			queue_redraw()
+			return
 	var player_moved: bool = not last_player.is_finite() or last_player.distance_to(game.player) > 0.1
 	still_seconds = 0.0 if player_moved else still_seconds+delta
 	last_player = game.player
@@ -191,10 +267,35 @@ func advance(delta: float) -> void:
 	update_pose()
 	queue_redraw()
 
+func try_bark() -> bool:
+	if not recruited or game.world != 0 or not game.underground or not is_visible_in_tree() or game.earth_transition or game.flight != 0 or game.planet_menu.visible or bark_cooldown > 0: return false
+	var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
+	if habitat == null: return false
+	var nearby: Array[Node2D] = []
+	for creature in habitat.creatures:
+		if not is_instance_valid(creature) or not creature.is_visible_in_tree(): continue
+		if creature.kind not in [CREATURE.Kind.RAT,CREATURE.Kind.BAT] or creature.state in ["flee","puff","gone"]: continue
+		if position.distance_to(creature.position) > BARK_RADIUS: continue
+		if not game.fog.is_revealed(game.area_id(),creature.position): continue
+		if not clear_route(position,creature.position,false): continue
+		nearby.append(creature)
+	if nearby.is_empty(): return false
+	nearby.sort_custom(func(a,b): return position.distance_squared_to(a.position) < position.distance_squared_to(b.position))
+	facing = FACING.from_movement(nearby[0].position-position,facing)
+	for creature in nearby: creature.scare_from(position)
+	state = "bark"
+	bark_remaining = BARK_SECONDS
+	bark_cooldown = BARK_COOLDOWN
+	bark_count += 1
+	bark_audio.pitch_scale = 1.0+sin(elapsed)*0.04
+	bark_audio.play()
+	return true
+
 func update_pose() -> void:
 	var sitting := state == "sit"
 	current_frame = int(elapsed*(9.0 if excitement > 0 else 5.0))%4 if sitting else (int(walk_distance/9.0)%4 if state == "walk" else 0)
-	var art := ART.pose(ART.Species.DOG,facing,current_frame,sitting)
+	if state == "bark": current_frame = clampi(int((BARK_SECONDS-bark_remaining)/0.18),0,3)
+	var art := ART.pose(ART.Species.DOG,facing,current_frame,sitting,state == "bark")
 	var texture: AtlasTexture = art.texture
 	var scale_factor: float = art.scale
 	pivot.scale.x = -1 if facing.x < 0 else 1
@@ -213,6 +314,11 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0,-1),0,Vector2(1,0.3))
 	draw_circle(Vector2.ZERO,17,Color(0.08,0.14,0.06,0.14))
 	draw_set_transform(Vector2.ZERO)
+	if bark_remaining > 0:
+		var bubble := Rect2(-29,-75,58,24)
+		draw_style_box(bark_bubble,bubble)
+		draw_colored_polygon(PackedVector2Array([Vector2(-5,-52),Vector2(4,-52),Vector2(0,-46)]),Color("fff0cc"))
+		draw_string(BARK_FONT,Vector2(-22,-58),"Woof!",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("394b40"))
 	if excitement > 0:
 		var lift := Vector2(0,-52-sin(elapsed*4)*2)
 		var heart := PackedVector2Array([Vector2(0,5),Vector2(-7,-1),Vector2(-7,-5),Vector2(-3,-7),Vector2(0,-4),Vector2(3,-7),Vector2(7,-5),Vector2(7,-1)])

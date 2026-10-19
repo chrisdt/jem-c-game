@@ -41,6 +41,7 @@ const BAT_HOMES := {
 const RAT_BOUNDS := {0:[Rect2(280,400,220,60),Rect2()]}
 var area_key := ""
 var creatures: Array[Node2D] = []
+var spawn_slot := 0
 
 static func floor_at(world: int, region: int, cave: bool, point: Vector2, catalog) -> bool:
 	if region > 0: return catalog.floor_contains(region,cave,point)
@@ -62,6 +63,7 @@ func clear() -> void:
 		remove_child(child)
 		child.free()
 	creatures.clear()
+	spawn_slot = 0
 	area_key = ""
 
 func populate(world: int, region: int, cave: bool, catalog, game: Node) -> void:
@@ -91,9 +93,16 @@ func populate(world: int, region: int, cave: bool, catalog, game: Node) -> void:
 			add_creature(CREATURE.Kind.FROSTLING if world == 1 else CREATURE.Kind.DUNE_SPRITE,home,world,region,cave,catalog,game,landmarks)
 
 func add_creature(kind: int, home: Vector2, world: int, region: int, cave: bool, catalog, game: Node, landmarks: Array[Vector2]) -> void:
+	var slot := spawn_slot
+	spawn_slot += 1
+	var mine_id: int = catalog.MINE_IDS[region] if cave else -1
+	if world == 0 and cave and is_instance_valid(game) and game.has_method("area_id"):
+		if game.scared_wildlife.get(mine_id,{}).has(slot): return
 	var creature := CREATURE.new()
 	creature.name = "Creature%d" % creatures.size()
 	creature.kind = kind
+	creature.scare_id = slot
+	creature.scare_area = mine_id
 	creature.position = home*SCALE
 	creature.cave = cave
 	creature.game = game
