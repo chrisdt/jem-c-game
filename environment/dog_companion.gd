@@ -206,8 +206,8 @@ func advance(delta: float) -> void:
 	if not is_visible_in_tree():
 		bark_audio.stop()
 		return
-	bark_audio.stream_paused = game.planet_menu.visible
-	if game.planet_menu.visible: return
+	bark_audio.stream_paused = game.menu_open()
+	if game.menu_open() or game.hud.help.visible: return
 	delta = maxf(0,delta)
 	elapsed += delta
 	excitement = maxf(0,excitement-delta)
@@ -268,7 +268,7 @@ func advance(delta: float) -> void:
 	queue_redraw()
 
 func try_bark() -> bool:
-	if not recruited or game.world != 0 or not game.underground or not is_visible_in_tree() or game.earth_transition or game.flight != 0 or game.planet_menu.visible or bark_cooldown > 0: return false
+	if not recruited or game.world != 0 or not game.underground or not is_visible_in_tree() or game.earth_transition or game.flight != 0 or game.menu_open() or game.hud.help.visible or bark_cooldown > 0: return false
 	var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
 	if habitat == null: return false
 	var nearby: Array[Node2D] = []
@@ -288,7 +288,8 @@ func try_bark() -> bool:
 	bark_cooldown = BARK_COOLDOWN
 	bark_count += 1
 	bark_audio.pitch_scale = 1.0+sin(elapsed)*0.04
-	bark_audio.play()
+	if not AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")):
+		bark_audio.play()
 	return true
 
 func update_pose() -> void:

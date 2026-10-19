@@ -22,6 +22,10 @@ const EARTH_TRIAL = preload("res://environment/earth_trial.gd")
 var trial: Node2D
 const HEALING_GARDENS = preload("res://environment/healing_gardens.gd")
 var gardens: Node2D
+const WOOD_SUPPLIES = preload("res://environment/wood_supplies.gd")
+var wood_supplies: Node2D
+const CAMP_MENU = preload("res://ui/camp_workbench.gd")
+var camp_menu: CAMP_MENU
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -219,6 +223,9 @@ func _ready() -> void:
 	add_child(planet_menu)
 	planet_menu.destination_selected.connect(travel_to_other_planet)
 	planet_menu.closed.connect(refresh_ui)
+	camp_menu = CAMP_MENU.new()
+	camp_menu.game = self
+	add_child(camp_menu)
 	companion = DOG_COMPANION.new()
 	companion.game = self
 	add_child(companion)
@@ -228,12 +235,15 @@ func _ready() -> void:
 	gardens = HEALING_GARDENS.new()
 	gardens.game = self
 	add_child(gardens)
+	wood_supplies = WOOD_SUPPLIES.new()
+	wood_supplies.game = self
+	add_child(wood_supplies)
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
 	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
-	message = "1 mining tool, 2 sword. Space attacks; the sword is stronger. Explore trails to find fruit."
+	message = "Earth missions: gather copper and fallen wood. Craft a sword and a hand drill at camp. E gathers; Space mines nearby ore or attacks."
 	if hud.touch_mode:
-		message = "Tap a tool, then Attack. The sword is stronger. Explore trails to find fruit."
+		message = "Earth missions: find copper and fallen wood, then craft at camp. Tap the action to gather and Attack to defend yourself."
 	refresh_ui()
 
 # The Earth-named transition fields are retained for the existing editor/test
@@ -274,6 +284,36 @@ func area_id() -> int:
 
 func has_base() -> bool:
 	return current_region() == 0
+
+func menu_open() -> bool:
+	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible)
+
+func at_workbench() -> bool:
+	return not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
+
+func craft_item(recipe: String) -> bool:
+	if not camp_menu.visible or not at_workbench(): return false
+	if recipe == "drill":
+		if upgraded or ore < trial.DRILL_COPPER: return false
+		ore -= trial.DRILL_COPPER
+		upgraded = true
+		message = "Mission complete: hand drill built! It can mine rare minerals."
+	elif recipe == "sword":
+		if world != 0 or trial.sword_owned or ore < trial.SWORD_COPPER or trial.wood < trial.SWORD_WOOD: return false
+		ore -= trial.SWORD_COPPER
+		trial.wood -= trial.SWORD_WOOD
+		trial.sword_owned = true
+		trial.selected_tool = 1
+		restore_walk_visual()
+		message = "Mission complete: copper sword crafted! Select 2 or tap Sword; Space or Jab attacks."
+	else: return false
+	return true
+
+func clear_touch_gestures() -> void:
+	hud.touch_controls.clear()
+	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
+	if is_instance_valid(camp_menu): buttons += camp_menu.buttons + [camp_menu.close_button]
+	for button in buttons: button.release_touch()
 
 func update_exploration() -> void:
 	if fog == null:
@@ -460,7 +500,7 @@ func _process(delta: float) -> void:
 	if flight != Flight.IDLE:
 		advance_flight(delta)
 		return
-	if planet_menu.visible:
+	if menu_open():
 		refresh_ui()
 		queue_redraw()
 		return
@@ -500,7 +540,7 @@ func restore_walk_visual() -> void:
 		scout.offset = Vector2(0,-145)
 
 func move_player(direction: Vector2, delta: float) -> void:
-	if flight != Flight.IDLE or earth_transition or planet_menu.visible:
+	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if is_instance_valid(trial) and trial.is_active():
 		if trial.jab_time >= 0:
@@ -584,7 +624,7 @@ func check_earth_trail(previous: Vector2) -> void:
 			return
 
 func begin_earth_transition(region: int, cave: bool, arrival: Vector2, rollback: Vector2) -> void:
-	if earth_transition or flight != Flight.IDLE or planet_menu.visible:
+	if earth_transition or flight != Flight.IDLE or menu_open():
 		return
 	if mining_target >= 0: cancel_mining()
 	district_rocks()[current_region()] = rocks
@@ -660,17 +700,29 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_pressed() and not event.is_echo():
 		if event.keycode == KEY_R:
 			# Discard held touch gestures before pausing their input handlers.
-			hud.touch_controls.clear()
-			for button in hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]:
-				button.release_touch()
+			clear_touch_gestures()
 			reset_confirmation.open()
 			get_viewport().set_input_as_handled()
-		elif not earth_transition and not planet_menu.visible and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
+		elif not earth_transition and not menu_open() and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
 			trial.equip(0 if event.keycode == KEY_1 else 1)
 		elif event.keycode == KEY_SPACE and trial.is_active():
-			trial.start_jab()
-		elif not earth_transition and not planet_menu.visible and (event.keycode == KEY_E or event.keycode == KEY_SPACE):
+			space_action()
+			get_viewport().set_input_as_handled()
+		elif not earth_transition and not menu_open() and (event.keycode == KEY_E or event.keycode == KEY_SPACE):
 			interact()
+
+func space_action() -> void:
+	if trial.blocked(): return
+	if trial.sword_equipped():
+		trial.start_jab()
+	elif mining_target >= 0:
+		interact()
+	else:
+		var rock := nearest_rock()
+		if rock >= 0:
+			start_mining(rock)
+			refresh_ui()
+		else: trial.start_jab()
 
 func nearest_rock() -> int:
 	var best := -1
@@ -684,7 +736,7 @@ func nearest_rock() -> int:
 	return best
 
 func interact() -> void:
-	if flight != Flight.IDLE or earth_transition or planet_menu.visible:
+	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if trial.is_active() and (hud.help.visible or trial.jab_time >= 0): return
 	if mining_target >= 0:
@@ -697,14 +749,9 @@ func interact() -> void:
 	if not underground and has_base() and player.distance_to(ship_position()) < 95:
 		open_planet_menu()
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
-		if not upgraded and ore >= 5:
-			ore -= 5
-			upgraded = true
-			message = "Hand drill built! Explore the " + mine_name() + " to find rare minerals."
-		elif upgraded:
-			message = "Your hand drill is fitted. Find rare minerals in the " + mine_name() + "!"
-		else:
-			message = "Workbench: bring 5 copper from Earth to build a hand drill." if world > 0 else "Workbench: follow the trails to collect 5 copper for your hand drill."
+		camp_menu.open()
+	elif is_instance_valid(wood_supplies) and wood_supplies.collect_nearby():
+		pass
 	else:
 		var i := nearest_rock()
 		if i >= 0:
@@ -715,7 +762,7 @@ func interact() -> void:
 	refresh_ui()
 
 func start_mining(index: int) -> void:
-	if flight != Flight.IDLE or earth_transition or planet_menu.visible:
+	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if is_instance_valid(trial) and trial.is_active() and trial.jab_time >= 0:
 		return
@@ -736,7 +783,7 @@ func start_mining(index: int) -> void:
 	walk_distance = 0.0
 	walking = false
 	face_direction(rock.pos - player)
-	var cancel_hint := "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E again to cancel."
+	var cancel_hint := "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E / Space to cancel."
 	message = "%s %s. %s" % ["Drilling" if upgraded else "Mining",material_name(rock),cancel_hint]
 	update_mining_visual()
 
@@ -839,11 +886,13 @@ func update_particles(delta: float) -> void:
 
 func refresh_ui() -> void:
 	if is_instance_valid(gardens): gardens.sync_area()
+	if is_instance_valid(wood_supplies): wood_supplies.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
 	if current_region() == 0:
 		local_life.populate(world,0,underground,regions(),self)
 	else:
 		local_life.clear()
+	if is_instance_valid(trial): trial.sync_area()
 	green_surface.visible = world == 0 and earth_region == 0 and not underground
 	green_surface.process_mode = Node.PROCESS_MODE_INHERIT if green_surface.visible else Node.PROCESS_MODE_DISABLED
 	moss_water.visible = world == 0 and earth_region == 0 and underground
@@ -854,6 +903,7 @@ func refresh_ui() -> void:
 	if hud == null:
 		return
 	planet_menu.set_touch_mode(hud.touch_mode)
+	if camp_menu.visible: camp_menu.present()
 	var flying := flight != Flight.IDLE or earth_transition
 	hud_layer.visible = not flying
 	flight_caption_panel.visible = flying
@@ -868,28 +918,32 @@ func refresh_ui() -> void:
 	var actionable := true
 	if mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
-		context = "E   Cancel %s · %.1fs" % ["drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
+		context = "E / Space   Cancel %s · %.1fs" % ["drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
 		context = "E   Choose a world"
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
-		context = "E   Hand drill fitted" if upgraded else "E   Build hand drill · 5 copper"
+		context = "E   Camp workbench"
+	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
+		context = "E   Pick up wood"
 	elif (not underground and regions().has_mine(current_region()) and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
 		context = "Walk to the surface" if underground else "Walk into " + mine_name()
 		actionable = false
 	elif nearest_rock() >= 0:
 		var rock: Dictionary = rocks[nearest_rock()]
-		context = "E   %s %s · %ds" % ["Drill" if upgraded else "Mine",material_name(rock),int(rock.seconds)]
+		context = "E / Space   %s %s · %ds" % ["Drill" if upgraded else "Mine",material_name(rock),int(rock.seconds)]
 		if rock.hard and not upgraded:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and nearest_rock() >= 0 and mining_target < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
 		"upgraded":upgraded,"objective":objective,"context":context,"actionable":actionable,
-		"flying":flying,"menu":planet_menu.visible,"mining":mining_target >= 0,"message":message,
+		"flying":flying,"menu":menu_open(),"mining":mining_target >= 0,"message":message,
 		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
+		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
+		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 

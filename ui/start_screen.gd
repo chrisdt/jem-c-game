@@ -49,7 +49,7 @@ func _ready() -> void:
 	STYLE.label(panel,"Start on Earth. See where your curiosity takes you.",Vector2(32,95),Vector2(480,28),15)
 	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Find your way","")
 	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Collect and upgrade","")
-	combat_text = guide_row(panel,316,CATALOG.tool_icon(true),"3. Try the Earth sword","")
+	combat_text = guide_row(panel,316,CATALOG.tool_icon(true),"3. Craft your Earth sword","")
 	guide_row(panel,408,CATALOG.planet_icon(1),"4. Fly to new worlds","Use the rocket to pick a new world.\nYour materials and drill come with you.")
 	start_button = STYLE.button(panel,"Start exploring",Vector2(32,514),Vector2(480,60),22)
 	start_button.pressed.connect(start_exploring)
@@ -99,8 +99,8 @@ func guide_row(panel: Control, y: float, icon: Texture2D, title: String, text: S
 func set_touch_mode(value: bool) -> void:
 	touch_mode = value
 	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
-	mine_text.text = "Tap the action button to mine or cancel.\nCollect 5 copper; build a drill at camp." if value else "E to mine or use. Move to cancel.\nCollect 5 copper; build a drill at camp."
-	combat_text.text = "Tap a tool, then Attack / Jab.\nExplore trails: berries +1 heart; apples +2." if value else "1 pick / drill, 2 sword; Space attacks.\nExplore trails: berries +1 heart; apples +2."
+	mine_text.text = "Tap the action button to mine or cancel.\nCollect 5 copper; build a drill at camp." if value else "E / Space mines nearby ore. Move to cancel.\nCollect 5 copper; build a drill at camp."
+	combat_text.text = "Gather 3 copper + 2 wood; craft at camp.\nTap a tool, then Attack / Jab. Fruit heals." if value else "E gathers wood; craft with 3 copper + 2 wood.\n1 tool, 2 sword; Space attacks. Fruit heals."
 	footer.text = ("Best on iPad in landscape. Tap ? in game for controls." if value else "Enter / Space to start. Open ? in game for controls.") + "\nProgress lasts while this game is open."
 
 func start_exploring() -> void:

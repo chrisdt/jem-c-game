@@ -5,6 +5,7 @@ const JAB: Texture2D = preload("res://assets/trial/miner_jab.png")
 const SNAKE: Texture2D = preload("res://assets/trial/snake.png")
 const PLANTS: Texture2D = preload("res://assets/trial/food_plants.png")
 const ICONS: Texture2D = preload("res://assets/trial/icons.png")
+const WOOD: Texture2D = preload("res://assets/trial/wood.png")
 const JAB_ROWS := [Vector2(0,345),Vector2(345,316),Vector2(661,363)]
 const SNAKE_ROWS := [Vector2(0,300),Vector2(320,325),Vector2(650,374)]
 const SNAKE_COLS := [0,269,517,769,1027,1280,1536]
@@ -35,6 +36,10 @@ static func plant(apple: bool, picked: bool) -> Texture2D:
 
 static func plant_anchor(apple: bool, picked: bool) -> Vector2:
 	return Vector2(365 if not picked else 345,642) if apple else Vector2(265 if not picked else 260,337)
+
+static func wood(index := 3) -> Texture2D:
+	var bounds: Rect2 = [Rect2(76,180,535,350),Rect2(736,166,456,382),Rect2(87,748,502,370),Rect2(720,752,470,378)][index]
+	return region("wood%d" % index,WOOD,bounds)
 
 static func snake_pose(row: int, frame: int) -> Dictionary:
 	var bounds := Rect2(SNAKE_COLS[frame],SNAKE_ROWS[row].x,SNAKE_COLS[frame+1]-SNAKE_COLS[frame],SNAKE_ROWS[row].y)

@@ -4,13 +4,11 @@ const PLANT = preload("res://environment/healing_plant.gd")
 const GRASS = preload("res://environment/flower_placement.gd")
 const ART = preload("res://environment/trial_art.gd")
 const STYLE = preload("res://ui/expedition_style.gd")
-# Exactly two fruit trees and two berry bushes per planet, across districts.
+# Exactly two fruit trees and two berry bushes across Earth's districts.
 # x/y use painting coordinates; z = 1 for a tree, 0 for a bush.
 # Landing Meadow has one bush and no fruit trees.
 const SITES := {
 	0:{0:Vector3(555,500,0),1:Vector3(510,755,1),2:Vector3(1190,770,0),3:Vector3(520,515,1)},
-	1:{1:Vector3(620,650,1),2:Vector3(1020,580,0),3:Vector3(390,650,1),4:Vector3(1020,680,0)},
-	2:{1:Vector3(610,540,0),2:Vector3(1010,470,1),3:Vector3(750,530,1),4:Vector3(1000,400,0)},
 }
 var game: Node
 var plants: Array[Node2D] = []
@@ -30,10 +28,10 @@ func _ready() -> void:
 	sync_area()
 
 func is_active() -> bool:
-	return active_area == game.area_id() and not game.underground and game.flight == 0 and not game.earth_transition
+	return game.world == 0 and active_area == game.area_id() and not game.underground and game.flight == 0 and not game.earth_transition
 
 func blocked() -> bool:
-	return not is_active() or game.get_tree().paused or game.planet_menu.visible or game.hud.help.visible
+	return not is_active() or game.trial.blocked()
 
 func clear_area() -> void:
 	if active_area >= 0:
@@ -48,7 +46,7 @@ func clear_area() -> void:
 	feedback.queue_redraw()
 
 func sync_area() -> void:
-	visible = game.flight == 0 and not game.earth_transition and not game.underground
+	visible = game.world == 0 and game.flight == 0 and not game.earth_transition and not game.underground
 	if game.flight != 0 or game.earth_transition: return
 	var area: int = game.area_id()
 	if active_area == area: return
@@ -58,7 +56,7 @@ func sync_area() -> void:
 		return
 	clear_area()
 	active_area = area
-	if game.underground: return
+	if game.world != 0 or game.underground: return
 	if not records.has(area):
 		records[area] = []
 		var district: int = game.current_region()
@@ -75,7 +73,6 @@ func sync_area() -> void:
 		plant.picked = record.picked
 		plant.discovered = record.discovered
 		plant.fade = record.fade
-		plant.modulate = [Color.WHITE,Color(0.83,0.94,1.0),Color(1.0,0.91,0.78)][game.world]
 		add_child(plant)
 		plants.append(plant)
 
@@ -99,24 +96,11 @@ func find_site(preferred_art: Vector2, apple: bool) -> Vector2:
 	var catalog = game.regions()
 	var preferred: Vector2 = catalog.from_art(preferred_art)
 	var plant_scale := 0.24 if apple else 0.16
-	if game.world == 0:
-		var painting: Texture2D = game.green_surface.get_node("Ground").texture if game.current_region() == 0 else game.earth_stream.textures[catalog.key(game.current_region(),false)]
-		var placement := GRASS.new(painting,catalog.SIZE,clear_floor)
-		for offset in [Vector2.ZERO,Vector2(-160,0),Vector2(160,0),Vector2(0,-150),Vector2(0,150)]:
-			var point := placement.place(preferred+offset,plant_scale)
-			if point.is_finite(): return point
-	else:
-		# Snow and sand do not pass Earth's green-grass mask. Check a complete
-		# root footprint against their own cliff, rock and lava floor boundaries.
-		for ring in 24:
-			for ray in 24:
-				var point := preferred+Vector2.from_angle(ray*TAU/24)*ring*12
-				var fits := true
-				for offset in [Vector2.ZERO,Vector2.LEFT*45,Vector2.RIGHT*45,Vector2.UP*28,Vector2.DOWN*28]:
-					if not clear_floor(point+offset):
-						fits = false
-						break
-				if fits: return point
+	var painting: Texture2D = game.green_surface.get_node("Ground").texture if game.current_region() == 0 else game.earth_stream.textures[catalog.key(game.current_region(),false)]
+	var placement := GRASS.new(painting,catalog.SIZE,clear_floor)
+	for offset in [Vector2.ZERO,Vector2(-160,0),Vector2(160,0),Vector2(0,-150),Vector2(0,150)]:
+		var point := placement.place(preferred+offset,plant_scale)
+		if point.is_finite(): return point
 	return Vector2.INF
 
 func _process(delta: float) -> void:

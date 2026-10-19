@@ -74,6 +74,8 @@ func run() -> void:
 			game.update_exploration()
 			game.cooldown = 0
 			game.interact()
+			game.camp_menu.craft("drill")
+			game.camp_menu.dismiss()
 			assert(game.ore == 2 and not game.upgraded,"Starting area should require more exploration for the drill")
 	assert(game.ore == 5)
 	assert(game.earth_visited.size() == 3)
@@ -82,6 +84,8 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.camp_menu.craft("drill")
+	game.camp_menu.dismiss()
 	assert(game.upgraded and game.ore == 0)
 	game.player = game.CAVE
 	game.update_exploration()

@@ -50,10 +50,14 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.camp_menu.craft("drill")
+	game.camp_menu.dismiss()
 	check(not game.upgraded and game.ore == 3,"Workbench fitted a drill without its copper cost")
 	game.ore = 5
 	game.cooldown = 0
 	game.interact()
+	game.camp_menu.craft("drill")
+	game.camp_menu.dismiss()
 	check(game.upgraded and game.ore == 0 and game.scout.sprite_frames == game.DRILL_VISUAL.WALK[0],"Buying the upgrade did not immediately fit the miner's drill")
 	check(game.hud.equipment.texture == game.CATALOG.tool_icon(true) and "drill" in game.hud.equipment.tooltip_text,"HUD equipment indicator did not upgrade")
 	var worlds := [0,1,2,0]

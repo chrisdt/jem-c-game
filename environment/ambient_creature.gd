@@ -4,6 +4,7 @@ enum Kind { FROSTLING, DUNE_SPRITE, RAT, BAT }
 const ART: Texture2D = preload("res://assets/creatures/ambient_creatures.png")
 const FACING = preload("res://environment/wildlife_facing.gd")
 const VERTICAL = preload("res://environment/wildlife_vertical.gd")
+const STYLE = preload("res://ui/expedition_style.gd")
 # The painted poses have different padding. Atlas regions and individual foot
 # anchors keep the body steady without trimming or resampling the source art.
 const ROWS := [Vector2(55,310),Vector2(397,310),Vector2(745,210),Vector2(980,220)]
@@ -47,6 +48,18 @@ const PUFF_SECONDS := 0.6
 var scare_id := -1
 var scare_area := -1
 var smoke_centre := Vector2.ZERO
+var hostile := false
+var health := 6
+var last_jab := -1
+var hit_flash := 0.0
+var health_seconds := 0.0
+var strike_done := false
+
+func max_health() -> int:
+	return 3 if kind == Kind.BAT else 6
+
+func hostile_active() -> bool:
+	return hostile and is_instance_valid(game) and game.world == 0 and game.underground and game.area_id() == scare_area
 
 func _ready() -> void:
 	rng.randomize()
@@ -134,6 +147,7 @@ func rest() -> void:
 
 func advance(delta: float) -> void:
 	if state == "gone": return
+	if hostile and (not hostile_active() or game.trial.blocked()): return
 	if state in ["flee","puff"]:
 		advance_escape(delta)
 		return
@@ -141,26 +155,117 @@ func advance(delta: float) -> void:
 		position = find_start()
 		previous_stop = position
 		settled = true
+	if hostile:
+		advance_hostile(delta)
+		return
 	var remaining := maxf(0,delta)
 	while remaining > 0.00001:
 		var step := minf(remaining,0.05)
 		elapsed += step
 		state_time += step
-		if state == "walk":
-			var next := position.move_toward(target,speed*step)
-			if not can_stand(next):
-				choose_target()
-			else:
-				var movement := next-position
-				position = next
-				walk_distance += movement.length()
-				facing = FACING.from_movement(movement, facing)
-				if position.distance_to(target) < 0.5: rest()
-		elif state_time >= rest_seconds:
-			choose_target()
+		wander_step(step)
 		remaining -= step
 	update_pose()
 	queue_redraw()
+
+func wander_step(step: float) -> void:
+	if state == "walk":
+		var next := position.move_toward(target,speed*step)
+		if not can_stand(next): choose_target()
+		else:
+			var movement := next-position
+			position = next
+			walk_distance += movement.length()
+			facing = FACING.from_movement(movement,facing)
+			if position.distance_to(target) < 0.5: rest()
+	elif state_time >= rest_seconds: choose_target()
+
+func hostile_move(finish: Vector2, velocity: float, step: float) -> void:
+	var next := position.move_toward(finish,velocity*step)
+	if not clear_route(next): return
+	var movement := next-position
+	position = next
+	walk_distance += movement.length()
+	facing = FACING.from_movement(movement,facing)
+
+func advance_hostile(delta: float) -> void:
+	var trial: Node = game.trial
+	var remaining := maxf(0,delta)
+	while remaining > 0.00001:
+		var step := minf(remaining,1.0/120.0)
+		remaining -= step
+		elapsed += step
+		state_time += step
+		hit_flash = maxf(0,hit_flash-step)
+		health_seconds = maxf(0,health_seconds-step)
+		var player: Vector2 = game.player
+		var distance := position.distance_to(player)
+		var safe: bool = trial.safe_at(player) or trial.invulnerable > 0.7
+		var revealed: bool = game.fog.is_revealed(scare_area,position)
+		match state:
+			"hurt":
+				if state_time > 0.22:
+					state = "recover"
+					state_time = 0
+			"warn":
+				if distance > 125 or safe or not revealed or not trial.clear_line(position,player): rest()
+				elif state_time >= 0.5:
+					state = "attack"
+					state_time = 0
+					strike_done = false
+					target = player
+			"attack":
+				hostile_move(target,140 if kind == Kind.BAT else 115,step)
+				if not strike_done and state_time >= 0.08:
+					strike_done = true
+					if distance < 94 and revealed and trial.clear_line(position,player): trial.hurt_player(1)
+				if state_time >= 0.22:
+					state = "recover"
+					state_time = 0
+			"recover":
+				if state_time > 0.95: rest()
+			_:
+				if revealed and not safe and distance < 210 and player.distance_to(home) < wander_radius+80 and trial.clear_line(position,player):
+					state = "chase"
+					facing = FACING.from_movement(player-position,facing)
+					if distance <= 83:
+						state = "warn"
+						state_time = 0
+					else: hostile_move(player,90 if kind == Kind.BAT else 75,step)
+				else:
+					if state == "chase": rest()
+					wander_step(step)
+	update_pose()
+	queue_redraw()
+
+func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
+	if not hostile_active() or game.trial.blocked() or health <= 0 or damage <= 0 or last_jab == jab_id or state in ["flee","puff","gone"]: return false
+	if not game.fog.is_revealed(scare_area,position): return false
+	last_jab = jab_id
+	health = maxi(0,health-damage)
+	if not game.trial.mine_health.has(scare_area): game.trial.mine_health[scare_area] = {}
+	game.trial.mine_health[scare_area][scare_id] = health
+	hit_flash = 0.16
+	health_seconds = 2.0
+	state_time = 0
+	if health == 0:
+		remember_removed()
+		game.trial.mine_defeated += 1
+		begin_puff()
+	else:
+		state = "hurt"
+		var away := (position-origin).normalized()
+		for i in 6:
+			var next := position+away*3
+			if can_stand(next): position = next
+		update_pose()
+	queue_redraw()
+	return true
+
+func remember_removed() -> void:
+	if is_instance_valid(game) and game.has_method("area_id") and scare_area >= 0 and scare_id >= 0:
+		if not game.scared_wildlife.has(scare_area): game.scared_wildlife[scare_area] = {}
+		game.scared_wildlife[scare_area][scare_id] = true
 
 func update_pose() -> void:
 	var frame := 0
@@ -170,7 +275,7 @@ func update_pose() -> void:
 		frame = int((elapsed+flight_phase)*(14 if state == "flee" else 9)) % 4
 		bob = 48 + sin(elapsed*2.1+flight_phase)*7 + (state_time*25 if state == "flee" else 0.0)
 		tilt = sin(elapsed*1.7+flight_phase)*0.04
-	elif state in ["walk","flee"]:
+	elif state in ["walk","flee","chase","attack"]:
 		var stride := 6.0 if kind == Kind.RAT else 9.0
 		frame = int(walk_distance/stride) % 4
 		bob = absf(sin(walk_distance/stride*PI)) * (1.0 if kind == Kind.RAT else 1.8)
@@ -191,8 +296,9 @@ func update_pose() -> void:
 		sprite.scale = Vector2.ONE*base_scale
 	sprite.position.y = -bob
 	sprite.rotation = tilt
-	var breathing := 1.0 if state in ["walk","flee"] or kind == Kind.BAT else 1.0+sin(elapsed*2+flight_phase)*0.012
+	var breathing := 1.0 if state in ["walk","flee","chase","attack"] or kind == Kind.BAT else 1.0+sin(elapsed*2+flight_phase)*0.012
 	sprite.scale.y *= breathing
+	sprite.modulate = Color(1.8,1.5,1.1) if hit_flash > 0 else Color.WHITE
 
 func scare_from(origin: Vector2) -> bool:
 	if kind not in [Kind.RAT,Kind.BAT] or state in ["flee","puff","gone"]: return false
@@ -212,9 +318,7 @@ func scare_from(origin: Vector2) -> bool:
 				target = candidate
 	state = "flee"
 	state_time = 0
-	if is_instance_valid(game) and game.has_method("area_id") and scare_area >= 0 and scare_id >= 0:
-		if not game.scared_wildlife.has(scare_area): game.scared_wildlife[scare_area] = {}
-		game.scared_wildlife[scare_area][scare_id] = true
+	remember_removed()
 	if position.distance_to(target) < 1: begin_puff()
 	return true
 
@@ -265,3 +369,9 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0,-1),0,Vector2(1,0.3))
 	draw_circle(Vector2.ZERO,width*size_variation,Color(0.08,0.11,0.13,0.1 if kind == Kind.BAT else 0.16))
 	draw_set_transform(Vector2.ZERO)
+	if hostile:
+		var y := -82.0 if kind == Kind.BAT else -30.0
+		if state == "warn": draw_string(STYLE.HEADING,Vector2(-4,y),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
+		if health_seconds > 0:
+			draw_rect(Rect2(-16,y,32,5),Color("143638"))
+			draw_rect(Rect2(-15,y+1,30*float(health)/max_health(),3),Color("d9ae58"))

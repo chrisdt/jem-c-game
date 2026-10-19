@@ -112,6 +112,8 @@ func run() -> void:
 	game.update_exploration()
 	game.cooldown = 0
 	game.interact()
+	game.camp_menu.craft("drill")
+	game.camp_menu.dismiss()
 	assert(game.upgraded and game.ore == 0)
 	game.player = game.SHIP
 	game.update_exploration()

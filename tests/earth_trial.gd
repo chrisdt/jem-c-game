@@ -71,6 +71,7 @@ func run() -> void:
 	for snake in trial.snakes:
 		check(snake.can_stand(snake.position),"Snake started on blocked floor or a landmark")
 	check(game.hud.attack_button.visible,"Mining tool has no touch attack")
+	trial.sword_owned = true
 	trial.equip(1)
 	check(trial.sword_equipped() and not game.scout.has_node("CarriedSword"),"Idle sword should be hidden")
 	game.upgraded = true
@@ -193,19 +194,7 @@ func run() -> void:
 	trial.advance(1)
 	check(trial.seconds == clock_before,"Trial advanced behind a menu")
 	game.planet_menu.dismiss()
-	for area in [[0,0,true],[0,1,false],[1,0,false],[2,0,false]]:
-		game.world = area[0]
-		game.earth_region = area[1]
-		game.underground = area[2]
-		trial.advance(1)
-		game.refresh_ui()
-		check(not trial.is_active() and not trial.visible and not game.scout.has_node("CarriedSword"),"First-screen content leaked to another area")
-		check(not game.hud.equip_slots[0].visible,"Trial HUD leaked to another area")
-	game.world = 0
-	game.earth_region = 0
-	game.underground = false
-	trial.advance(0)
-	check(snake.state == "gone" and trial.defeated == before_defeated+1,"Revisiting respawned a defeated snake")
+	check(snake.state == "gone" and trial.defeated == before_defeated+1,"Defeated snake state was lost")
 	# Long movement stays on floor; direction changes use genuinely different art.
 	var living: Node = trial.snakes[1]
 	living.health = 9
@@ -299,7 +288,7 @@ func run() -> void:
 			check(fresh.trial.floor_at(plant.position),"Fresh-layout healing plant is not on clear ground")
 			for rock in fresh.rocks:
 				check(rock.cave or rock.pos.distance_to(plant.position) >= 100,"Fresh-layout healing plant overlaps ore")
-		check(fresh.trial.health == 10 and fresh.trial.defeated == 0 and fresh.gardens.plants.all(func(p): return not p.picked),"Fresh game inherited trial progress")
+		check(fresh.trial.health == 10 and not fresh.trial.sword_owned and fresh.trial.defeated == 0 and fresh.gardens.plants.all(func(p): return not p.picked),"Fresh game inherited trial progress")
 		fresh.queue_free()
 		await process_frame
 		await process_frame

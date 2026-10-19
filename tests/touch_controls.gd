@@ -81,12 +81,24 @@ func run() -> void:
 	assert(game.ore == 1 and game.rocks[0].hp == 0)
 	# The same touch action buys a real upgrade, then operates the rocket and
 	# destination picker with another finger still resting on the walk pad.
-	game.ore = 5
+	game.ore = 8
+	game.trial.wood = 2
 	game.player = game.CAMP
 	game.cooldown = 0
 	game.refresh_ui()
+	await touch(0,center+Vector2(65,0),true)
 	await tap(1,game.action_button)
+	assert(game.camp_menu.visible and not game.upgraded)
+	assert(joy.finger == -1 and joy.direction == Vector2.ZERO,"Opening the workbench kept a held walking gesture")
+	var camp_point: Vector2 = game.player
+	game._process(0.05)
+	assert(game.player == camp_point,"Held movement walked beneath crafting")
+	await tap(2,game.camp_menu.buttons[1])
+	assert(game.trial.sword_owned and game.ore == 5 and game.trial.wood == 0,"Touch sword craft used the wrong ingredients")
+	await tap(1,game.camp_menu.buttons[0])
 	assert(game.upgraded and game.ore == 0)
+	await tap(1,game.camp_menu.close_button)
+	await touch(0,center,false)
 	game.player = game.SHIP
 	game.cooldown = 0
 	game.refresh_ui()

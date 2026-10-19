@@ -29,7 +29,7 @@ func run() -> void:
 			if region != game.current_region(): await TRAVEL.enter(game,region,false)
 			game.refresh_ui()
 			var garden = game.gardens
-			check(garden.active_area == game.area_id() and garden.visible,"Garden is on the wrong area")
+			check(garden.active_area == game.area_id() and garden.visible == (world == 0),"Garden is on the wrong area")
 			check(garden.plants.size() <= 1,"Plants were crowded into a single district")
 			check(game.earth_stream.textures.size() <= game.earth_stream.MAX_TEXTURES,"Healing plants bypassed the scenery cache bound")
 			if world == 0 and region == 0: check(garden.plants.all(func(p): return not p.apple),"Fruit tree reappeared on the starting screen")
@@ -56,7 +56,7 @@ func run() -> void:
 				check(plant.collect() and game.trial.health == (8 if plant.apple else 6),"Food healed the wrong amount outside the first screen")
 				check(not plant.collect() and plant.picked,"A picked plant can heal repeatedly")
 				remembered[game.area_id()] = plant.position
-		check(counts == Vector2i(2,2),"Planet %d does not have two fruit trees and two berry bushes: %s" % [world,counts])
+		check(counts == (Vector2i(2,2) if world == 0 else Vector2i.ZERO),"Earth should have two trees/two bushes; other planets should have none: %d %s" % [world,counts])
 		# Travel all districts again: no respawns, stable positions, no large
 		# retained image/tree collections for the previous district.
 		for region in range(4,-1,-1):
@@ -79,5 +79,5 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	if failures == 0:
-		print("PASS: no starter fruit trees; two trees/two bushes per world across 15 districts, grass/floor/ore/door clearance, fog fade, exact healing, health HUD away from home, full-health/menu protection, bounded active plants/textures, and harvest memory through all mines and rocket trips")
+		print("PASS: no starter fruit trees; two Earth trees/two bushes and none on other planets across 15 districts, grass/floor/ore/door clearance, fog fade, exact healing, health HUD away from home, full-health/menu protection, bounded active plants/textures, and harvest memory through all mines and rocket trips")
 	quit(1 if failures else 0)

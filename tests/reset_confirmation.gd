@@ -51,6 +51,8 @@ func run() -> void:
 	game.blue_crystals = 2
 	game.upgraded = true
 	game.trial.health = 6
+	game.trial.sword_owned = true
+	game.trial.wood = 4
 	game.trial.equip(1)
 	game.gardens.plants[0].picked = true
 	game.trial.snakes[0].health = 2
@@ -75,7 +77,7 @@ func run() -> void:
 	check(game.trial.jab_id == jab_id and game.trial.selected_tool == 1,"Gameplay input changed equipment or attacked beneath the prompt")
 	await click(prompt.no_button)
 	check(not prompt.visible and not paused and current_scene == game,"Clicking No did not resume the same game")
-	check(game.ore == 4 and game.blue_crystals == 2 and game.upgraded and game.trial.health == 6,"No lost inventory, upgrade or health")
+	check(game.ore == 4 and game.blue_crystals == 2 and game.upgraded and game.trial.sword_owned and game.trial.wood == 4 and game.trial.health == 6,"No lost inventory, upgrade or health")
 	check(game.gardens.plants[0].picked and game.trial.snakes[0].health == 2,"No lost harvested/enemy state")
 	game.set_process(false)
 	await key(KEY_R)
@@ -121,6 +123,16 @@ func run() -> void:
 	check(game.planet_menu.visible and root.gui_get_focus_owner() == previous_focus,"Cancel closed the destination picker or lost its keyboard focus")
 	game.planet_menu.dismiss()
 	game.refresh_ui()
+	game.player = game.CAMP
+	game.cooldown = 0
+	game.interact()
+	check(game.camp_menu.visible,"Workbench fixture did not open")
+	previous_focus = root.gui_get_focus_owner()
+	await key(KEY_R)
+	await key(KEY_R,false)
+	await click(prompt.no_button)
+	check(game.camp_menu.visible and root.gui_get_focus_owner() == previous_focus and game.trial.sword_owned and game.trial.wood == 4,"No lost workbench focus or crafted progress")
+	game.camp_menu.dismiss()
 	# Touch choices remain usable while paused, even with a walking thumb held.
 	game.hud.set_touch_mode(true)
 	game.refresh_ui()
@@ -152,7 +164,7 @@ func run() -> void:
 	check(current_scene != null and current_scene != game,"Yes did not create a fresh game")
 	var fresh = current_scene
 	check(not paused and not fresh.reset_confirmation.visible,"Confirmed reset left the new game paused")
-	check(fresh.ore == 0 and fresh.blue_crystals == 0 and not fresh.upgraded,"Yes kept old inventory or upgrade")
+	check(fresh.ore == 0 and fresh.blue_crystals == 0 and not fresh.upgraded and not fresh.trial.sword_owned and fresh.trial.wood == 0,"Yes kept old inventory or upgrade")
 	check(fresh.trial.health == 10 and fresh.trial.snakes[0].health == 9 and not fresh.gardens.plants[0].picked,"Yes kept old health, enemies or harvested state")
 	check(fresh.world == 0 and fresh.flight == fresh.Flight.IDLE and fresh.mining_target == -1,"Reset did not return to the initial playable world")
 	# Standalone cleanup must restore the pause state it originally owned.

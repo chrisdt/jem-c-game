@@ -104,7 +104,7 @@ func run() -> void:
 				game.update_exploration()
 			check(dog.try_bark(),"Buddy did not bark at a nearby rat or bat")
 			check(dog.state == "bark" and dog.bark_count == count_before+1,"Bark pose/count missing")
-			check(dog.bark_audio.playing and dog.bark_audio.stream.get_length() > 0.5,"Bark sound was not played")
+			check(not dog.bark_audio.playing and dog.bark_audio.stream.get_length() > 0.5,"Silent gameplay started bark audio")
 			check(not dog.try_bark() and dog.bark_count == count_before+1,"Bark cooldown allowed spam")
 			var player_before: Vector2 = game.player
 			var ore_before: int = game.ore

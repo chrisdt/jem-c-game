@@ -2,7 +2,7 @@
 
 The next playable loop is: explore Earth → collect resources → craft equipment → mine → respond to a snake → resume mining → find fruit to heal. Build and playtest this in small steps before extending combat to the other worlds.
 
-This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the project. The recording is supporting evidence, rather than an instruction to implement every idea. Chris and Jeremy subsequently approved the concepts and requested the [first-screen animation trial](FIRST_SCREEN_TRIAL.md), now implemented on Landing Meadow. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.
+This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the project. The recording is supporting evidence, rather than an instruction to implement every idea. Chris and Jeremy subsequently approved the concepts and requested the [first-screen animation trial](FIRST_SCREEN_TRIAL.md), now expanded in the Earth rollout. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.
 
 **What the discussion establishes**
 
@@ -15,7 +15,9 @@ This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adven
 
 **Earth task list, in suggested working order**
 
-E02’s [HUD mockups and Earth illustration concepts](concepts/earth-hud-v1/README.md) are approved. The first-screen trial covers an initial version of E03–E05 and E09–E10, with immediate sword access, a health/mission/equipment HUD, directional jabs, slithering snakes, silent smoke defeat and healing plants. E13 is ready for Jeremy’s first playtest. Broader rollout and the crafting/progression tasks remain pending. “Requested” means a clear direction from the discussion, while “Idea” marks a tentative mechanic.
+The [Earth crafting/combat rollout](EARTH_ADVENTURE.md) now implements the approved HUD, locked/owned equipment, health, sparse Earth-only healing, fallen-wood gathering, both camp recipes, directional attacks and surface/mine combat. The confirmed sword recipe is **3 copper + 2 wood**; the drill remains **5 copper**. Snakes live across all five Earth districts, and rats/bats attack in all three Earth mines and can be defeated or scared away by Buddy. These systems are excluded from the other planets. Completed crafting missions persist after spending their ingredients. Jeremy's complete Earth playtest is the next review checkpoint.
+
+E03–E05, E07–E10 and E12 now have playable implementations; food randomization/balance remains a tuning choice. E06's retained mining progress and E11's mining-triggered spawning remain ideas to test, rather than changes included in this rollout. E01 still needs the visual walking-problem locations. “Requested” means a clear direction from the discussion, while “Idea” marks a tentative mechanic.
 
 The latest review specifies **straight jabs**, **no sound**, **one heart per berry bush** and **two hearts per apple tree**. Those choices supersede the earlier example values below.
 
@@ -35,14 +37,14 @@ The latest review specifies **straight jabs**, **no sound**, **one heart per ber
 | E12 | Add the Earth mission checklist and update the guide | Requested, 05:27–05:53 | The brass panel tracks “Build the hand drill” and “Build a sword,” with material progress and lasting completion ticks. Spending the ingredients does not undo completion. The guide explains equipping, combat, healing and resumed mining. |
 | E13 | Playtest and tune one complete Earth loop | Requested incremental approach, 05:13–05:26 | Jeremy can find materials/food, craft both items, face a snake, heal and resume a deposit. Then extend the proven behaviour across Earth’s five districts and three mines. Verify browser/iPad input, area loading, session state and performance. |
 
-E01 can progress independently. E02 is the recommended next design task. E03–E06 establish the core mechanics; E07–E08 add the sword’s resource loop; E09–E11 introduce one small combat encounter; E12–E13 make the complete loop clear and playable. Use temporary art while proving the mechanics, then finish the matching illustrations and animations before expanding across Earth.
+E01 can progress independently when the walking-problem locations are available. The approved E02 artwork now supports the Earth rollout. Review E13 with Jeremy before tuning the remaining E06 mining-progress and E11 encounter-spawning ideas or extending combat to other planets.
 
 **Suggested starting rules — recommendations, not decisions from the recording**
 
 - **Equipment:** two compact slots at bottom centre: mining tool and sword. Use number keys or tapping to select; keep the iPad movement pad and action button clear. A future fishing rod can add another slot. Keep fruit as immediate healing initially, so it needs no extra food-management screen.
 - **Gentle combat:** try five hearts, a half-heart snake bite, a short recovery window after damage, and a snake defeated in two or three hits. Show a clear warning before its first bite. At zero health, return to camp with collected materials retained. These are playtest values to adjust with Jeremy.
 - **Healing:** the approved trial now uses one heart per berry bush and two hearts per apple tree. At full health, fruit remains available. Free manual camp resting remains an optional future recommendation; the trial restores health on a safe return after losing all hearts.
-- **Sword resources:** an example first recipe is three copper plus two wood. Earth currently provides ten surface copper and three common mine deposits; the existing drill costs five copper. This example leaves a reasonable material margin, but the final recipe depends on the chosen wood mechanic. Start with branches or small logs to try the crafting loop quickly, while retaining tree chopping as a later option.
+- **Sword resources:** the confirmed first recipe is three copper plus two wood. Earth currently provides ten surface copper and three common mine deposits; the existing drill costs five copper. The implemented branches/logs provide six wood pickups, and both recipes together use eight of the thirteen available copper deposits. Full tree chopping remains a later option.
 - **First encounter:** teach sword use after it is crafted, then try one snake near one test deposit. Expand to occasional encounters rather than an enemy at every rock. Mining noise can attract a nearby snake or reveal one from a suitable hiding place. Pick the presentation after seeing the animation mockup.
 - **Defeat feedback:** a small smoke puff fits the existing wildlife effects. Enemy health can appear only while fighting to keep the screen uncluttered. These are visual suggestions, not requirements from the transcript.
 - **Progression:** show separate ownership and equipped-tool state, so carrying a sword does not remove the player’s drill upgrade. Keep completed missions separate from current material counts. Store paused mining on its deposit, using the game’s existing area/session memory.
@@ -62,6 +64,6 @@ The current game remembers progress only while the session remains open. This pr
 | L06 | World unlock rules | The discussion tentatively links the sword to later-world access at 01:20–01:33. Decide whether travel requires equipment, mission completion or remains freely available; travel is currently open for testing. |
 | L07 | Browser save and continue | Additional recommendation: decide what survives closing the browser, then add versioned save data for inventory, equipment, missions, mining progress, discoveries and companion friendship. |
 
-**First review checkpoint**
+**Current review checkpoint**
 
-Create one HUD mockup showing the two equipment slots, health and two Earth missions in the approved style, with a matching iPad layout. Include a small sword/snake concept beside it. Chris and Jeremy can then choose the look and the first rules before any combat is rolled out.
+Play the complete [Earth adventure](EARTH_ADVENTURE.md): gather resources, craft both tools, fight a surface snake and a mine rat/bat, use fruit, find Buddy and revisit unloaded areas. Tune resource spacing, warning times and damage with Jeremy before adding later-world combat or the remaining mining-progress/spawning ideas.

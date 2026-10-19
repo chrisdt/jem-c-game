@@ -35,6 +35,7 @@ var health_panel: Panel
 var health_hearts: Array[TextureRect] = []
 var mission_panel: Panel
 var mission_labels: Array[Label] = []
+var mission_checks: Array[Line2D] = []
 var equip_slots: Array[Button] = []
 var equip_icons: Array[TextureRect] = []
 var equip_marks: Array[Panel] = []
@@ -48,9 +49,9 @@ func _ready() -> void:
 	location_title = STYLE.label(location_panel, "EARTH", Vector2(66,7), Vector2(164,24), 18, true)
 	location_subtitle = STYLE.label(location_panel, "Surface", Vector2(66,31), Vector2(162,20), 14)
 	resource_panel = STYLE.panel(self, Vector2(888,18), Vector2(374,58))
-	for i in 2:
+	for i in 3:
 		var x := 12 + i * 148
-		material_icons.append(STYLE.icon(resource_panel, CATALOG.ORES[0][i], Vector2(x,8), Vector2(40,42)))
+		material_icons.append(STYLE.icon(resource_panel, CATALOG.ORES[0][i] if i < 2 else TRIAL_ART.wood(), Vector2(x,8), Vector2(40,42)))
 		material_labels.append(STYLE.label(resource_panel, "", Vector2(x+47,7), Vector2(94,18), 12))
 		counts.append(STYLE.label(resource_panel, "0", Vector2(x+47,24), Vector2(90,29), 22, true))
 		var divider := ColorRect.new()
@@ -94,6 +95,15 @@ func make_trial_hud() -> void:
 	STYLE.label(mission_panel,"MISSIONS",Vector2(13,7),Vector2(246,18),12,true)
 	for i in 3:
 		mission_labels.append(STYLE.label(mission_panel,"",Vector2(13,30+i*22),Vector2(250,22),13))
+		if i < 2:
+			var mark := Line2D.new()
+			mark.position = Vector2(14,36+i*22)
+			mark.points = PackedVector2Array([Vector2(0,4),Vector2(4,8),Vector2(12,0)])
+			mark.width = 2
+			mark.default_color = STYLE.GOLD
+			mark.antialiased = true
+			mission_panel.add_child(mark)
+			mission_checks.append(mark)
 	for i in 2:
 		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
 		button.focus_mode = Control.FOCUS_NONE
@@ -121,7 +131,7 @@ func make_trial_hud() -> void:
 	attack_button = STYLE.button(self,"Space · Jab",Vector2(1110,688),Vector2(112,62),14)
 	attack_button.focus_mode = Control.FOCUS_NONE
 	attack_button.pressed.connect(func(): attack_requested.emit())
-	# No extra HUD is shown until present() identifies Landing Meadow.
+	# No extra HUD is shown until present() identifies Earth.
 	set_trial_visibility(false)
 
 func set_trial_visibility(value: bool) -> void:
@@ -148,18 +158,22 @@ func present(state: Dictionary) -> void:
 	location_title.text = CATALOG.NAMES[world].to_upper()
 	location_subtitle.text = state.place
 	planet.texture = CATALOG.planet_icon(world)
-	for i in 2:
-		material_icons[i].texture = CATALOG.ORES[world][i]
-		material_labels[i].text = CATALOG.MATERIALS[world][i]
-		counts[i].text = str(state.inventory[i])
+	for i in 3:
+		var shown := i < 2 or world == 0
+		material_icons[i].visible = shown
+		material_labels[i].visible = shown
+		counts[i].visible = shown
+		material_icons[i].texture = CATALOG.ORES[world][i] if i < 2 else TRIAL_ART.wood()
+		material_labels[i].text = CATALOG.MATERIALS[world][i] if i < 2 else "Wood"
+		counts[i].text = str(state.inventory[i]) if i < 2 else str(state.get("wood",0))
 	equipment.texture = CATALOG.tool_icon(state.upgraded)
 	equipment.tooltip_text = "Hand drill fitted — ready for every mineral" if state.upgraded else "Starter pick — build a hand drill at camp for 5 copper"
 	equipment.visible = not trial_active
-	resource_panel.position.x = 948 if trial_active else 888
-	resource_panel.size.x = 314 if trial_active else 374
+	resource_panel.position.x = 804 if trial_active else 888
+	resource_panel.size.x = 458 if trial_active else 374
 	objective.text = state.objective
 	objective.visible = not state.menu and not trial_active
-	context_button.text = state.context.trim_prefix("E   ") if touch_mode else state.context
+	context_button.text = state.context.trim_prefix("E / Space   ").trim_prefix("E   ") if touch_mode else state.context
 	context_button.disabled = state.flying or state.menu or not state.actionable
 	# Keep the control logically enabled in open ground, while hiding it when
 	# there is nothing nearby to interact with. Flight always locks input.
@@ -199,24 +213,34 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap tool, then Attack\nSword hits harder than a pick\nBerries +1 heart; apples +2" if touch_mode else "WASD / arrows · walk\n1 · mining tool   2 · sword\nSpace · attack   E · use\nSword hits harder than a pick"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nTap tool, then Attack / Jab\nCraft your sword at camp" if touch_mode else "WASD / arrows · walk\n1 · tool   2 · crafted sword\nE · use   Space · mine / attack\nCraft your sword at camp"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
 func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)
-	mission_labels[0].text = "✓ Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % state.inventory.x
-	mission_labels[1].text = "Sword ready · meadow trial"
-	mission_labels[2].text = "Snakes · %d / %d" % [state.get("defeated",0),state.get("snake_count",3)]
+	mission_labels[0].text = "Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % mini(state.inventory.x,5)
+	var owned: bool = state.get("sword_owned",false)
+	mission_labels[1].text = "Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)]
+	for i in 2:
+		mission_checks[i].visible = state.upgraded if i == 0 else owned
+		mission_labels[i].position.x = 32 if mission_checks[i].visible else 13
+		mission_labels[i].size.x = 231 if mission_checks[i].visible else 250
+	mission_labels[2].text = "Earth explored · %d / 5" % state.get("earth_explored",1)
 	equip_icons[0].texture = CATALOG.tool_icon(state.upgraded)
 	var selected: int = state.get("selected_tool",0)
 	for i in 2:
 		equip_marks[i].visible = i == selected
 		equip_slots[i].disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 		equip_labels[i].text = (["Drill" if state.upgraded else "Pick","Sword"][i] if touch_mode else ["1 · Tool","2 · Sword"][i])
+	equip_slots[1].disabled = equip_slots[1].disabled or not owned
+	equip_icons[1].modulate.a = 1.0 if owned else 0.35
+	equip_slots[1].tooltip_text = "Copper sword" if owned else "Craft at Earth camp: 3 copper + 2 wood"
+	if not owned: equip_labels[1].text = "Locked" if touch_mode else "2 · Locked"
 	equipped_label.text = "Sword" if selected == 1 else ("Hand drill" if state.upgraded else "Mining pick")
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
+	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"
 	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
 	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
 	notice.position.y = 580 if not touch_mode else 627

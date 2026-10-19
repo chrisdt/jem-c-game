@@ -40,7 +40,10 @@ func _ready() -> void:
 	update_pose()
 
 func can_stand(point: Vector2) -> bool:
-	if point.distance_to(home) > 240 or point.distance_to(trial.game.CAMP) < 245: return false
+	if point.distance_to(home) > 240 or trial.game.underground or trial.safe_at(point): return false
+	for link in trial.game.EARTH.LINKS[trial.game.earth_region]:
+		if point.distance_to(trial.game.EARTH.portal(trial.game.earth_region,link.side)) < 150: return false
+	if trial.game.EARTH.has_mine(trial.game.earth_region) and point.distance_to(trial.game.cave_position()) < 150: return false
 	for offset in [Vector2.ZERO,Vector2.LEFT*18,Vector2.RIGHT*18,Vector2.UP*16,Vector2.DOWN*16]:
 		if not trial.floor_at(point+offset): return false
 	for rock in trial.game.rocks:
@@ -85,14 +88,14 @@ func advance(delta: float) -> void:
 			hide()
 		queue_redraw()
 		return
-	if not seen: seen = trial.game.fog.is_revealed(0,position)
+	if not seen: seen = trial.game.fog.is_revealed(trial.game.area_id(),position)
 	if not seen:
 		for picture in pictures: picture.hide()
 		return
 	fade = minf(1,fade+delta/0.6)
 	var player: Vector2 = trial.game.player
 	var distance := position.distance_to(player)
-	var safe: bool = player.distance_to(trial.game.CAMP) < 230 or trial.invulnerable > 0.7
+	var safe: bool = trial.safe_at(player) or trial.invulnerable > 0.7
 	match state:
 		"hurt":
 			if clock > 0.22:

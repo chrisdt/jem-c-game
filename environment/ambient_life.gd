@@ -103,6 +103,9 @@ func add_creature(kind: int, home: Vector2, world: int, region: int, cave: bool,
 	creature.kind = kind
 	creature.scare_id = slot
 	creature.scare_area = mine_id
+	creature.hostile = world == 0 and cave and is_instance_valid(game) and is_instance_valid(game.get("trial"))
+	if creature.hostile:
+		creature.health = game.trial.mine_health.get(mine_id,{}).get(slot,creature.max_health())
 	creature.position = home*SCALE
 	creature.cave = cave
 	creature.game = game
