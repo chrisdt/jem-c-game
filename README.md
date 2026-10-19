@@ -1,6 +1,6 @@
 # Sunny Scout — browser testing build
 
-This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `b1f54c9`.
+This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `61eae00`.
 
 ## Download and upload
 
@@ -24,6 +24,8 @@ Then open https://www.digitalthing.com.au/jem/ and hard-refresh. No Godot instal
 
 ## Earth adventure
 
+Scout starts on the clear ground directly in front of the camp workbench, matching the chosen camp view. New games, confirmed resets and Earth camp recovery use this position. Mineral and wood placement excludes the actual opening camera view.
+
 - Start with a pick and a locked sword. Explore the five Earth districts for copper and six illustrated fallen branches/logs. **E** or the contextual touch action gathers wood.
 - Open the **Camp workbench** to craft a **copper sword for 3 copper + 2 wood**, and a **hand drill for 5 copper**, in either order. Crafted equipment and completed mission checks persist after spending ingredients.
 - **1** selects the pick/fitted drill; **2** selects the crafted sword. **Space** mines a nearby revealed deposit when the mining tool is selected, and cancels an active attempt. Away from ore it attacks. With the sword selected, Space jabs. **E** can also start/cancel mining, open camp and use the rocket. Touch has separate movement, equipment, contextual action and Attack/Jab controls.
@@ -37,3 +39,5 @@ The build retains the illustrated viewport-filling loading screen and welcome gu
 ## Validation
 
 Native checks cover real resource gathering and randomized wood availability, exact one-time recipes, lasting missions, directional attacks, walls/terrain, safe arrivals, warned damage/recovery, persistent enemy damage/removal, Buddy's scare interruption, Earth-only food/enemies, mining timing and E/Space cross-cancellation, drill gates, touch crafting, reset, startup and planet travel. Browser review covers the actual rendered workbench purchases and wood pickup, Space mining, Pinewood sword attacks, hostile rat/bat warning/damage/smoke in all three mines, off-world exclusion and two-finger tablet crafting. The final production build passes normal welcome/start, locked sword, camp and Pinewood streaming under `/jem/`, with desktop and tablet emulation and no script/download errors. A physical iPad Safari playtest is still needed.
+
+Camp spawn update: native checks cover guide starts, confirmed reset, safe recovery, 150 random mineral layouts and Earth wood/crafting progression. The production browser build was reviewed on desktop and tablet emulation for the new camp position, opening the workbench without walking and returning there after reset.
