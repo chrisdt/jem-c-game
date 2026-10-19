@@ -19,7 +19,7 @@ var position_index := 0
 var rowan_height := 0.0
 var scout_height := 0.0
 var source_bounds: Rect2i
-var normal_foot := Vector2(650,454)
+var normal_foot := Vector2(590,454) # Clear ground between the crafting hut and CAMP sign.
 
 func _ready() -> void:
 	game = load("res://main.tscn").instantiate()
@@ -113,7 +113,7 @@ func conversation_closed(completed: bool) -> void:
 
 func next_position() -> void:
 	position_index = (position_index+1)%5
-	var screens := [Vector2(650,454),Vector2(70,235),Vector2(1210,235),Vector2(70,585),Vector2(1210,585)]
+	var screens := [normal_foot,Vector2(70,235),Vector2(1210,235),Vector2(70,585),Vector2(1210,585)]
 	rowan.position = game.get_viewport().get_canvas_transform().affine_inverse()*screens[position_index]
 	marker.position = rowan.position
 	if position_index == 0:

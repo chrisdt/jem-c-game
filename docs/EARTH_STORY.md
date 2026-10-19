@@ -52,7 +52,7 @@ The concept images are visual targets, not production sprite atlases or evidence
 
 Rowan is a practical, patient camp craftsperson. Curly black hair, a teal bandana, an ochre shirt and a worn teal apron distinguish her from Scout. A small hammer stays at her belt. She welcomes the player rather than delivering the entire Earth story at once.
 
-Place her beside the workbench on clear ground, visible near the opening camp view. Match Scout's visible height and head/body proportions at the same zoom; the first concept made Rowan too large and has been revised. Keep the workbench route and interaction usable. Confirm the final foot position and exact sprite bounds against Scout and the existing scenery in the placement task.
+Place her on the clear ground between the crafting hut and the CAMP sign, visible near the opening camp view. The preview uses foot position `(590, 454)` in Landing Meadow. Match Scout's visible height and head/body proportions at the same zoom; the first concept made Rowan too large and has been revised. Keep the workbench route and interaction usable. Confirm the final foot position and exact sprite bounds against Scout and the existing scenery in the placement task.
 
 ### Ready for the Trail
 

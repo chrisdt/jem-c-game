@@ -19,7 +19,7 @@ For a separate Web preview, run `python3 tools/export_rowan_preview.py`. It expo
 3. Choose **Show a hint**. The shorter bubble disappears after a few seconds.
 4. Choose **Next position** to check the four screen corners. Close the current conversation to use the preview controls again. Near the top edge, the bubble moves beside Rowan to leave her face clear.
 5. Choose **Touch buttons** for larger buttons without keyboard prefixes. On a touch device this layout is detected automatically. Tap Next and Close; a cancelled or dragged-out touch must not activate either action.
-6. Compare Rowan and Scout at the normal camp position. The preview measures each texture's visible alpha bounds and gives them the same rendered height; transparent padding is excluded.
+6. Compare Rowan and Scout at the normal camp position. Rowan stands on the clear ground between the crafting hut and the CAMP sign. The preview measures each texture's visible alpha bounds and gives them the same rendered height; transparent padding is excluded.
 
 The preview's bottom buttons are review controls, not additions to the main game's HUD. The normal mission panel and long instruction banner remain unchanged until the bubble is integrated with Rowan in the following tasks.
 
