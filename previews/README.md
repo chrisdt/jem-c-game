@@ -1,6 +1,8 @@
-# Rowan speech bubble preview
+# Developer speech bubble fixture
 
-This is the review build for **R04**, the reusable character speech bubble. It uses the real camp as a frozen backdrop and displays Rowan at Scout's measured height. It does not accept a quest, grant a sword or change the normal game startup.
+**Player reviews now use the main game: F5 → Start exploring.** Rowan is integrated in camp for R05. Placement screenshots are sufficient for approval; no separate preview needs to be downloaded or opened.
+
+This retained R04 developer fixture uses the real camp as a frozen backdrop and displays the production Rowan actor at Scout's measured height. It does not accept a quest or grant a sword.
 
 ## Run in Godot
 
@@ -21,13 +23,13 @@ For a separate Web preview, run `python3 tools/export_rowan_preview.py`. It expo
 5. Choose **Touch buttons** for larger buttons without keyboard prefixes. On a touch device this layout is detected automatically. Tap Next and Close; a cancelled or dragged-out touch must not activate either action.
 6. Compare Rowan and Scout at the normal camp position. Rowan stands on the clear ground between the crafting hut and the CAMP sign. The preview measures each texture's visible alpha bounds and gives them the same rendered height; transparent padding is excluded.
 
-The preview's bottom buttons are review controls, not additions to the main game's HUD. The normal mission panel and long instruction banner remain unchanged until the bubble is integrated with Rowan in the following tasks.
+The fixture's bottom buttons are developer controls. The main game now uses the shared bubble for Rowan's conversation and temporary notices; its existing mission panel remains until the mission-log task.
 
 ## Component and checks
 
 `ui/character_bubble.gd` supports one active conversation or timed hint, a speaker, text pages, a world-space head offset, and an optional final action label. Dialogue takes priority over hints. Invalid, hidden, removed and offscreen speakers cannot leave an active bubble behind.
 
-The component emits `opened`, `page_changed(index)` and `closed(completed)`. The caller must pause gameplay and clear movement gestures when opening a conversation, resume them on close, and dismiss dialogue when opening another menu or changing areas. Hints do not capture keyboard focus. Rowan's live interaction and Buddy's bark priority will connect to this component in the subsequent camp integration task.
+The component emits `opened`, `page_changed(index)` and `closed(completed)`. The caller must pause gameplay and clear movement gestures when opening a conversation, resume them on close, and guard menu/area changes. Hints do not capture keyboard focus. `game.gd` now connects Rowan's live interaction, deferred notices and Buddy's bark priority.
 
 Run the interaction checks with:
 

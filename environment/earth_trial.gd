@@ -121,7 +121,7 @@ func is_active() -> bool:
 	return game.world == 0
 
 func blocked() -> bool:
-	return game.get_tree().paused or game.flight != 0 or game.earth_transition or game.planet_menu.visible or game.camp_menu.visible or game.hud.help.visible
+	return game.get_tree().paused or game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible
 
 func sword_equipped() -> bool:
 	return is_active() and sword_owned and selected_tool == 1

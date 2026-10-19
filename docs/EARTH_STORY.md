@@ -2,7 +2,7 @@
 
 Build Earth's story one character and mission at a time. For each character, make a character mockup and an in-world dialogue mockup, write the mission, implement it, then playtest that complete interaction before starting the next character. Names and dialogue are working choices.
 
-Rowan's character and camp dialogue concepts have been reviewed, including the matching character scale. The current review step is **R04, the reusable speech bubble**, in an [isolated playable camp preview](../previews/README.md). Normal gameplay and mission progression remain unchanged. Review and test this task before starting R05.
+Rowan's character, scale and position between the crafting hut and CAMP sign have been reviewed. **R05, Rowan in the main game**, is ready for review: press **F5**, choose **Start exploring**, walk toward Rowan and use **E / Talk to Rowan**. Future character placements will be shown as screenshots for approval. Test all gameplay in the main game; separate preview scenes are developer fixtures.
 
 ## Story direction
 
@@ -14,7 +14,7 @@ Each landmark introduces a person with a practical problem. Helping them teaches
 
 | Order | Character and location | Mission | Result | Current task |
 | --- | --- | --- | --- | --- |
-| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R04 speech bubble preview ready for testing |
+| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R05 camp interaction ready in the main game |
 | 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | Mock up after Rowan's mission is playable |
 | 3 | Otis, quarry foreman; on the Pinewood side of the blocked quarry trail | Clear the Way: craft the hand drill for 5 copper and clear the rockfall | Old Quarry becomes accessible | Initial character exploration only |
 | 4 | Mara, quarry mechanic; beside the quarry rails and mine cart | Better Tools: use quarry minerals to upgrade both drill and sword | Equipment for hard rock and the ruins encounter | Design after Otis |
@@ -27,7 +27,7 @@ The mine/cart, ruins, stream/bridge and fallen-tree screenshots supplied in chat
 ## Small tasks for every character
 
 1. **Character mockup:** one full-body design with a distinct silhouette, outfit, role and personality. Every human uses Scout's character scale: match visible head-to-foot height and overall head/body proportions. Distinguish people through their design, not by enlarging them.
-2. **Placement and dialogue mockup:** show the character at the existing landmark beside Scout at the same camera zoom, with one short speech bubble. Include a side-by-side scale check before calling the mockup ready.
+2. **Placement and dialogue mockup:** show a screenshot at the existing landmark beside Scout at the same camera zoom, with one short speech bubble. Include a side-by-side scale check and get placement approval before building the character's mission. Use the main game for playable reviews.
 3. **Mission script:** write the introduction, objective, progress reminder, completion and next destination. Define any item costs and rewards.
 4. **Character implementation:** fit the production sprite, foot anchor, idle presentation, discovery and interaction to the current world.
 5. **Mission implementation:** add only that character's objective tracking, contextual dialogue and rewards; reuse the shared systems.
@@ -42,8 +42,8 @@ The concept images are visual targets, not production sprite atlases or evidence
 | R01 | Character concept | Rowan reads as a welcoming craftsperson and is distinct from Scout | Reviewed |
 | R02 | Camp dialogue concept | Rowan stands beside camp at Scout's scale; a readable bubble points to her; the long instruction banner is absent | Revised and reviewed |
 | R03 | Mission and dialogue | The recipe, objective, reminders, completion and next destination are written | Script below |
-| R04 | Reusable speech bubble | One speaker, short text pages, keyboard/touch advance, close, screen-edge fitting and priority rules work | Implemented; isolated preview for review/testing |
-| R05 | Rowan in camp | A fitted sprite, discovery, greeting and talk interaction work without obstructing the workbench | Next after R04 review |
+| R04 | Reusable speech bubble | One speaker, short text pages, keyboard/touch advance, close, screen-edge fitting and priority rules work | Reviewed; shared component |
+| R05 | Rowan in camp | A fitted sprite, discovery, greeting and talk interaction work without obstructing the workbench | Implemented; main-game review |
 | R06 | Rowan's crafting objective | Gathering and the existing sword craft update the mission; already-crafted swords are recognized | Pending |
 | R07 | Reopenable mission log | Rowan's objective can be recalled after dialogue closes; desktop and touch can open/close it | Pending |
 | R08 | Rowan playtest | The checks below pass and the implemented desktop/touch views are captured | Pending |
@@ -52,7 +52,7 @@ The concept images are visual targets, not production sprite atlases or evidence
 
 Rowan is a practical, patient camp craftsperson. Curly black hair, a teal bandana, an ochre shirt and a worn teal apron distinguish her from Scout. A small hammer stays at her belt. She welcomes the player rather than delivering the entire Earth story at once.
 
-Place her on the clear ground between the crafting hut and the CAMP sign, visible near the opening camp view. The preview uses foot position `(590, 454)` in Landing Meadow. Match Scout's visible height and head/body proportions at the same zoom; the first concept made Rowan too large and has been revised. Keep the workbench route and interaction usable. Confirm the final foot position and exact sprite bounds against Scout and the existing scenery in the placement task.
+Rowan stands on the approved clear ground between the crafting hut and the CAMP sign, at foot position `(590, 454)` in Landing Meadow. Her visible alpha bounds are fitted to Scout's 87.45-world-unit idle height, excluding transparent padding. The closest of Rowan and the workbench gets the interaction in their overlapping approach areas. The R05 actor uses the approved concept's cropped Rowan figure; separate directional/animated production art remains future work.
 
 ### Ready for the Trail
 
@@ -125,6 +125,8 @@ Use the current session-memory scope for this rollout. Area unloading, mine visi
 
 ## Next handoff
 
-Review **R04** using the [speech bubble preview](../previews/README.md). It provides the shared component and a frozen camp backdrop with Rowan at Scout's measured visible height. Keyboard, touch and screen-edge checks cover the component; it does not accept a mission or alter the main game.
+Review **R05 in the main game**: F5 → Start exploring. Rowan greets once near camp; walk toward her until **Talk to Rowan** appears, then press E or tap the action. E / Enter / Next advances, and Escape / × closes. Movement, combat, travel and other gameplay keys stop during her conversation; touch gestures are cleared on open and close. Temporary messages now appear above Scout instead of in the old bottom banner. Buddy's bark cannot interrupt dialogue. Recipes remain available at the workbench, and Rowan recognizes an already-crafted sword. No mission acceptance/tracking or rewards are added in this step.
 
-The next coding task is **R05 only: Rowan in the playable camp**, including her greeting, talk interaction, world pause/input handoff and integration with existing notices and Buddy. Review that interaction before R06 adds her crafting objective. R07 adds the reopenable mission log, then R08 tests the complete first mission. Make Bea's character and landmark mockups after Rowan's mission has been reviewed. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks.
+Run `godot --headless --path . --script tests/rowan_camp.gd` for the actual startup-to-camp integration, including keyboard/touch controls, placement/scale, notification priority, crafting access, area scope and session reset. `tests/character_bubble.gd` retains component edge and lifecycle checks.
+
+After this interaction is reviewed, **R06** adds her crafting objective. R07 adds the reopenable mission log, then R08 tests the complete first mission. Make Bea's character and landmark screenshots after Rowan's mission has been reviewed. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks.

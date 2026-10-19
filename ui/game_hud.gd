@@ -22,14 +22,9 @@ var counts: Array[Label] = []
 var equipment: TextureRect
 var objective: Label
 var context_button: Button
-var notice: Panel
-var notice_label: Label
 var help_button: Button
 var help: Panel
 var help_text: Label
-var last_message := ""
-var notice_seconds := 0.0
-var blocked := false
 var trial_active := false
 var health_panel: Panel
 var health_hearts: Array[TextureRect] = []
@@ -67,12 +62,6 @@ func _ready() -> void:
 	context_button = STYLE.button(self, "", Vector2(450,742), Vector2(380,40))
 	context_button.focus_mode = Control.FOCUS_NONE
 	context_button.pressed.connect(func(): action_requested.emit())
-	notice = STYLE.panel(self, Vector2(345,684), Vector2(590,46))
-	notice_label = STYLE.label(notice, "", Vector2(15,5), Vector2(560,36), 13)
-	notice_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	notice_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notice_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notice.visible = false
 	help_button = STYLE.button(self, "?", Vector2(1230,746), Vector2(32,34), 17)
 	help_button.focus_mode = Control.FOCUS_NONE
 	help_button.tooltip_text = "Controls"
@@ -184,7 +173,6 @@ func present(state: Dictionary) -> void:
 	context_button.position.x = 1262-width if touch_mode else (1280-width)*0.5
 	context_button.visible = not state.flying and not state.menu and not state.context.is_empty()
 	context_button.position.y = (599 if touch_mode else 638) if trial_active else (704 if touch_mode else 742)
-	blocked = state.menu or state.mining or state.flying
 	touch_blocked = state.menu or state.flying
 	touch_controls.set_active(touch_mode and not touch_blocked)
 	help_button.visible = not state.menu
@@ -197,15 +185,9 @@ func present(state: Dictionary) -> void:
 		# Keep remaining health readable while searching other districts for
 		# scarce fruit, without adding combat controls outside the meadow trial.
 		health_panel.visible = state.get("health",10) < 10 and not state.menu and not state.flying
-		notice.position.y = 684
 		set_touch_layout_positions()
 	present_health(state.get("health",10))
 	objective.position.y = 123 if health_panel.visible else 83
-	if state.message != last_message:
-		last_message = state.message
-		notice_label.text = state.message
-		notice_seconds = 4.5
-	notice.visible = notice_seconds > 0 and not blocked and not state.message.is_empty()
 
 func set_touch_layout_positions() -> void:
 	help_button.position = Vector2(1194,622) if touch_mode else Vector2(1230,746)
@@ -213,7 +195,7 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nTap tool, then Attack / Jab\nCraft your sword at camp" if touch_mode else "WASD / arrows · walk\n1 · tool   2 · crafted sword\nE · use   Space · mine / attack\nCraft your sword at camp"
+		help_text.text = "Drag pad · walk\nTap action · talk / gather / mine\nTap tool, then Attack / Jab\nCraft your sword at camp" if touch_mode else "WASD / arrows · walk\n1 · tool   2 · crafted sword\nE · talk / use   Space · mine / attack\nCraft your sword at camp"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
@@ -242,7 +224,6 @@ func present_trial(state: Dictionary) -> void:
 	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"
 	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
 	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
-	notice.position.y = 580 if not touch_mode else 627
 	if touch_mode:
 		help_button.position = Vector2(1194,515)
 		help.position = Vector2(922,343)
@@ -253,7 +234,3 @@ func present_health(health: int) -> void:
 		var units := clampi(health-i*2,0,2)
 		health_hearts[i].texture = TRIAL_ART.icon(1 if units == 2 else (2 if units == 1 else 3))
 	health_panel.tooltip_text = "%.1f / 5 hearts" % (health*0.5)
-
-func _process(delta: float) -> void:
-	notice_seconds = maxf(0, notice_seconds - delta)
-	notice.visible = notice_seconds > 0 and not blocked and visible

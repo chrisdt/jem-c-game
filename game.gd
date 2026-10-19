@@ -18,6 +18,12 @@ const WORLD_SIGNS = preload("res://environment/world_signs.gd")
 const GAME_HUD = preload("res://ui/game_hud.gd")
 const RESET_CONFIRMATION = preload("res://ui/reset_confirmation.gd")
 var reset_confirmation: RESET_CONFIRMATION
+const CHARACTER_BUBBLE = preload("res://ui/character_bubble.gd")
+const ROWAN = preload("res://environment/rowan.gd")
+var character_bubble: CHARACTER_BUBBLE
+var rowan: ROWAN
+var last_hint_message := ""
+var pending_hint := ""
 const DRILL_VISUAL = preload("res://drill_visual.gd")
 const EARTH_TRIAL = preload("res://environment/earth_trial.gd")
 var trial: Node2D
@@ -139,7 +145,7 @@ var blue_crystals := 0
 var rocks: Array[Dictionary] = []
 var ore_rng := RandomNumberGenerator.new()
 var fog: EXPLORATION_FOG
-var message := "WASD / arrows to walk. E to mine. Follow trails to find 5 copper, then build your hand drill at camp."
+var message := ""
 var cooldown := 0.0
 var elapsed := 0.0
 var camera: Camera2D
@@ -206,8 +212,6 @@ func _ready() -> void:
 		if is_instance_valid(trial): trial.equip(index))
 	hud.attack_requested.connect(func():
 		if is_instance_valid(trial): trial.start_jab())
-	if hud.touch_mode:
-		message = "Drag the pad to walk. Tap action buttons to mine. Explore trails to find 5 copper for your drill."
 	var travel_layer := CanvasLayer.new()
 	travel_layer.layer = 2
 	add_child(travel_layer)
@@ -239,12 +243,16 @@ func _ready() -> void:
 	wood_supplies = WOOD_SUPPLIES.new()
 	wood_supplies.game = self
 	add_child(wood_supplies)
+	rowan = ROWAN.new()
+	rowan.game = self
+	add_child(rowan)
+	character_bubble = CHARACTER_BUBBLE.new()
+	add_child(character_bubble)
+	character_bubble.opened.connect(conversation_opened)
+	character_bubble.closed.connect(conversation_closed)
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
 	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
-	message = "Earth missions: gather copper and fallen wood. Craft a sword and a hand drill at camp. E gathers; Space mines nearby ore or attacks."
-	if hud.touch_mode:
-		message = "Earth missions: find copper and fallen wood, then craft at camp. Tap the action to gather and Attack to defend yourself."
 	refresh_ui()
 
 # The Earth-named transition fields are retained for the existing editor/test
@@ -287,7 +295,53 @@ func has_base() -> bool:
 	return current_region() == 0
 
 func menu_open() -> bool:
-	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible)
+	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or dialogue_open()
+
+func dialogue_open() -> bool:
+	return is_instance_valid(character_bubble) and character_bubble.is_dialogue_open()
+
+func talk_to_rowan() -> void:
+	if menu_open() or earth_transition or flight != Flight.IDLE or hud.help.visible or not rowan.can_talk(): return
+	if trial.jab_time >= 0 or mining_target >= 0: return
+	character_bubble.set_touch_mode(hud.touch_mode)
+	if character_bubble.show_dialogue("Rowan",rowan.pages(),rowan,Vector2(0,-rowan.height),"Done"):
+		rowan.greeted = true
+
+func conversation_opened() -> void:
+	clear_touch_gestures()
+	walking = false
+	walk_distance = 0
+	restore_walk_visual()
+	companion.queue_redraw()
+	refresh_ui()
+
+func conversation_closed(completed: bool) -> void:
+	# Scene teardown can close an active bubble after siblings have been freed.
+	if is_queued_for_deletion() or not is_inside_tree() or not is_instance_valid(hud) or not is_instance_valid(planet_menu): return
+	if completed and is_instance_valid(rowan): rowan.introduced = true
+	clear_touch_gestures()
+	cooldown = 0.3
+	companion.queue_redraw()
+	refresh_ui()
+
+func present_character_messages(flying: bool) -> void:
+	if not is_instance_valid(character_bubble): return
+	character_bubble.set_touch_mode(hud.touch_mode)
+	if message != last_hint_message:
+		last_hint_message = message
+		pending_hint = message
+	if flying:
+		pending_hint = ""
+	if dialogue_open(): return
+	if flying or menu_open() or hud.help.visible or mining_target >= 0:
+		character_bubble.dismiss()
+		return
+	if not pending_hint.is_empty():
+		if character_bubble.show_hint(pending_hint,scout,Vector2(0,-70)):
+			pending_hint = ""
+	elif not rowan.greeted and rowan.is_visible_in_tree() and player.distance_to(rowan.position) < 160 and character_bubble.mode == CHARACTER_BUBBLE.Mode.CLOSED:
+		if character_bubble.show_hint("Need a hand getting ready for the trail? Come talk to me.",rowan,Vector2(0,-rowan.height)):
+			rowan.greeted = true
 
 func at_workbench() -> bool:
 	return not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
@@ -376,7 +430,7 @@ func open_planet_menu() -> void:
 	refresh_ui()
 
 func travel_to_other_planet(destination: int = -1) -> void:
-	if flight != Flight.IDLE or earth_transition or underground or mining_target >= 0:
+	if flight != Flight.IDLE or earth_transition or underground or mining_target >= 0 or dialogue_open():
 		return
 	if destination < 0:
 		destination = 0 if world == 1 else 1
@@ -749,6 +803,8 @@ func interact() -> void:
 	cooldown = 0.3
 	if not underground and has_base() and player.distance_to(ship_position()) < 95:
 		open_planet_menu()
+	elif rowan.can_talk():
+		talk_to_rowan()
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		camp_menu.open()
 	elif is_instance_valid(wood_supplies) and wood_supplies.collect_nearby():
@@ -886,6 +942,7 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	if is_instance_valid(rowan): rowan.sync_area()
 	if is_instance_valid(gardens): gardens.sync_area()
 	if is_instance_valid(wood_supplies): wood_supplies.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
@@ -922,6 +979,8 @@ func refresh_ui() -> void:
 		context = "E / Space   Cancel %s · %.1fs" % ["drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
 		context = "E   Choose a world"
+	elif rowan.can_talk():
+		context = "E   Talk to Rowan"
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
 	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
@@ -936,7 +995,7 @@ func refresh_ui() -> void:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and not rowan.can_talk() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
@@ -947,6 +1006,7 @@ func refresh_ui() -> void:
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
+	present_character_messages(flying)
 
 func ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := PackedVector2Array()

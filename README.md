@@ -14,10 +14,12 @@ Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the
 
 New games and confirmed resets place Scout on the clear ground directly in front of the camp workbench. Earth's safe recovery uses the same spot. Ore and fallen wood stay outside this opening camera view.
 
+**Rowan's camp interaction (R05):** test in the main game with **F5 → Start exploring**. Rowan stands between the crafting hut and CAMP sign at Scout's height. Walk toward her and press **E / Talk to Rowan**. **E / Enter / Next** advances her pages; **Escape / ×** closes. Movement and combat stop while reading. The workbench remains a separate nearby action. Her sword advice reflects your materials/equipment; mission acceptance and tracking come in the next task. Temporary notices appear as bubbles above characters. Future placement reviews use screenshots, with playable checks in the main game. Run `godot --headless --path . --script tests/rowan_camp.gd` for integration checks.
+
 The loading and welcome screens share one illustrated logo: **Planet Adventures** is a smaller, centred subtitle beneath **Sunny Scout**, using matching gold lettering and a teal outline.
 
 - **WASD / arrow keys:** move
-- **E / action button:** gather, start mining, use workbench or rocket. With the pick or drill selected, **Space** also starts or cancels nearby mining; away from ore it attacks. With the sword selected, **Space** jabs. Outside Earth, **Space** also uses nearby objects.
+- **E / action button:** talk, gather, start mining, use workbench or rocket. With the pick or drill selected, **Space** also starts or cancels nearby mining; away from ore it attacks. With the sword selected, **Space** jabs. Outside Earth, **Space** also uses nearby objects.
 - **Mine doorways:** walk into an entrance or exit to change areas automatically
 - **iPad / touch:** drag the pad at bottom left to walk; tap the action at bottom right to mine, cancel, upgrade or open the rocket. Tap a world card's **Fly here** button to travel.
 - While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.

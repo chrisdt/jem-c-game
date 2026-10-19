@@ -1,17 +1,16 @@
 extends Node2D
 
-# An isolated R04 review scene. The normal startup, game and quest state are
-# unchanged. The world is a frozen backdrop, with no mission acceptance yet.
+# Retained R04 developer fixture. Player reviews use the main game's Rowan;
+# this scene freezes that world to exercise the bubble at different edges.
 const BUBBLE = preload("res://ui/character_bubble.gd")
 const STYLE = preload("res://ui/expedition_style.gd")
-const PEOPLE: Texture2D = preload("res://assets/npcs/earth_people_concept.png")
 const PAGES: Array[String] = [
 	"Let's get you ready for the trail. Find 3 copper and 2 fallen wood.",
 	"Bring them to this workbench to craft a sword. It'll help with the snakes along the trails.",
 ]
 var game: Node2D
 var bubble: BUBBLE
-var rowan: Sprite2D
+var rowan: Node2D
 var marker: Marker2D
 var status_label: Label
 var preview_buttons: Array[Button] = []
@@ -25,7 +24,7 @@ func _ready() -> void:
 	game = load("res://main.tscn").instantiate()
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	add_child(game)
-	game.hud.notice.hide()
+	game.character_bubble.dismiss()
 	game.hud.mission_panel.hide()
 	game.hud.context_button.hide()
 	game.hud.help_button.hide()
@@ -38,20 +37,10 @@ func _ready() -> void:
 	var scout_art: Texture2D = game.scout.sprite_frames.get_frame_texture(game.scout.animation,game.scout.frame)
 	var scout_bounds := visible_bounds(scout_art.get_image())
 	scout_height = scout_bounds.size.y*game.scout.scale.y
-	var left := PEOPLE.get_image().get_region(Rect2i(0,0,768,1024))
-	source_bounds = visible_bounds(left)
-	var atlas := AtlasTexture.new()
-	atlas.atlas = PEOPLE
-	atlas.region = Rect2(source_bounds)
-	rowan = Sprite2D.new()
-	rowan.name = "RowanScalePreview"
-	rowan.texture = atlas
-	rowan.centered = false
-	rowan.offset = Vector2(-source_bounds.size.x*0.5,-source_bounds.size.y)
-	rowan.scale = Vector2.ONE*(scout_height/source_bounds.size.y)
-	rowan_height = source_bounds.size.y*rowan.scale.y
+	rowan = game.rowan
+	source_bounds = Rect2i(rowan.illustration.texture.region)
+	rowan_height = rowan.height
 	rowan.position = normal_foot
-	game.add_child(rowan)
 	marker = Marker2D.new()
 	marker.position = rowan.position
 	game.add_child(marker)
