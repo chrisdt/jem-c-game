@@ -2,7 +2,7 @@
 
 Build Earth's story one character and mission at a time. For each character, make a character mockup and an in-world dialogue mockup, write the mission, implement it, then playtest that complete interaction before starting the next character. Names and dialogue are working choices.
 
-Rowan's character, scale, camp position and main-game interaction have been reviewed. **R06, Ready for the Trail**, is ready for review: press **F5**, choose **Start exploring**, talk to Rowan and choose **Accept mission** after her introduction. Gather 3 copper and 2 fallen wood, then craft a sword at camp. Future character placements will be shown as screenshots for approval. Test all gameplay in the main game; separate preview scenes are developer fixtures.
+Rowan's character, scale, camp interaction and **R06, Ready for the Trail**, have been reviewed. The user requested the next characters and missions. The current checkpoint is **Bea's character, placement screenshot and mission draft (B01–B03)** in [Woodland Supplies](BEA_MISSION.md). Approve the screenshot before B04 adds her to the main game. Rowan's reopenable mission log (R07) remains pending. Test all gameplay in the main game; character placement reviews use screenshots.
 
 ## Story direction
 
@@ -14,8 +14,8 @@ Each landmark introduces a person with a practical problem. Helping them teaches
 
 | Order | Character and location | Mission | Result | Current task |
 | --- | --- | --- | --- | --- |
-| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R06 mission ready in the main game |
-| 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | Mock up after Rowan's mission is playable |
+| 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R06 reviewed; R07 log pending |
+| 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | B01–B03 character/placement and mission draft for approval |
 | 3 | Otis, quarry foreman; on the Pinewood side of the blocked quarry trail | Clear the Way: craft the hand drill for 5 copper and clear the rockfall | Old Quarry becomes accessible | Initial character exploration only |
 | 4 | Mara, quarry mechanic; beside the quarry rails and mine cart | Better Tools: use quarry minerals to upgrade both drill and sword | Equipment for hard rock and the ruins encounter | Design after Otis |
 | 5 | Iris, field researcher; at Sunstone Ridge's circular ruins | The Old Expedition: explore the ruins and recover an expedition locker | Damaged spacesuit and navigation component | Design after Mara |
@@ -44,7 +44,7 @@ The concept images are visual targets, not production sprite atlases or evidence
 | R03 | Mission and dialogue | The recipe, objective, reminders, completion and next destination are written | Script below |
 | R04 | Reusable speech bubble | One speaker, short text pages, keyboard/touch advance, close, screen-edge fitting and priority rules work | Reviewed; shared component |
 | R05 | Rowan in camp | A fitted sprite, discovery, greeting and talk interaction work without obstructing the workbench | Reviewed in the main game |
-| R06 | Rowan's crafting objective | Gathering and the existing sword craft update the mission; already-crafted swords are recognized | Implemented; main-game review |
+| R06 | Rowan's crafting objective | Gathering and the existing sword craft update the mission; already-crafted swords are recognized | Reviewed in the main game |
 | R07 | Reopenable mission log | Rowan's objective can be recalled after dialogue closes; desktop and touch can open/close it | Pending |
 | R08 | Rowan playtest | The checks below pass and the implemented desktop/touch views are captured | Pending |
 
@@ -125,8 +125,8 @@ Use the current session-memory scope for this rollout. Area unloading, mine visi
 
 ## Next handoff
 
-Review **R06 in the main game**: F5 → Start exploring → Talk to Rowan → Next → Accept mission. Watch **Ready for the Trail** in the existing mission panel while gathering copper and fallen wood. Return to Rowan for a reminder, then use the separate workbench to craft the sword. Crafting completes the mission and spends only the existing recipe's 3 copper + 2 wood. Talk to Rowan again for her acknowledgement and conversational introduction to Bea. Also try closing the offer before accepting, crafting the drill first, and crafting the sword before talking to her. Completion and dialogue progress last for the current session; a confirmed reset clears them.
+Rowan's **R06** main-game test has been approved. Continue with [Bea's B01–B03 design checkpoint](BEA_MISSION.md): review her character and the screenshot beside Pinewood's southeast fallen tree, then approve her look/placement before **B04** adds her greeting and Talk interaction to the main game. **B05** implements her designated encounter, persistent supply box and one-time return; **B06** playtests that mission before Otis.
 
 Run `godot --headless --path . --script tests/rowan_mission.gd` for real mining/pickups, keyboard/touch acceptance and cancellation, drill-first resource availability, exact crafting costs, early-sword recognition, one-time ending, district/mine/planet memory and a confirmed reset. `tests/rowan_camp.gd` checks startup, camp placement and dialogue controls; `tests/character_bubble.gd` retains component edge and lifecycle checks.
 
-After this mission step is reviewed, **R07** adds the reopenable mission log, then R08 tests the complete first mission. Make Bea's character and landmark screenshots after Rowan's mission has been reviewed. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks.
+**R07**, the reopenable mission log, and **R08**, Rowan's full checkpoint including the log, remain pending while the requested rollout moves to Bea. Keep the remaining characters, quarry obstruction and rocket repair in their own subsequent tasks. Future playable reviews always use F5 → Start exploring in the main game.
