@@ -197,7 +197,7 @@ wind_speed = 0.91
 wind_phase = 0.13375
 
 [node name="Tree23" parent="." instance=ExtResource("3")]
-position = Vector2(733.823, 1361.296)
+position = Vector2(630, 1361.296)
 scale = Vector2(0.46, 0.46)
 tree_style = 1
 wind_strength = 3.6
@@ -528,7 +528,7 @@ wind_speed = 0.96
 wind_phase = 5.28586
 
 [node name="Flowers33" parent="." instance=ExtResource("4")]
-position = Vector2(867.245, 1254.528)
+position = Vector2(1060, 1160)
 scale = Vector2(0.093, 0.093)
 plant_style = 0
 wind_strength = 8.0

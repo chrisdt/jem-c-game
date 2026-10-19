@@ -13,6 +13,7 @@ const DESERT_LAYOUT = preload("res://desert_layout.gd")
 const PLANET_MENU = preload("res://planet_menu.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const UI_STYLE = preload("res://ui/expedition_style.gd")
+const WORLD_SIGNS = preload("res://environment/world_signs.gd")
 const GAME_HUD = preload("res://ui/game_hud.gd")
 const DRILL_VISUAL = preload("res://drill_visual.gd")
 const PLANET_NAMES := CATALOG.NAMES
@@ -814,9 +815,6 @@ func ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 		points.append(center + Vector2(cos(a), sin(a)) * radius)
 	draw_colored_polygon(points, color)
 
-func label_at(pos: Vector2, text: String, color := Color("f6e5b8"), size := 20) -> void:
-	draw_string(UI_STYLE.HEADING, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
-
 func _draw() -> void:
 	if world != 2 and (underground or world == 1) and current_region() == 0:
 		draw_rect(Rect2(0, 0, 2000, 1400), Color("182d2b") if underground else Color("719c58"))
@@ -831,21 +829,12 @@ func _draw() -> void:
 			var flicker := 0.012 + sin(elapsed * 4.3 + i * 2.1) * 0.004
 			for radius in [25, 40, 58]:
 				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
-		label_at(exit_position() + Vector2(-85, -95 if world > 0 or earth_region > 0 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
 	else:
 		if world == 1 and current_region() == 0:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
 		elif world == 2 and current_region() == 0:
 			draw_texture_rect(DESERT_ART, Rect2(0, 0, 2000, 1400), false)
-		if has_base():
-			label_at(camp_position()+Vector2(-70,-110),"CAMP / DRILL",Color("f6e5b8"),14)
-			if flight == Flight.IDLE:
-				label_at(ship_position()+Vector2(-65,80),"ROCKET" if hud != null and hud.touch_mode else "[E] ROCKET",Color("ffe4ac"),14)
-		if regions().has_mine(current_region()):
-			label_at(cave_position()+Vector2(-65,-140),mine_name().to_upper(),Color("f6e5b8"),14)
-		for link in regions().LINKS[current_region()]:
-			var point: Vector2 = regions().portal(current_region(),link.side)
-			label_at(point+Vector2(-240 if link.side == "east" else -70,-70),"To "+regions().NAMES[link.target],Color("fff0cc"),16)
+	WORLD_SIGNS.draw_map(self, world, current_region(), underground, regions())
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]
