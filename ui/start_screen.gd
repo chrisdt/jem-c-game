@@ -3,6 +3,7 @@ extends Control
 const STYLE = preload("res://ui/expedition_style.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const TOUCH = preload("res://ui/touch_controls.gd")
+const STARTUP_ART = preload("res://ui/startup_art.gd")
 const ART: Texture2D = preload("res://assets/ui/title_landscape.png")
 const WORLD_SCENE := "res://main.tscn"
 enum Stage { GUIDE, LOADING, ENTERING }
@@ -15,21 +16,34 @@ var footer: Label
 var load_status: Label
 var progress: ProgressBar
 var request_started := false
+var backdrop: TextureRect
+var content: Control
+var logo: TextureRect
+var window: Window
+var previous_aspect := Window.CONTENT_SCALE_ASPECT_KEEP
 
 func _ready() -> void:
-	var backdrop := TextureRect.new()
+	window = get_window()
+	previous_aspect = window.content_scale_aspect
+	# Fill the window during the welcome scene. The game restores its usual
+	# camera/HUD aspect when this scene leaves the tree.
+	window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+	backdrop = TextureRect.new()
 	backdrop.texture = ART
 	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
-	var title := STYLE.label(self,"SUNNY\nSCOUT",Vector2(76,88),Vector2(520,178),64,true)
-	title.add_theme_color_override("font_color",Color("fff0c8"))
-	title.add_theme_constant_override("shadow_offset_y",3)
-	var subtitle := STYLE.label(self,"PLANET ADVENTURES",Vector2(82,272),Vector2(500,32),22,true)
+	content = Control.new()
+	content.name = "WelcomeContent"
+	content.size = Vector2(1280,800)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(content)
+	logo = STYLE.icon(content,STARTUP_ART.logo_texture(),Vector2(76,86),Vector2(530,140))
+	var subtitle := STYLE.label(content,"Planet Adventures",Vector2(86,236),Vector2(500,32),22,true)
 	subtitle.add_theme_color_override("font_color",STYLE.GOLD)
-	var panel := STYLE.panel(self,Vector2(676,72),Vector2(544,656))
+	var panel := STYLE.panel(content,Vector2(676,72),Vector2(544,656))
 	var eyebrow := STYLE.label(panel,"YOUR EXPLORER'S GUIDE",Vector2(32,22),Vector2(480,24),14,true)
 	eyebrow.add_theme_color_override("font_color",STYLE.GOLD)
 	STYLE.label(panel,"Ready, explorer?",Vector2(32,49),Vector2(480,42),30,true)
@@ -61,11 +75,20 @@ func _ready() -> void:
 	progress.hide()
 	set_touch_mode(TOUCH.device_uses_touch())
 	start_button.grab_focus()
+	get_viewport().size_changed.connect(layout_content)
+	resized.connect(layout_content)
+	layout_content()
 	if OS.has_feature("web"):
 		# Let the HTML loader cover engine initialization, then reveal this
 		# finished guide instead of exposing an empty first frame.
 		await get_tree().process_frame
 		JavaScriptBridge.eval("window.dispatchEvent(new Event('scout-startup-ready'))")
+
+func layout_content() -> void:
+	content.position = (get_viewport_rect().size - content.size) * 0.5
+
+func _exit_tree() -> void:
+	window.content_scale_aspect = previous_aspect
 
 func guide_row(panel: Control, y: float, icon: Texture2D, title: String, text: String) -> Label:
 	STYLE.icon(panel,icon,Vector2(29,y+5),Vector2(64,64))
