@@ -65,10 +65,12 @@ const EXIT_ANGLES := [
 	{0:0.0, 1:0.0, 4:0.0},
 ]
 const BASE_SIGNS := [
-	{"camp":Vector2(435,350), "rocket":Vector2(210,370)},
-	{"camp":Vector2(450,823), "rocket":Vector2(300,840)},
-	{"camp":Vector2(1118,816), "rocket":Vector2(1348,911)},
+	{"camp":Vector2(485,280), "rocket":Vector2(235,345)},
+	{"camp":Vector2(535,710), "rocket":Vector2(300,830)},
+	{"camp":Vector2(1160,785), "rocket":Vector2(1390,830)},
 ]
+# Base labels sit beside the props; keep these smaller than trail wayfinding.
+const BASE_SIGN_SCALE := 0.64
 const DIRECTIONS := {
 	"west":Vector2.LEFT, "east":Vector2.RIGHT, "north":Vector2.UP,
 	"south":Vector2.DOWN, "north_west":Vector2(-0.70710678,-0.70710678),
@@ -84,8 +86,8 @@ static func draw_map(canvas: Node2D, world: int, region: int, cave: bool, catalo
 			post(canvas, Vector2(305,930), "SURFACE", Vector2(-1,-1).normalized())
 		return
 	if region == 0:
-		post(canvas, BASE_SIGNS[world].camp, "CAMP / DRILL")
-		post(canvas, BASE_SIGNS[world].rocket, "ROCKET")
+		post(canvas, BASE_SIGNS[world].camp, "CAMP", Vector2.ZERO, BASE_SIGN_SCALE)
+		post(canvas, BASE_SIGNS[world].rocket, "ROCKET", Vector2.ZERO, BASE_SIGN_SCALE)
 	if catalog.has_mine(region):
 		inscribe_beam(canvas, ENTRANCES[world][region], ENTRANCE_ANGLES[world][region], catalog.MINE_NAMES[region])
 	for link in catalog.LINKS[region]:
@@ -105,13 +107,13 @@ static func inscribe_beam(canvas: Node2D, beam: Vector4, angle: float, text: Str
 	lettering(canvas, Rect2(-size * 0.5, size), text, 15)
 	canvas.draw_set_transform(Vector2.ZERO)
 
-static func post(canvas: Node2D, foot: Vector2, text: String, direction := Vector2.ZERO) -> void:
+static func post(canvas: Node2D, foot: Vector2, text: String, direction := Vector2.ZERO, size_scale := 1.0) -> void:
 	canvas.draw_set_transform(foot * ART_SCALE)
-	canvas.draw_texture_rect(WOOD, Rect2(-72,-85,144,96), false)
-	var face := Rect2(-52,-65,104,29)
+	canvas.draw_texture_rect(WOOD, Rect2(Vector2(-72,-85) * size_scale, Vector2(144,96) * size_scale), false)
+	var face := Rect2(Vector2(-52,-65) * size_scale, Vector2(104,29) * size_scale)
 	if direction != Vector2.ZERO:
-		paint_arrow(canvas, Vector2(-52,-50), direction)
-		face = Rect2(-35,-65,82,29)
+		paint_arrow(canvas, Vector2(-52,-50) * size_scale, direction)
+		face = Rect2(Vector2(-35,-65) * size_scale, Vector2(82,29) * size_scale)
 	lettering(canvas, face, text, 14, text.contains(" / "))
 	canvas.draw_set_transform(Vector2.ZERO)
 
