@@ -1,6 +1,6 @@
 # Sunny Scout — browser testing build
 
-This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `db36a02`.
+This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `bc71041`.
 
 ## Download and upload
 
@@ -43,3 +43,5 @@ Native checks cover real resource gathering and randomized wood availability, ex
 Camp spawn update: native checks cover guide starts, confirmed reset, safe recovery, 150 random mineral layouts and Earth wood/crafting progression. The production browser build was reviewed on desktop and tablet emulation for the new camp position, opening the workbench without walking and returning there after reset.
 
 Equipment thumbnails now show only 1 and 2 on desktop and touch layouts. The selected equipment name stays above the slots; the uncrafted sword keeps its disabled, dimmed icon and recipe tooltip. Native HUD/drill checks and rendered desktop/tablet equipment review pass.
+
+Mist compatibility update: the screen blur uses four fixed, small base-level blur passes instead of browser-dependent screen mipmaps/textureLod. Blur radius stays consistent with world pixels on Retina displays, cloud noise avoids large sine hashes, and fully explored ground bypasses the blur. Discovery, hidden resources and per-map memory are unchanged. Native exploration and rendered desktop/Retina/tablet checks pass. Safari itself still needs an on-device check; this cloud runtime could not download WebKit.
