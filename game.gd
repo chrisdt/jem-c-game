@@ -76,8 +76,10 @@ var earth_return_player := Vector2.ZERO
 var earth_trail_cooldown := 0.0
 const GREEN_ENVIRONMENT: PackedScene = preload("res://environment/green_planet.tscn")
 const EARTH_WATER = preload("res://environment/earth_water.gd")
+const AMBIENT_LIFE = preload("res://environment/ambient_life.gd")
 var green_surface: Node2D
 var moss_water: Node2D
+var local_life: Node2D
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
@@ -139,6 +141,9 @@ func _ready() -> void:
 	add_child(green_surface)
 	moss_water = EARTH_WATER.add_to(self,"moss",MINE_ART,1)
 	moss_water.hide()
+	local_life = AMBIENT_LIFE.new()
+	local_life.name = "LocalAmbientLife"
+	add_child(local_life)
 	earth_stream = EARTH_STREAM.new()
 	earth_stream.y_sort_enabled = true
 	add_child(earth_stream)
@@ -772,6 +777,10 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	if current_region() == 0:
+		local_life.populate(world,0,underground,regions(),self)
+	else:
+		local_life.clear()
 	green_surface.visible = world == 0 and earth_region == 0 and not underground
 	green_surface.process_mode = Node.PROCESS_MODE_INHERIT if green_surface.visible else Node.PROCESS_MODE_DISABLED
 	moss_water.visible = world == 0 and earth_region == 0 and underground
