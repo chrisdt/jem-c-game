@@ -232,11 +232,10 @@ func present_trial(state: Dictionary) -> void:
 	for i in 2:
 		equip_marks[i].visible = i == selected
 		equip_slots[i].disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
-		equip_labels[i].text = (["Drill" if state.upgraded else "Pick","Sword"][i] if touch_mode else ["1 · Tool","2 · Sword"][i])
+		equip_labels[i].text = str(i+1)
 	equip_slots[1].disabled = equip_slots[1].disabled or not owned
 	equip_icons[1].modulate.a = 1.0 if owned else 0.35
 	equip_slots[1].tooltip_text = "Copper sword" if owned else "Craft at Earth camp: 3 copper + 2 wood"
-	if not owned: equip_labels[1].text = "Locked" if touch_mode else "2 · Locked"
 	equipped_label.text = "Sword" if selected == 1 else ("Hand drill" if state.upgraded else "Mining pick")
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
