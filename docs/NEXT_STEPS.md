@@ -1,5 +1,7 @@
 **Sunny Scout — next steps from Chris and Jeremy’s discussion, 19 October 2026**
 
+The subsequent [Earth NPC and mission task plan](EARTH_STORY.md) breaks the new story into character mockups, mission scripts and one-character implementations. Rowan's character and dialogue concepts have been reviewed. **R04, the reusable speech bubble, has an [isolated playable preview](../previews/README.md)** for keyboard/touch review before R05 places Rowan in camp. Build and review each small task before moving to the next; Bea follows the complete Rowan mission. The quarry rockfall, later upgrades, spacesuit and final rocket repair follow in their own tasks. Normal gameplay and mission progression are unchanged by the R04 preview.
+
 The next playable loop is: explore Earth → collect resources → craft equipment → mine → respond to a snake → resume mining → find fruit to heal. Build and playtest this in small steps before extending combat to the other worlds.
 
 This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the project. The recording is supporting evidence, rather than an instruction to implement every idea. Chris and Jeremy subsequently approved the concepts and requested the [first-screen animation trial](FIRST_SCREEN_TRIAL.md), now expanded in the Earth rollout. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.
