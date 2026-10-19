@@ -8,6 +8,8 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the illustrated explorer's guide, then choose **Start exploring**. **Enter / Space** also starts. Running `main.tscn` directly with **F6** skips the welcome screen for development.
 
+The loading and welcome screens share one illustrated logo: **Planet Adventures** is a smaller, centred subtitle beneath **Sunny Scout**, using matching gold lettering and a teal outline.
+
 - **WASD / arrow keys:** move
 - **E / Space / MINE button:** start mining, use workbench or rocket
 - **Mine doorways:** walk into an entrance or exit to change areas automatically

@@ -40,9 +40,7 @@ func _ready() -> void:
 	content.size = Vector2(1280,800)
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(content)
-	logo = STYLE.icon(content,STARTUP_ART.logo_texture(),Vector2(76,86),Vector2(530,140))
-	var subtitle := STYLE.label(content,"Planet Adventures",Vector2(86,236),Vector2(500,32),22,true)
-	subtitle.add_theme_color_override("font_color",STYLE.GOLD)
+	logo = STYLE.icon(content,STARTUP_ART.logo_texture(),Vector2(76,86),Vector2(530,156))
 	var panel := STYLE.panel(content,Vector2(676,72),Vector2(544,656))
 	var eyebrow := STYLE.label(panel,"YOUR EXPLORER'S GUIDE",Vector2(32,22),Vector2(480,24),14,true)
 	eyebrow.add_theme_color_override("font_color",STYLE.GOLD)
