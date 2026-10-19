@@ -15,6 +15,8 @@ const CATALOG = preload("res://ui/world_catalog.gd")
 const UI_STYLE = preload("res://ui/expedition_style.gd")
 const WORLD_SIGNS = preload("res://environment/world_signs.gd")
 const GAME_HUD = preload("res://ui/game_hud.gd")
+const RESET_CONFIRMATION = preload("res://ui/reset_confirmation.gd")
+var reset_confirmation: RESET_CONFIRMATION
 const DRILL_VISUAL = preload("res://drill_visual.gd")
 const EARTH_TRIAL = preload("res://environment/earth_trial.gd")
 var trial: Node2D
@@ -221,6 +223,9 @@ func _ready() -> void:
 	trial = EARTH_TRIAL.new()
 	trial.game = self
 	add_child(trial)
+	reset_confirmation = RESET_CONFIRMATION.new()
+	add_child(reset_confirmation)
+	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
 	message = "Earth trial: 1 mining tool, 2 sword, Space to jab. Berries heal 1 heart; apples heal 2."
 	if hud.touch_mode:
 		message = "Earth trial: tap a tool, then Jab. Berries heal 1 heart; apples heal 2."
@@ -650,7 +655,12 @@ func finish_earth_switch() -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_pressed() and not event.is_echo():
 		if event.keycode == KEY_R:
-			get_tree().reload_current_scene()
+			# Discard held touch gestures before pausing their input handlers.
+			hud.touch_controls.clear()
+			for button in hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]:
+				button.release_touch()
+			reset_confirmation.open()
+			get_viewport().set_input_as_handled()
 		elif not earth_transition and not planet_menu.visible and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
 			trial.equip(0 if event.keycode == KEY_1 else 1)
 		elif event.keycode == KEY_SPACE and trial.sword_equipped():

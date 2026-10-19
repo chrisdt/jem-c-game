@@ -11,7 +11,7 @@ The confirmed changes from that review are a smooth slithering snake, a straight
 - On iPad, drag the pad, tap the tool slots, and tap **Jab**. Equipment and attack touches have independent finger ownership, so a held movement thumb does not block them.
 - The sword is available immediately for this test. The drill still uses the existing five-copper purchase, and selecting the sword does not remove the earned drill.
 - A bite costs half a heart. Approach a revealed berry bush for one heart, or an apple tree for two. Full health leaves fruit unpicked. At zero health, Scout returns safely to camp with five hearts and collected materials intact.
-- **R** or reloading starts a fresh session. Defeated snakes and harvested plants stay that way during the current session, including when visiting a mine, another district or another planet.
+- **R** opens a paused **Reset game?** prompt: **Yes** starts a fresh session; **No** or **Escape** continues the current game. Reloading also starts fresh. Defeated snakes and harvested plants stay that way during the current session, including when visiting a mine, another district or another planet.
 
 **What to review with Jeremy**
 

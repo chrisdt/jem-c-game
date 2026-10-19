@@ -17,7 +17,7 @@ The loading and welcome screens share one illustrated logo: **Planet Adventures*
 - **Mine doorways:** walk into an entrance or exit to change areas automatically
 - **iPad / touch:** drag the pad at bottom left to walk; tap the action at bottom right to mine, cancel, upgrade or open the rocket. Tap a world card's **Fly here** button to travel.
 - While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.
-- **R:** restart
+- **R:** open the **Reset game?** prompt. **Yes** starts a fresh game; **No** or **Escape** keeps the current game. The game pauses while choosing, with **No** selected by default.
 
 **Landing Meadow animation trial:** the sword is provided immediately for testing. Press **1** for your pick/fitted drill, **2** for the sword, and **Space** for a short directional jab. **E** still uses camp, rocket and mining interactions. On touch, tap the equipment slots and the **Jab** button while using the movement pad. The compact trial HUD shows five hearts, equipment selection, the drill objective and defeated snakes. The workbench still builds the real drill for five copper; the sword is a trial item rather than a completed crafting recipe.
 
@@ -144,6 +144,8 @@ godot --headless --path . --script tests/smoke.gd
 ```
 
 The smoke test exercises movement and facing, collecting five copper across three surface districts, the upgrade purchase, returning to the landing camp, mine entry, the 9-second crystal objective and returning outdoors. Run `godot --headless --path . --script tests/mining.gd` for interruption, tool restrictions, directional mining poses, frame-rate independence and effect cleanup checks.
+
+Run `godot --headless --path . --script tests/reset_confirmation.gd` to check reset confirmation through real keyboard, mouse and touch input, paused gameplay/mining/flight, preserved progress on No, menu focus restoration and a fresh unpaused game on Yes.
 
 The mine navigation check (`godot --headless --path . --script tests/mine_layout.gd`) verifies walls, pool and pillar collisions, all ore and side-chamber routes, and entry/exit interactions.
 
