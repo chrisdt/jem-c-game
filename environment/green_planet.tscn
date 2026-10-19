@@ -268,6 +268,13 @@ wind_phase = 6.20053
 [node name="PondLife" parent="." instance=ExtResource("5")]
 position = Vector2(1270, 960)
 
+[node name="PondLife02" parent="." instance=ExtResource("5")]
+position = Vector2(1270, 960)
+swim_radius = Vector2(72, 19)
+swim_offset = Vector2(0, 11)
+minimum_jump_wait = 11.0
+maximum_jump_wait = 23.0
+
 [node name="Duck" parent="." instance=ExtResource("6")]
 position = Vector2(975, 970)
 

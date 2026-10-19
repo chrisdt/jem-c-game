@@ -8,6 +8,8 @@ const FOOT_Y := [492.0, 484.0, 493.0, 415.0, 418.0, 415.0]
 const WANDER_AREA := Rect2(890, 865, 165, 220)
 
 @export_range(10.0, 40.0) var walk_speed := 21.0
+@export var wander_area := WANDER_AREA
+var shore_floor: Callable
 var rng := RandomNumberGenerator.new()
 var sprite: Sprite2D
 var target := Vector2.ZERO
@@ -35,9 +37,26 @@ func _process(delta: float) -> void:
 		advance(delta)
 
 func choose_target() -> void:
-	target = WANDER_AREA.position + Vector2(rng.randf() * WANDER_AREA.size.x, rng.randf() * WANDER_AREA.size.y)
-	state = "walk"
+	for attempt in 48:
+		var point := wander_area.position + Vector2(rng.randf(), rng.randf()) * wander_area.size
+		if position.distance_to(point) > 12 and clear_route(point):
+			target = point
+			state = "walk"
+			state_time = 0
+			return
+	state = "rest"
 	state_time = 0
+	rest_seconds = 1.5
+
+func can_stand(point: Vector2) -> bool:
+	return wander_area.has_point(point) and (not shore_floor.is_valid() or shore_floor.call(point))
+
+func clear_route(finish: Vector2) -> bool:
+	var steps := maxi(1, ceili(position.distance_to(finish) / 4.0))
+	for i in range(1, steps + 1):
+		if not can_stand(position.lerp(finish, float(i) / steps)):
+			return false
+	return true
 
 func advance(delta: float) -> void:
 	var remaining := maxf(0, delta)
@@ -45,7 +64,12 @@ func advance(delta: float) -> void:
 		var step := minf(remaining, 0.05)
 		state_time += step
 		if state == "walk":
-			var movement := position.move_toward(target, walk_speed * step) - position
+			var next := position.move_toward(target, walk_speed * step)
+			if not can_stand(next):
+				choose_target()
+				remaining -= step
+				continue
+			var movement := next - position
 			position += movement
 			walk_distance += movement.length()
 			if absf(movement.x) > 0.01:

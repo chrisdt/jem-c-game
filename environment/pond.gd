@@ -10,6 +10,12 @@ const JUMP_SECONDS := 1.15
 @export_range(3.0, 60.0) var minimum_jump_wait := 8.0
 @export_range(3.0, 60.0) var maximum_jump_wait := 18.0
 @export_range(20.0, 90.0) var jump_height := 55.0
+@export var ground_texture: Texture2D = GROUND
+@export var swim_radius := Vector2(92, 27)
+@export var swim_offset := Vector2(0, -5)
+@export var water_radius := Vector2(132, 60)
+var water_mask: Texture2D
+var water_mask_image: Image
 var rng := RandomNumberGenerator.new()
 var swimmer: MeshInstance2D
 var jumper: Sprite2D
@@ -44,7 +50,10 @@ func _ready() -> void:
 	swimmer.position = -cell * 0.05
 	var tail := ShaderMaterial.new()
 	tail.shader = SWIM
-	tail.set_shader_parameter("ground_texture", GROUND)
+	tail.set_shader_parameter("ground_texture", ground_texture)
+	if water_mask != null:
+		tail.set_shader_parameter("water_mask", water_mask)
+		tail.set_shader_parameter("use_water_mask", true)
 	swimmer.material = tail
 	jumper = Sprite2D.new()
 	jumper.name = "LeapingFish"
@@ -62,10 +71,17 @@ func _process(delta: float) -> void:
 
 func swim_point(at: float) -> Vector2:
 	# A smooth, gently turning route stays well inside the shoreline.
-	return Vector2(sin(at) * 92, sin(at * 2 + 0.4) * 27 - 5)
+	return Vector2(sin(at) * swim_radius.x, sin(at * 2 + 0.4) * swim_radius.y) + swim_offset
 
 func water_contains(point: Vector2) -> bool:
-	return (point / Vector2(132, 60)).length_squared() < 1.0
+	if (point / water_radius).length_squared() >= 1.0:
+		return false
+	if water_mask_image != null:
+		var pixel := Vector2i((position + point) / Vector2(2000,1400) * Vector2(water_mask_image.get_size()))
+		if pixel.x < 0 or pixel.y < 0 or pixel.x >= water_mask_image.get_width() or pixel.y >= water_mask_image.get_height():
+			return false
+		return water_mask_image.get_pixelv(pixel).r > 0.5
+	return true
 
 func advance(delta: float) -> void:
 	var remaining := maxf(0.0, delta)
@@ -112,7 +128,7 @@ func _advance_step(delta: float) -> void:
 			wake_wait = 0.6
 	ripple_wait -= delta
 	if ripple_wait <= 0:
-		add_ripple(Vector2(rng.randf_range(-62, 62), rng.randf_range(-22, 22)))
+		add_ripple(water_radius * Vector2(rng.randf_range(-0.47, 0.47), rng.randf_range(-0.36, 0.36)))
 		ripple_wait = rng.randf_range(1.8, 3.2)
 
 func _update_visuals() -> void:
@@ -130,7 +146,7 @@ func _update_visuals() -> void:
 		fish_position = swim_point(phase)
 		var heading := swimmer.get_parent() as Node2D
 		heading.position = fish_position
-		heading.rotation = Vector2(92 * cos(phase), 54 * cos(phase * 2 + 0.4)).angle()
+		heading.rotation = Vector2(swim_radius.x * cos(phase), swim_radius.y * 2 * cos(phase * 2 + 0.4)).angle()
 
 func add_ripple(point: Vector2, splash := false) -> void:
 	if ripples.size() >= 16:

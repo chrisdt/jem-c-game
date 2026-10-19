@@ -4,6 +4,7 @@ extends Node2D
 const OUTER_REGIONS = preload("res://outer_regions.gd")
 const AMBIENCE = preload("res://environment/region_ambience.gd")
 const LAVA_FLOW = preload("res://shaders/lava_flow.gdshader")
+const EARTH_WATER = preload("res://environment/earth_water.gd")
 
 var REGIONS = preload("res://earth_regions.gd")
 const TREE: PackedScene = preload("res://environment/wind_tree.tscn")
@@ -193,6 +194,8 @@ func show_area(region: int, cave: bool) -> void:
 	ground.z_index = -2
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	scenery.add_child(ground)
+	if not REGIONS is OUTER_REGIONS:
+		EARTH_WATER.add_to(scenery,key,textures[key])
 	if REGIONS is OUTER_REGIONS:
 		var atmosphere := AMBIENCE.new()
 		atmosphere.world = REGIONS.world

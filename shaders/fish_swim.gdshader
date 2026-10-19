@@ -2,6 +2,8 @@ shader_type canvas_item;
 
 uniform vec2 atlas_origin = vec2(0.5, 0.5);
 uniform sampler2D ground_texture : source_color;
+uniform sampler2D water_mask : filter_linear;
+uniform bool use_water_mask = false;
 varying vec4 fish_tint;
 varying vec2 water_uv;
 
@@ -18,4 +20,7 @@ void fragment() {
 	// sprite rises above the surface and does not use this water mask.
 	vec3 ground = texture(ground_texture, water_uv).rgb;
 	COLOR.a *= smoothstep(0.015, 0.065, min(ground.g, ground.b) - ground.r);
+	if (use_water_mask) {
+		COLOR.a *= texture(water_mask, water_uv).r;
+	}
 }

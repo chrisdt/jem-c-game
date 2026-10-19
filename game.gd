@@ -75,7 +75,9 @@ var earth_target_player := Vector2.ZERO
 var earth_return_player := Vector2.ZERO
 var earth_trail_cooldown := 0.0
 const GREEN_ENVIRONMENT: PackedScene = preload("res://environment/green_planet.tscn")
+const EARTH_WATER = preload("res://environment/earth_water.gd")
 var green_surface: Node2D
+var moss_water: Node2D
 const COPPER_ART: Texture2D = preload("res://assets/copper_ore.png")
 const BLUE_ORE_ART: Texture2D = preload("res://assets/blue_ore.png")
 const SCOUT_FRAMES: SpriteFrames = preload("res://assets/scout_frames.tres")
@@ -135,6 +137,8 @@ func _ready() -> void:
 	y_sort_enabled = true
 	green_surface = GREEN_ENVIRONMENT.instantiate()
 	add_child(green_surface)
+	moss_water = EARTH_WATER.add_to(self,"moss",MINE_ART,1)
+	moss_water.hide()
 	earth_stream = EARTH_STREAM.new()
 	earth_stream.y_sort_enabled = true
 	add_child(earth_stream)
@@ -770,6 +774,8 @@ func update_particles(delta: float) -> void:
 func refresh_ui() -> void:
 	green_surface.visible = world == 0 and earth_region == 0 and not underground
 	green_surface.process_mode = Node.PROCESS_MODE_INHERIT if green_surface.visible else Node.PROCESS_MODE_DISABLED
+	moss_water.visible = world == 0 and earth_region == 0 and underground
+	moss_water.process_mode = Node.PROCESS_MODE_INHERIT if moss_water.visible else Node.PROCESS_MODE_DISABLED
 	earth_stream.visible = true
 	lava_environment.visible = world == 2 and current_region() == 0 and underground
 	rocket.visible = not underground and has_base()
