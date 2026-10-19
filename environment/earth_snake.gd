@@ -2,7 +2,9 @@ extends Node2D
 
 const ART = preload("res://environment/trial_art.gd")
 const FACING = preload("res://environment/wildlife_facing.gd")
-const MAX_HEALTH := 3
+const STYLE = preload("res://ui/expedition_style.gd")
+const MAX_HEALTH := 9
+const POSE_SCALES := [0.20,0.15,0.15]
 const SPEED := 57.0
 const REACH := 62.0
 var trial: Node
@@ -43,8 +45,9 @@ func can_stand(point: Vector2) -> bool:
 		if not trial.floor_at(point+offset): return false
 	for rock in trial.game.rocks:
 		if not rock.cave and rock.hp > 0 and point.distance_to(rock.pos) < 75: return false
-	for plant in trial.plants:
-		if point.distance_to(plant.position) < (43 if plant.apple else 35): return false
+	if is_instance_valid(trial.game.gardens):
+		for plant in trial.game.gardens.plants:
+			if point.distance_to(plant.position) < (43 if plant.apple else 35): return false
 	return true
 
 func clear_route(point: Vector2) -> bool:
@@ -137,6 +140,9 @@ func advance(delta: float) -> void:
 func update_pose() -> void:
 	if pictures.is_empty(): return
 	var row := 0 if facing.y == 0 else (1 if facing.y > 0 else 2)
+	# Front/rear paintings have a longer body silhouette. Fit those views
+	# separately so turning never makes a small ground creature look giant.
+	var pose_scale: float = POSE_SCALES[row]
 	var cycle := fposmod(phase*6.0,6.0)
 	current_frame = int(cycle)
 	var blend := smoothstep(0,1,fmod(cycle,1.0))
@@ -145,19 +151,20 @@ func update_pose() -> void:
 		var pose := ART.snake_pose(row,frame)
 		var picture := pictures[i]
 		picture.texture = pose.texture
-		picture.offset = picture.texture.get_size()*0.5-pose.anchor+Vector2(0,20.0/0.30)
+		picture.offset = picture.texture.get_size()*0.5-pose.anchor+Vector2(0,20.0/pose_scale)
 		picture.flip_h = facing.x < 0
 		if picture.flip_h: picture.offset.x = -picture.offset.x
-		picture.scale = Vector2.ONE*0.30
+		picture.scale = Vector2.ONE*pose_scale
 		picture.modulate = Color(1.9,1.6,1.3) if hit_flash > 0 else Color.WHITE
 		picture.modulate.a = (1-blend if i == 0 else blend)*smoothstep(0,1,fade)
 		picture.visible = seen and health > 0
 
-func take_hit(jab_id: int, origin: Vector2) -> bool:
+func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
 	if health <= 0 or not seen or last_jab == jab_id or not trial.is_active() or trial.blocked(): return false
+	if damage <= 0: return false
 	last_jab = jab_id
-	health -= 1
-	damage_taken += 1
+	damage_taken += mini(health,damage)
+	health = maxi(0,health-damage)
 	health_seconds = 2.0
 	hit_flash = 0.16
 	clock = 0
@@ -186,7 +193,7 @@ func _draw() -> void:
 		return
 	if not seen or health <= 0: return
 	if state == "warn":
-		draw_string(trial.STYLE.HEADING,Vector2(-4,-35),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
+		draw_string(STYLE.HEADING,Vector2(-4,-35),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
 	if health_seconds > 0:
 		draw_rect(Rect2(-18,-30,36,5),Color("143638"))
 		draw_rect(Rect2(-17,-29,34*float(health)/MAX_HEALTH,3),Color("d9ae58"))

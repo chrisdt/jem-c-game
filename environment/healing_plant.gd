@@ -3,7 +3,7 @@ extends Node2D
 const ART = preload("res://environment/trial_art.gd")
 const MESH = preload("res://environment/wind_mesh.gd")
 const WIND: Shader = preload("res://shaders/trial_leaves.gdshader")
-var trial: Node
+var garden: Node
 var apple := false
 var picked := false
 var discovered := false
@@ -38,25 +38,27 @@ func update_art() -> void:
 
 func advance(delta: float, seconds: float) -> void:
 	if not discovered:
-		discovered = trial.game.fog.is_revealed(0,position)
+		discovered = garden.game.fog.is_revealed(garden.active_area,position)
 	if discovered:
 		fade = minf(1,fade+delta/0.75)
 	modulate.a = smoothstep(0,1,fade)
 	rustle = maxf(0,rustle-delta)
 	leaves.set_shader_parameter("seconds",seconds)
 	leaves.set_shader_parameter("strength",2.0+rustle*14.0)
-	if discovered and not picked and trial.health < trial.MAX_HEALTH and trial.game.player.distance_to(position) < (65.0 if apple else 48.0):
+	if discovered and not picked and garden.game.trial.health < garden.game.trial.MAX_HEALTH and garden.game.player.distance_to(position) < (65.0 if apple else 48.0):
 		collect()
 
 func collect() -> bool:
-	if picked or not discovered or not trial.is_active() or trial.blocked() or trial.health >= trial.MAX_HEALTH:
+	var trial: Node = garden.game.trial
+	if picked or not discovered or garden.blocked() or trial.health >= trial.MAX_HEALTH:
 		return false
-	if trial.game.player.distance_to(position) >= (65.0 if apple else 48.0): return false
+	if garden.game.player.distance_to(position) >= (65.0 if apple else 48.0): return false
 	var amount := 4 if apple else 2
 	if trial.heal(amount) <= 0: return false
 	picked = true
 	rustle = 0.5
 	update_art()
-	trial.add_heal_effect(position,2 if apple else 1)
-	trial.game.message = "Apples restore two hearts." if apple else "Berries restore one heart."
+	garden.add_heal_effect(position,2 if apple else 1)
+	garden.game.message = "Apples restore two hearts." if apple else "Berries restore one heart."
+	garden.game.refresh_ui()
 	return true

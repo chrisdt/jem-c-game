@@ -99,8 +99,8 @@ func guide_row(panel: Control, y: float, icon: Texture2D, title: String, text: S
 func set_touch_mode(value: bool) -> void:
 	touch_mode = value
 	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
-	mine_text.text = "Tap the action button to mine or cancel.\nCollect 5 copper; build a drill at camp." if value else "E / Space to mine. Move to cancel.\nCollect 5 copper; build a drill at camp."
-	combat_text.text = "In the meadow: tap Sword, then Jab.\nBerries heal 1 heart; apples heal 2." if value else "In the meadow: 2 equips; Space jabs.\nBerries heal 1 heart; apples heal 2."
+	mine_text.text = "Tap the action button to mine or cancel.\nCollect 5 copper; build a drill at camp." if value else "E to mine or use. Move to cancel.\nCollect 5 copper; build a drill at camp."
+	combat_text.text = "Tap a tool, then Attack / Jab.\nExplore trails: berries +1 heart; apples +2." if value else "1 pick / drill, 2 sword; Space attacks.\nExplore trails: berries +1 heart; apples +2."
 	footer.text = ("Best on iPad in landscape. Tap ? in game for controls." if value else "Enter / Space to start. Open ? in game for controls.") + "\nProgress lasts while this game is open."
 
 func start_exploring() -> void:

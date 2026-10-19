@@ -44,7 +44,7 @@ func prepare(game: Node, snake: Node, origin: Vector2, direction: Vector2) -> vo
 	snake.fade = 1
 	snake.state = "recover"
 	snake.clock = 0
-	snake.health = 3
+	snake.health = 9
 	snake.last_jab = -1
 	snake.show()
 	game.fog.observe(0,snake.position)
@@ -58,10 +58,11 @@ func run() -> void:
 	var trial: Node = game.trial
 	check(trial.health == 10 and trial.selected_tool == 0,"Trial must start with five hearts and mining tool")
 	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")),"Game playback is not silent")
-	check(trial.snakes.size() == 3 and trial.plants.size() == 4,"Landing Meadow lost its bounded trial actors")
+	check(trial.snakes.size() == 3 and game.gardens.plants.size() == 1,"Landing Meadow lost its bounded trial actors")
 	check(trial.is_active() and game.hud.health_panel.visible and game.hud.equip_slots[1].visible,"First-screen HUD is missing")
 	check(not game.hud.objective.visible and not game.hud.equipment.visible,"Old overlays duplicate the trial HUD")
-	for plant in trial.plants:
+	check(game.gardens.plants.all(func(p): return not p.apple),"Landing Meadow contains a fruit tree")
+	for plant in game.gardens.plants:
 		check(trial.floor_at(plant.position),"Healing plant is outside safe grass")
 		var uv: Vector4 = plant.leaves.get_shader_parameter("frame_region")
 		check(uv.z < 0.5 and uv.w < 0.7,"Plant mesh displays the full atlas instead of its own artwork")
@@ -69,9 +70,9 @@ func run() -> void:
 			check(rock.cave or rock.pos.distance_to(plant.position) >= 100,"Healing plant overlaps a mineral")
 	for snake in trial.snakes:
 		check(snake.can_stand(snake.position),"Snake started on blocked floor or a landmark")
-	check(not trial.start_jab(),"Mining tool can attack")
+	check(game.hud.attack_button.visible,"Mining tool has no touch attack")
 	trial.equip(1)
-	check(trial.sword_equipped() and trial.weapon.visible,"Sword selection did not update its carried artwork")
+	check(trial.sword_equipped() and not game.scout.has_node("CarriedSword"),"Idle sword should be hidden")
 	game.upgraded = true
 	trial.equip(0)
 	check(game.scout.sprite_frames == game.DRILL_VISUAL.WALK[0],"Selecting mining tool lost the drill")
@@ -89,25 +90,59 @@ func run() -> void:
 		check(trial.start_jab(),"A ready sword could not jab")
 		check(not trial.start_jab(),"Repeated input bypassed the jab cooldown")
 		trial.advance(0.12)
-		check(snake.health == 2,"A forward jab did not register one hit: %s" % direction)
+		check(snake.health == 6,"A forward jab did not register one hit: %s" % direction)
 		check(game.scout.animation == StringName("jab_"+str(game.facing)),"Jab uses the wrong directional pose")
 		check(game.scout.flip_h == (direction == Vector2.LEFT),"Left jab is not mirrored correctly")
-		check(not trial.weapon.visible,"Carried sword draws over the illustrated jab")
+		check(not game.scout.has_node("CarriedSword"),"Floating weapon draws over the illustrated jab")
 		var row: int = {&"side":0,&"down":1,&"up":2}[game.facing]
 		var anchor: Vector2 = trial.ART.ANCHORS.JAB_ANCHORS[row][game.scout.frame]
 		var texture: Texture2D = game.scout.sprite_frames.get_frame_texture(game.scout.animation,game.scout.frame)
 		var foot: float = (anchor.y-texture.get_height()*0.5+game.scout.offset.y)*game.scout.scale.y
 		check(absf(foot-20) < 0.1,"Jab boots jump off the ground")
 		trial.advance(0.06)
-		check(snake.health == 2,"One thrust applied multiple hits")
+		check(snake.health == 6,"One thrust applied multiple hits")
 		trial.advance(0.4)
-		check(trial.jab_time < 0 and trial.weapon.visible,"Sword did not return to its carried pose")
+		check(trial.jab_time < 0 and game.scout.sprite_frames == game.MINER_FRAMES,"Sword remains visible after its attack")
 		# A target behind the player must remain untouched.
 		prepare(game,snake,origin,-direction)
 		game.face_direction(direction)
 		trial.start_jab()
 		trial.advance(0.45)
-		check(snake.health == 3,"Sword jab hit behind Scout")
+		check(snake.health == 9,"Sword jab hit behind Scout")
+	# The starter pick and fitted drill can defend Scout, but remove only one
+	# health unit where the sword removes three. All four swings stay grounded.
+	for fitted in [false,true]:
+		game.upgraded = fitted
+		trial.equip(0)
+		for direction in [Vector2.RIGHT,Vector2.LEFT,Vector2.DOWN,Vector2.UP]:
+			prepare(game,snake,origin,direction)
+			check(trial.start_jab(),"Mining tool could not attack")
+			trial.advance(0.12)
+			check(snake.health == 8,"Pick/drill did not deal exactly one-third sword damage")
+			check(game.mining_target == -1 and game.scout.animation == StringName("mine_"+str(game.facing)),"Tool attack started mining or used sword artwork")
+			var frames: SpriteFrames = game.DRILL_VISUAL.MINING[0] if fitted else game.MINER_MINE_FRAMES
+			check(game.scout.sprite_frames == frames,"Tool attack lost its fitted pick/drill")
+			game.start_mining(0)
+			check(game.mining_target == -1,"An E/mining action interrupted an attack")
+			if not fitted:
+				var pose: int = game.scout.frame
+				var size: Vector2 = frames.get_frame_texture(game.scout.animation,pose).get_size()
+				var foot: float = (game.MINE_ANCHORS[game.facing][pose].y-size.y*0.5+game.scout.offset.y)*game.scout.scale.y
+				check(absf(foot-20) < 0.1,"Pick swing lifted Scout's boots")
+			trial.advance(0.06)
+			check(snake.health == 8,"One pick swing hit multiple times")
+			trial.advance(0.5)
+	# Nine pick hits defeat a full-health snake; mixed/overkill hits clamp at 0.
+	prepare(game,snake,origin,Vector2.RIGHT)
+	for hit in 9:
+		game.player = snake.position-Vector2.RIGHT*57
+		trial.jab_cooldown = 0
+		check(trial.start_jab(),"Pick combo failed to start")
+		trial.advance(0.18)
+		check(snake.health == 8-hit,"Pick kill threshold differs from nine hits")
+		trial.advance(0.5)
+	check(snake.state == "puff" or snake.state == "gone","Final pick strike did not produce smoke")
+	trial.equip(1)
 	# A defeated snake poofs once and stays gone through area/planet changes.
 	prepare(game,snake,origin,Vector2.RIGHT)
 	var before_defeated: int = trial.defeated
@@ -117,7 +152,7 @@ func run() -> void:
 		trial.jab_cooldown = 0
 		trial.start_jab()
 		trial.advance(0.18)
-		check(snake.health == 2-attack,"Successive jabs did not remove one snake health each")
+		check(snake.health == 6-attack*3,"Successive jabs did not remove one snake health each")
 		if attack < 2: trial.advance(0.4)
 	check(snake.state == "puff" and trial.defeated == before_defeated+1,"Defeated snake did not enter smoke exactly once")
 	trial.advance(1.0)
@@ -143,17 +178,6 @@ func run() -> void:
 	check(not trial.hurt_player(1) and trial.health == 9,"Contact damage bypassed invulnerability")
 	game.refresh_ui()
 	check(game.hud.health_hearts[4].texture == trial.ART.icon(2),"Half-heart HUD icon is wrong")
-	# Full health leaves fruit available. Berries +1 heart, apples +2 hearts.
-	for apple in [false,true]:
-		var plant: Node = trial.plants.filter(func(p): return p.apple == apple)[0]
-		game.player = plant.position+Vector2(0,35)
-		game.update_exploration()
-		plant.discovered = true
-		trial.health = 10
-		check(not plant.collect() and not plant.picked,"Fruit was wasted at full health")
-		trial.health = 4
-		check(plant.collect() and trial.health == (8 if apple else 6),"Healing amount differs from Jeremy's request")
-		check(plant.picked and not plant.collect(),"A picked plant can be harvested repeatedly")
 	# Empty health returns safely, retaining the earned materials and tool.
 	trial.health = 1
 	trial.invulnerable = 0
@@ -175,8 +199,8 @@ func run() -> void:
 		game.underground = area[2]
 		trial.advance(1)
 		game.refresh_ui()
-		check(not trial.is_active() and not trial.visible and not trial.weapon.visible,"First-screen content leaked to another area")
-		check(not game.hud.health_panel.visible and not game.hud.equip_slots[0].visible,"Trial HUD leaked to another area")
+		check(not trial.is_active() and not trial.visible and not game.scout.has_node("CarriedSword"),"First-screen content leaked to another area")
+		check(not game.hud.equip_slots[0].visible,"Trial HUD leaked to another area")
 	game.world = 0
 	game.earth_region = 0
 	game.underground = false
@@ -184,7 +208,7 @@ func run() -> void:
 	check(snake.state == "gone" and trial.defeated == before_defeated+1,"Revisiting respawned a defeated snake")
 	# Long movement stays on floor; direction changes use genuinely different art.
 	var living: Node = trial.snakes[1]
-	living.health = 3
+	living.health = 9
 	living.state = "roam"
 	living.seen = true
 	living.fade = 1
@@ -199,6 +223,15 @@ func run() -> void:
 		living.update_pose()
 		views[living.pictures[0].texture.region] = true
 	check(views.size() == 3,"Snake has no distinct front/rear/side artwork")
+	for direction in [Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
+		living.facing = direction
+		for frame in 6:
+			living.phase = float(frame)/6.0
+			living.update_pose()
+			var picture: Sprite2D = living.pictures[0]
+			var bounds := picture.texture.get_image().get_used_rect()
+			var visible_size: Vector2 = Vector2(bounds.size)*picture.scale
+			check(visible_size.x < 60 and visible_size.y < 60,"A snake view is too large for a small ground animal")
 	var positions: Array[Vector2] = []
 	for fps in [30,144]:
 		living.position = origin
@@ -244,25 +277,32 @@ func run() -> void:
 	await touch(1,tool_at,true)
 	await touch(1,tool_at,false)
 	check(trial.selected_tool == 0 and game.scout.sprite_frames == game.DRILL_VISUAL.WALK[0],"Touching the first slot failed to restore the drill")
-	check(trial.effects.size() <= 4,"Healing effects accumulated")
+	trial.jab_cooldown = 0
+	game.refresh_ui()
+	check(game.hud.attack_button.visible,"Pick/drill attack button is hidden")
+	await touch(2,game.hud.attack_button.get_global_rect().get_center(),true)
+	await touch(2,game.hud.attack_button.get_global_rect().get_center(),false)
+	check(trial.jab_time >= 0 and game.scout.sprite_frames == game.DRILL_VISUAL.MINING[0],"Touch Attack did not animate the mining tool")
+	trial.advance(0.5)
+	check(game.gardens.effects.size() <= 4,"Healing effects accumulated")
 	game.queue_free()
 	await process_frame
 	await process_frame
-	# Different random ore layouts must still leave all four test plants on
+	# Different random ore layouts must leave the single starting berry bush on
 	# safe grass; fallback sites handle a deposit occupying a preferred spot.
 	for run_index in 10:
 		var fresh = load("res://main.tscn").instantiate()
 		root.add_child(fresh)
 		fresh.set_process(false)
-		check(fresh.trial.plants.size() == 4 and fresh.trial.snakes.size() == 3,"A new layout omitted trial actors")
-		for plant in fresh.trial.plants:
+		check(fresh.gardens.plants.size() == 1 and fresh.trial.snakes.size() == 3,"A new layout omitted trial actors")
+		for plant in fresh.gardens.plants:
 			check(fresh.trial.floor_at(plant.position),"Fresh-layout healing plant is not on clear ground")
 			for rock in fresh.rocks:
 				check(rock.cave or rock.pos.distance_to(plant.position) >= 100,"Fresh-layout healing plant overlaps ore")
-		check(fresh.trial.health == 10 and fresh.trial.defeated == 0 and fresh.trial.plants.all(func(p): return not p.picked),"Fresh game inherited trial progress")
+		check(fresh.trial.health == 10 and fresh.trial.defeated == 0 and fresh.gardens.plants.all(func(p): return not p.picked),"Fresh game inherited trial progress")
 		fresh.queue_free()
 		await process_frame
 		await process_frame
 	if failures == 0:
-		print("PASS: first-screen trial, four-direction grounded jabs, one-hit/cooldown/front-only strikes, snake health/smoke memory, safe 30/144fps slithering, exact berry/apple healing, half-heart protection/recovery, HUD/tool ownership, independent touch fingers, menus/travel scope and silent playback")
+		print("PASS: first-screen trial, hidden idle sword, grounded four-direction sword/pick/drill attacks, 3:1 damage and three-sword/nine-tool thresholds, one-hit/cooldown/front-only strikes, small directional snakes, smoke memory, safe 30/144fps slithering, half-heart protection/recovery, HUD/tool ownership, independent touch fingers, menus/travel scope and silent playback")
 	quit(1 if failures else 0)

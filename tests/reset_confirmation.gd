@@ -52,7 +52,7 @@ func run() -> void:
 	game.upgraded = true
 	game.trial.health = 6
 	game.trial.equip(1)
-	game.trial.plants[0].picked = true
+	game.gardens.plants[0].picked = true
 	game.trial.snakes[0].health = 2
 	await key(KEY_R)
 	check(current_scene == game and prompt.visible and paused,"R reset the game instead of opening a paused confirmation")
@@ -76,7 +76,7 @@ func run() -> void:
 	await click(prompt.no_button)
 	check(not prompt.visible and not paused and current_scene == game,"Clicking No did not resume the same game")
 	check(game.ore == 4 and game.blue_crystals == 2 and game.upgraded and game.trial.health == 6,"No lost inventory, upgrade or health")
-	check(game.trial.plants[0].picked and game.trial.snakes[0].health == 2,"No lost harvested/enemy state")
+	check(game.gardens.plants[0].picked and game.trial.snakes[0].health == 2,"No lost harvested/enemy state")
 	game.set_process(false)
 	await key(KEY_R)
 	await key(KEY_R,false)
@@ -153,7 +153,7 @@ func run() -> void:
 	var fresh = current_scene
 	check(not paused and not fresh.reset_confirmation.visible,"Confirmed reset left the new game paused")
 	check(fresh.ore == 0 and fresh.blue_crystals == 0 and not fresh.upgraded,"Yes kept old inventory or upgrade")
-	check(fresh.trial.health == 10 and fresh.trial.snakes[0].health == 3 and not fresh.trial.plants[0].picked,"Yes kept old health, enemies or harvested state")
+	check(fresh.trial.health == 10 and fresh.trial.snakes[0].health == 9 and not fresh.gardens.plants[0].picked,"Yes kept old health, enemies or harvested state")
 	check(fresh.world == 0 and fresh.flight == fresh.Flight.IDLE and fresh.mining_target == -1,"Reset did not return to the initial playable world")
 	# Standalone cleanup must restore the pause state it originally owned.
 	paused = true

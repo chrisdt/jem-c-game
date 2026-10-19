@@ -20,6 +20,8 @@ var reset_confirmation: RESET_CONFIRMATION
 const DRILL_VISUAL = preload("res://drill_visual.gd")
 const EARTH_TRIAL = preload("res://environment/earth_trial.gd")
 var trial: Node2D
+const HEALING_GARDENS = preload("res://environment/healing_gardens.gd")
+var gardens: Node2D
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -223,12 +225,15 @@ func _ready() -> void:
 	trial = EARTH_TRIAL.new()
 	trial.game = self
 	add_child(trial)
+	gardens = HEALING_GARDENS.new()
+	gardens.game = self
+	add_child(gardens)
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
 	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
-	message = "Earth trial: 1 mining tool, 2 sword, Space to jab. Berries heal 1 heart; apples heal 2."
+	message = "1 mining tool, 2 sword. Space attacks; the sword is stronger. Explore trails to find fruit."
 	if hud.touch_mode:
-		message = "Earth trial: tap a tool, then Jab. Berries heal 1 heart; apples heal 2."
+		message = "Tap a tool, then Attack. The sword is stronger. Explore trails to find fruit."
 	refresh_ui()
 
 # The Earth-named transition fields are retained for the existing editor/test
@@ -532,7 +537,6 @@ func move_player(direction: Vector2, delta: float) -> void:
 		walk_distance = 0.0
 	restore_walk_visual()
 	scout.position = player
-	if is_instance_valid(trial): trial.update_weapon()
 	fog.reveal_motion(area_id(), previous, player)
 	update_exploration()
 	check_mine_transition(previous)
@@ -663,7 +667,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif not earth_transition and not planet_menu.visible and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
 			trial.equip(0 if event.keycode == KEY_1 else 1)
-		elif event.keycode == KEY_SPACE and trial.sword_equipped():
+		elif event.keycode == KEY_SPACE and trial.is_active():
 			trial.start_jab()
 		elif not earth_transition and not planet_menu.visible and (event.keycode == KEY_E or event.keycode == KEY_SPACE):
 			interact()
@@ -682,7 +686,7 @@ func nearest_rock() -> int:
 func interact() -> void:
 	if flight != Flight.IDLE or earth_transition or planet_menu.visible:
 		return
-	if trial.is_active() and hud.help.visible: return
+	if trial.is_active() and (hud.help.visible or trial.jab_time >= 0): return
 	if mining_target >= 0:
 		cancel_mining()
 		refresh_ui()
@@ -712,6 +716,8 @@ func interact() -> void:
 
 func start_mining(index: int) -> void:
 	if flight != Flight.IDLE or earth_transition or planet_menu.visible:
+		return
+	if is_instance_valid(trial) and trial.is_active() and trial.jab_time >= 0:
 		return
 	if is_instance_valid(trial) and trial.sword_equipped():
 		message = "Select your mining tool first: press 1 or tap its equipment slot."
@@ -748,15 +754,20 @@ func cancel_mining() -> void:
 func update_mining_visual() -> void:
 	var phase := fmod(mining_elapsed,STRIKE_SECONDS)
 	var pose := int(mining_elapsed / 0.09) % 3 if upgraded else mini(2,int(phase / (STRIKE_SECONDS / 3.0)))
+	set_mining_pose(pose)
+	if upgraded:
+		# A small motor tremor accompanies the braced three-pose drill loop.
+		scout.offset.x += sin(mining_elapsed * 95) * 0.6 / scout.scale.x
+
+func set_mining_pose(pose: int) -> void:
 	scout.sprite_frames = DRILL_VISUAL.MINING[int(world > 0)] if upgraded else (MINER_MINE_FRAMES if world == 0 else MINE_FRAMES)
 	scout.animation = StringName("mine_" + str(facing))
 	scout.frame = pose
 	scout.flip_h = facing_left
 	scout.position = player
+	scout.rotation = 0
 	if upgraded:
 		DRILL_VISUAL.fit(scout,world > 0,true,facing)
-		# A small motor tremor accompanies the braced three-pose drill loop.
-		scout.offset.x += sin(mining_elapsed * 95) * 0.6 / scout.scale.x
 	else:
 		scout.scale = Vector2.ONE * 0.22
 		var texture_size := scout.sprite_frames.get_frame_texture(scout.animation,pose).get_size()
@@ -827,7 +838,7 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
-	if is_instance_valid(trial): trial.update_weapon()
+	if is_instance_valid(gardens): gardens.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
 	if current_region() == 0:
 		local_life.populate(world,0,underground,regions(),self)
@@ -878,7 +889,7 @@ func refresh_ui() -> void:
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
 		"upgraded":upgraded,"objective":objective,"context":context,"actionable":actionable,
 		"flying":flying,"menu":planet_menu.visible,"mining":mining_target >= 0,"message":message,
-		"trial_active":trial_active,"health":trial.health if trial_active else 10,
+		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 

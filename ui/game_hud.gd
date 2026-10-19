@@ -180,8 +180,13 @@ func present(state: Dictionary) -> void:
 		present_trial(state)
 	else:
 		set_trial_visibility(false)
+		# Keep remaining health readable while searching other districts for
+		# scarce fruit, without adding combat controls outside the meadow trial.
+		health_panel.visible = state.get("health",10) < 10 and not state.menu and not state.flying
 		notice.position.y = 684
 		set_touch_layout_positions()
+	present_health(state.get("health",10))
+	objective.position.y = 123 if health_panel.visible else 83
 	if state.message != last_message:
 		last_message = state.message
 		notice_label.text = state.message
@@ -194,17 +199,12 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap tool · equip; Jab · attack\nBerries +1 heart; apples +2\nSword trial: Landing Meadow" if touch_mode else "WASD / arrows · walk\n1 · mining tool   2 · sword\nSpace · jab   E · use\nBerries +1 heart; apples +2"
+		help_text.text = "Drag pad · walk\nTap tool, then Attack\nSword hits harder than a pick\nBerries +1 heart; apples +2" if touch_mode else "WASD / arrows · walk\n1 · mining tool   2 · sword\nSpace · attack   E · use\nSword hits harder than a pick"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
 func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)
-	var health: int = state.get("health",10)
-	for i in 5:
-		var units := clampi(health-i*2,0,2)
-		health_hearts[i].texture = TRIAL_ART.icon(1 if units == 2 else (2 if units == 1 else 3))
-	health_panel.tooltip_text = "%.1f / 5 hearts" % (health*0.5)
 	mission_labels[0].text = "✓ Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % state.inventory.x
 	mission_labels[1].text = "Sword ready · meadow trial"
 	mission_labels[2].text = "Snakes · %d / %d" % [state.get("defeated",0),state.get("snake_count",3)]
@@ -215,9 +215,8 @@ func present_trial(state: Dictionary) -> void:
 		equip_slots[i].disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 		equip_labels[i].text = (["Drill" if state.upgraded else "Pick","Sword"][i] if touch_mode else ["1 · Tool","2 · Sword"][i])
 	equipped_label.text = "Sword" if selected == 1 else ("Hand drill" if state.upgraded else "Mining pick")
-	attack_button.visible = attack_button.visible and selected == 1
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
-	attack_button.text = "Jab" if touch_mode else "Space · Jab"
+	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
 	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
 	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
 	notice.position.y = 580 if not touch_mode else 627
@@ -225,6 +224,12 @@ func present_trial(state: Dictionary) -> void:
 		help_button.position = Vector2(1194,515)
 		help.position = Vector2(922,343)
 	else: set_touch_layout_positions()
+
+func present_health(health: int) -> void:
+	for i in 5:
+		var units := clampi(health-i*2,0,2)
+		health_hearts[i].texture = TRIAL_ART.icon(1 if units == 2 else (2 if units == 1 else 3))
+	health_panel.tooltip_text = "%.1f / 5 hearts" % (health*0.5)
 
 func _process(delta: float) -> void:
 	notice_seconds = maxf(0, notice_seconds - delta)
