@@ -77,6 +77,8 @@ var earth_trail_cooldown := 0.0
 const GREEN_ENVIRONMENT: PackedScene = preload("res://environment/green_planet.tscn")
 const EARTH_WATER = preload("res://environment/earth_water.gd")
 const AMBIENT_LIFE = preload("res://environment/ambient_life.gd")
+const DOG_COMPANION = preload("res://environment/dog_companion.gd")
+var companion: Node2D
 var green_surface: Node2D
 var moss_water: Node2D
 var local_life: Node2D
@@ -204,6 +206,9 @@ func _ready() -> void:
 	add_child(planet_menu)
 	planet_menu.destination_selected.connect(travel_to_other_planet)
 	planet_menu.closed.connect(refresh_ui)
+	companion = DOG_COMPANION.new()
+	companion.game = self
+	add_child(companion)
 	refresh_ui()
 
 # The Earth-named transition fields are retained for the existing editor/test
@@ -777,6 +782,7 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	if is_instance_valid(companion): companion.sync_area()
 	if current_region() == 0:
 		local_life.populate(world,0,underground,regions(),self)
 	else:
