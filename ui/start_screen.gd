@@ -12,6 +12,7 @@ var touch_mode := false
 var start_button: Button
 var walk_text: Label
 var mine_text: Label
+var combat_text: Label
 var footer: Label
 var load_status: Label
 var progress: ProgressBar
@@ -48,7 +49,7 @@ func _ready() -> void:
 	STYLE.label(panel,"Start on Earth. See where your curiosity takes you.",Vector2(32,95),Vector2(480,28),15)
 	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Find your way","")
 	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Collect and upgrade","")
-	guide_row(panel,316,CATALOG.tool_icon(true),"3. Discover rare minerals","Use your drill to mine blue crystals.\nExplore the mist to uncover hidden ore.")
+	combat_text = guide_row(panel,316,CATALOG.tool_icon(true),"3. Try the Earth sword","")
 	guide_row(panel,408,CATALOG.planet_icon(1),"4. Fly to new worlds","Use the rocket to pick a new world.\nYour materials and drill come with you.")
 	start_button = STYLE.button(panel,"Start exploring",Vector2(32,514),Vector2(480,60),22)
 	start_button.pressed.connect(start_exploring)
@@ -99,6 +100,7 @@ func set_touch_mode(value: bool) -> void:
 	touch_mode = value
 	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
 	mine_text.text = "Tap the action button to mine or cancel.\nCollect 5 copper; build a drill at camp." if value else "E / Space to mine. Move to cancel.\nCollect 5 copper; build a drill at camp."
+	combat_text.text = "In the meadow: tap Sword, then Jab.\nBerries heal 1 heart; apples heal 2." if value else "In the meadow: 2 equips; Space jabs.\nBerries heal 1 heart; apples heal 2."
 	footer.text = ("Best on iPad in landscape. Tap ? in game for controls." if value else "Enter / Space to start. Open ? in game for controls.") + "\nProgress lasts while this game is open."
 
 func start_exploring() -> void:

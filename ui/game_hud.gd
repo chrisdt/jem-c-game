@@ -1,10 +1,13 @@
 extends CanvasLayer
 
 signal action_requested
+signal equipment_requested(index: int)
+signal attack_requested
 
 const STYLE = preload("res://ui/expedition_style.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const TOUCH_CONTROLS = preload("res://ui/touch_controls.gd")
+const TRIAL_ART = preload("res://environment/trial_art.gd")
 var touch_controls: TOUCH_CONTROLS
 var touch_mode := false
 var touch_blocked := false
@@ -27,6 +30,17 @@ var help_text: Label
 var last_message := ""
 var notice_seconds := 0.0
 var blocked := false
+var trial_active := false
+var health_panel: Panel
+var health_hearts: Array[TextureRect] = []
+var mission_panel: Panel
+var mission_labels: Array[Label] = []
+var equip_slots: Array[Button] = []
+var equip_icons: Array[TextureRect] = []
+var equip_marks: Array[Panel] = []
+var equip_labels: Array[Label] = []
+var equipped_label: Label
+var attack_button: Button
 
 func _ready() -> void:
 	location_panel = STYLE.panel(self, Vector2(18,18), Vector2(242,58))
@@ -70,6 +84,52 @@ func _ready() -> void:
 	add_child(touch_controls)
 	touch_controls.touch_detected.connect(func(): set_touch_mode(true))
 	set_touch_mode(TOUCH_CONTROLS.device_uses_touch())
+	make_trial_hud()
+
+func make_trial_hud() -> void:
+	health_panel = STYLE.panel(self,Vector2(18,84),Vector2(198,34))
+	for i in 5:
+		health_hearts.append(STYLE.icon(health_panel,TRIAL_ART.icon(1),Vector2(10+i*36,4),Vector2(31,26)))
+	mission_panel = STYLE.panel(self,Vector2(18,124),Vector2(276,106))
+	STYLE.label(mission_panel,"MISSIONS",Vector2(13,7),Vector2(246,18),12,true)
+	for i in 3:
+		mission_labels.append(STYLE.label(mission_panel,"",Vector2(13,30+i*22),Vector2(250,22),13))
+	for i in 2:
+		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(func(): equipment_requested.emit(i))
+		equip_slots.append(button)
+		equip_icons.append(STYLE.icon(button,CATALOG.tool_icon(false) if i == 0 else TRIAL_ART.icon(0),Vector2(10,6),Vector2(52,48)))
+		equip_labels.append(STYLE.label(button,"",Vector2(4,53),Vector2(64,16),11))
+		equip_labels[i].horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var selected := Panel.new()
+		selected.position = Vector2(1,1)
+		selected.size = Vector2(70,70)
+		selected.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var frame := StyleBoxFlat.new()
+		frame.bg_color = Color.TRANSPARENT
+		frame.border_color = Color("ffe19a")
+		frame.set_border_width_all(3)
+		frame.set_corner_radius_all(10)
+		frame.shadow_color = Color(1,0.78,0.24,0.35)
+		frame.shadow_size = 4
+		selected.add_theme_stylebox_override("panel",frame)
+		button.add_child(selected)
+		equip_marks.append(selected)
+	equipped_label = STYLE.label(self,"",Vector2(545,682),Vector2(180,22),14,true)
+	equipped_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	attack_button = STYLE.button(self,"Space · Jab",Vector2(1110,688),Vector2(112,62),14)
+	attack_button.focus_mode = Control.FOCUS_NONE
+	attack_button.pressed.connect(func(): attack_requested.emit())
+	# No extra HUD is shown until present() identifies Landing Meadow.
+	set_trial_visibility(false)
+
+func set_trial_visibility(value: bool) -> void:
+	health_panel.visible = value
+	mission_panel.visible = value
+	equipped_label.visible = value
+	for button in equip_slots: button.visible = value
+	attack_button.visible = value
 
 func set_touch_mode(value: bool) -> void:
 	touch_mode = value
@@ -78,10 +138,12 @@ func set_touch_mode(value: bool) -> void:
 	help_button.position = Vector2(1194,622) if value else Vector2(1230,746)
 	help_button.size = Vector2(68,60) if value else Vector2(32,34)
 	help.position = Vector2(922,454) if value else Vector2(922,574)
-	help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if value else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Start a new game"
+	update_help_copy()
 	touch_controls.set_active(value and not touch_blocked)
 
 func present(state: Dictionary) -> void:
+	trial_active = state.get("trial_active",false)
+	update_help_copy()
 	var world: int = state.world
 	location_title.text = CATALOG.NAMES[world].to_upper()
 	location_subtitle.text = state.place
@@ -92,8 +154,11 @@ func present(state: Dictionary) -> void:
 		counts[i].text = str(state.inventory[i])
 	equipment.texture = CATALOG.tool_icon(state.upgraded)
 	equipment.tooltip_text = "Hand drill fitted — ready for every mineral" if state.upgraded else "Starter pick — build a hand drill at camp for 5 copper"
+	equipment.visible = not trial_active
+	resource_panel.position.x = 948 if trial_active else 888
+	resource_panel.size.x = 314 if trial_active else 374
 	objective.text = state.objective
-	objective.visible = not state.menu
+	objective.visible = not state.menu and not trial_active
 	context_button.text = state.context.trim_prefix("E   ") if touch_mode else state.context
 	context_button.disabled = state.flying or state.menu or not state.actionable
 	# Keep the control logically enabled in open ground, while hiding it when
@@ -104,17 +169,62 @@ func present(state: Dictionary) -> void:
 	context_button.size.x = width
 	context_button.position.x = 1262-width if touch_mode else (1280-width)*0.5
 	context_button.visible = not state.flying and not state.menu and not state.context.is_empty()
+	context_button.position.y = (599 if touch_mode else 638) if trial_active else (704 if touch_mode else 742)
 	blocked = state.menu or state.mining or state.flying
 	touch_blocked = state.menu or state.flying
 	touch_controls.set_active(touch_mode and not touch_blocked)
 	help_button.visible = not state.menu
 	if state.menu:
 		help.visible = false
+	if trial_active:
+		present_trial(state)
+	else:
+		set_trial_visibility(false)
+		notice.position.y = 684
+		set_touch_layout_positions()
 	if state.message != last_message:
 		last_message = state.message
 		notice_label.text = state.message
 		notice_seconds = 4.5
 	notice.visible = notice_seconds > 0 and not blocked and not state.message.is_empty()
+
+func set_touch_layout_positions() -> void:
+	help_button.position = Vector2(1194,622) if touch_mode else Vector2(1230,746)
+	help.position = Vector2(922,454) if touch_mode else Vector2(922,574)
+
+func update_help_copy() -> void:
+	if trial_active:
+		help_text.text = "Drag pad · walk\nTap tool · equip; Jab · attack\nBerries +1 heart; apples +2\nSword trial: Landing Meadow" if touch_mode else "WASD / arrows · walk\n1 · mining tool   2 · sword\nSpace · jab   E · use\nBerries +1 heart; apples +2"
+	else:
+		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Start a new game"
+
+func present_trial(state: Dictionary) -> void:
+	set_trial_visibility(not state.menu and not state.flying)
+	var health: int = state.get("health",10)
+	for i in 5:
+		var units := clampi(health-i*2,0,2)
+		health_hearts[i].texture = TRIAL_ART.icon(1 if units == 2 else (2 if units == 1 else 3))
+	health_panel.tooltip_text = "%.1f / 5 hearts" % (health*0.5)
+	mission_labels[0].text = "✓ Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % state.inventory.x
+	mission_labels[1].text = "Sword ready · meadow trial"
+	mission_labels[2].text = "Snakes · %d / %d" % [state.get("defeated",0),state.get("snake_count",3)]
+	equip_icons[0].texture = CATALOG.tool_icon(state.upgraded)
+	var selected: int = state.get("selected_tool",0)
+	for i in 2:
+		equip_marks[i].visible = i == selected
+		equip_slots[i].disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
+		equip_labels[i].text = (["Drill" if state.upgraded else "Pick","Sword"][i] if touch_mode else ["1 · Tool","2 · Sword"][i])
+	equipped_label.text = "Sword" if selected == 1 else ("Hand drill" if state.upgraded else "Mining pick")
+	attack_button.visible = attack_button.visible and selected == 1
+	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
+	attack_button.text = "Jab" if touch_mode else "Space · Jab"
+	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
+	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
+	notice.position.y = 580 if not touch_mode else 627
+	if touch_mode:
+		help_button.position = Vector2(1194,515)
+		help.position = Vector2(922,343)
+	else: set_touch_layout_positions()
 
 func _process(delta: float) -> void:
 	notice_seconds = maxf(0, notice_seconds - delta)

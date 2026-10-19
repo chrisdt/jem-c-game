@@ -2,7 +2,7 @@
 
 The next playable loop is: explore Earth → collect resources → craft equipment → mine → respond to a snake → resume mining → find fruit to heal. Build and playtest this in small steps before extending combat to the other worlds.
 
-This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the current project. The recording is supporting evidence, rather than an instruction to implement every idea. No gameplay changes are included in this planning update. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.
+This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the project. The recording is supporting evidence, rather than an instruction to implement every idea. Chris and Jeremy subsequently approved the concepts and requested the [first-screen animation trial](FIRST_SCREEN_TRIAL.md), now implemented on Landing Meadow. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.
 
 **What the discussion establishes**
 
@@ -15,7 +15,9 @@ This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adven
 
 **Earth task list, in suggested working order**
 
-E02 now has [desktop/iPad HUD mockups and Earth illustration concepts ready for review](concepts/earth-hud-v1/README.md). It remains open until the design is reviewed; the other implementation tasks are pending. “Requested” means the feature is a clear direction from the discussion, not that its detailed rules have been approved. “Idea” marks a tentative mechanic. Completion checks below are proposed implementation boundaries.
+E02’s [HUD mockups and Earth illustration concepts](concepts/earth-hud-v1/README.md) are approved. The first-screen trial covers an initial version of E03–E05 and E09–E10, with immediate sword access, a health/mission/equipment HUD, directional jabs, slithering snakes, silent smoke defeat and healing plants. E13 is ready for Jeremy’s first playtest. Broader rollout and the crafting/progression tasks remain pending. “Requested” means a clear direction from the discussion, while “Idea” marks a tentative mechanic.
+
+The latest review specifies **straight jabs**, **no sound**, **one heart per berry bush** and **two hearts per apple tree**. Those choices supersede the earlier example values below.
 
 | ID | Task | Basis / transcript time | Complete when |
 | --- | --- | --- | --- |
@@ -39,7 +41,7 @@ E01 can progress independently. E02 is the recommended next design task. E03–E
 
 - **Equipment:** two compact slots at bottom centre: mining tool and sword. Use number keys or tapping to select; keep the iPad movement pad and action button clear. A future fishing rod can add another slot. Keep fruit as immediate healing initially, so it needs no extra food-management screen.
 - **Gentle combat:** try five hearts, a half-heart snake bite, a short recovery window after damage, and a snake defeated in two or three hits. Show a clear warning before its first bite. At zero health, return to camp with collected materials retained. These are playtest values to adjust with Jeremy.
-- **Healing:** try berries restoring half a heart and an apple restoring one. At full health, leave the fruit available. A camp rest can be a free recovery option so sparse fruit cannot leave a child stuck at very low health. This camp-rest feature is an additional recommendation.
+- **Healing:** the approved trial now uses one heart per berry bush and two hearts per apple tree. At full health, fruit remains available. Free manual camp resting remains an optional future recommendation; the trial restores health on a safe return after losing all hearts.
 - **Sword resources:** an example first recipe is three copper plus two wood. Earth currently provides ten surface copper and three common mine deposits; the existing drill costs five copper. This example leaves a reasonable material margin, but the final recipe depends on the chosen wood mechanic. Start with branches or small logs to try the crafting loop quickly, while retaining tree chopping as a later option.
 - **First encounter:** teach sword use after it is crafted, then try one snake near one test deposit. Expand to occasional encounters rather than an enemy at every rock. Mining noise can attract a nearby snake or reveal one from a suitable hiding place. Pick the presentation after seeing the animation mockup.
 - **Defeat feedback:** a small smoke puff fits the existing wildlife effects. Enemy health can appear only while fighting to keep the screen uncluttered. These are visual suggestions, not requirements from the transcript.

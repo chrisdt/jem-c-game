@@ -1,6 +1,6 @@
 **Sunny Scout — Earth HUD and illustration concepts, version 1**
 
-Created 19 October 2026 for Chris and Jeremy, following the [next-steps backlog](../../NEXT_STEPS.md). These are visual concepts for review. The game has not been changed to use this HUD or these new elements yet.
+Created 19 October 2026 for Chris and Jeremy, following the [next-steps backlog](../../NEXT_STEPS.md). These concepts were approved and now inform the [Landing Meadow animation trial](../../FIRST_SCREEN_TRIAL.md). The production trial uses straight sword jabs rather than the sweeping pose shown on the original concept sheet.
 
 The direction keeps the existing painted scenery, miner outfit, teal panels, brass edges and cream lettering. Health sits beneath the location plaque, missions have their own compact brass panel, materials remain at top right, and the drill/sword equipment slots sit at bottom centre.
 
@@ -34,4 +34,4 @@ Review the HUD scale and placement, the sword shape, snake appearance, and food/
 
 The illustrations are presentation sheets, rather than finished sprite atlases. Implementation will need separate transparent sprites, aligned pivots, consistent front/back/side animation frames, and fitted weapon poses in both existing outfits. Interactive plants will use separate fruit/foliage layers so harvesting and subtle wind can preserve the tree or bush silhouette.
 
-The original generated PNGs are preserved in the working environment. These copies are kept under `docs/concepts/`; the parent `.gdignore` prevents them being imported or included in future game exports. The current browser build is unchanged.
+The original generated PNGs are preserved in the working environment. These copies are kept under `docs/concepts/`; the parent `.gdignore` prevents the presentation sheets being imported into game exports. Separate production atlases for the first-screen trial live in `assets/trial/`.
