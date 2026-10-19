@@ -1,0 +1,79 @@
+name: Deploy Sunny Scout to WP Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Check connection, inspect the public SSH host key, deploy, or restore the previous game
+        type: choice
+        required: true
+        default: check
+        options:
+          - check
+          - host-key
+          - deploy
+          - rollback
+      build_ref:
+        description: Branch or commit containing the compiled build/web folder
+        type: string
+        required: true
+        default: browser-build
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sunny-scout-wpengine-play
+  cancel-in-progress: false
+
+jobs:
+  game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout deployment tools
+        uses: actions/checkout@v4
+        with:
+          path: source
+          persist-credentials: false
+      - name: Checkout compiled browser build
+        if: inputs.operation == 'check' || inputs.operation == 'deploy'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.build_ref }}
+          path: browser-build
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install SFTP dependency
+        run: python -m pip install -r source/tools/deploy-requirements.txt
+      - name: Run requested operation
+        env:
+          DEPLOY_OPERATION: ${{ inputs.operation }}
+          WPE_SFTP_PASSWORD: ${{ secrets.WPE_SFTP_PASSWORD }}
+          WPE_SFTP_KNOWN_HOSTS: ${{ vars.WPE_SFTP_KNOWN_HOSTS }}
+          WPE_WEB_ROOT: ${{ vars.WPE_WEB_ROOT }}
+        run: python source/tools/deploy_wpengine.py "$DEPLOY_OPERATION" --build-dir browser-build/build/web
+      - name: Check the public game files
+        if: inputs.operation == 'deploy'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          from urllib.request import Request, urlopen
+          sys.path.insert(0, 'source/tools')
+          from deploy_wpengine import collect_assets, release_id, PUBLIC_URL
+          assets = collect_assets(Path('browser-build/build/web'))
+          release = release_id(assets)
+          request = Request(PUBLIC_URL + '?release=' + release, headers={'Cache-Control': 'no-cache'})
+          with urlopen(request, timeout=30) as response:
+              html = response.read(2 * 1024 * 1024).decode()
+          assert f'name="sunny-scout-release" content="{release}"' in html, 'Public entry does not serve the new release; inspect WP Engine caching/domain setup'
+          for asset in assets:
+              url = PUBLIC_URL + 'releases/' + release + '/' + asset.name
+              with urlopen(Request(url, method='HEAD'), timeout=30) as response:
+                  assert response.status == 200, url
+                  assert 'text/html' not in response.headers.get('Content-Type', '') or asset.name == 'index.html', 'Asset is returning an HTML page: ' + asset.name
+          print('Public entry and all 30 release files respond successfully: ' + PUBLIC_URL)
+          PY

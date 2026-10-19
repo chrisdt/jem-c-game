@@ -6,6 +6,8 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 ## Play
 
+To publish a checked build at **playsunnyscout.com/play/**, say **“deploy Sunny Scout”**. The [WP Engine deployment workflow](docs/DEPLOY_WPENGINE.md) provides an explicit upload command, verified versioned releases and rollback. Commits and ZIP builds alone do not deploy.
+
 The next features and small implementation steps from Chris and Jeremy’s 19 October discussion are in [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md). The [Earth adventure](docs/EARTH_ADVENTURE.md) now runs across all five districts and three mines, with resource gathering, camp crafting, missions, health and combat. Snakes, fruit trees, berry bushes and wood appear **only on Earth**.
 
 Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the illustrated explorer's guide, then choose **Start exploring**. **Enter / Space** also starts. Running `main.tscn` directly with **F6** skips the welcome screen for development.
