@@ -11,6 +11,7 @@ const MIST: Shader = preload("res://shaders/exploration_mist.gdshader")
 var maps: Dictionary = {}
 var active_map := -1
 var mist: ShaderMaterial
+var blur_materials: Array[ShaderMaterial] = []
 
 func _ready() -> void:
 	name = "ExplorationMist"
@@ -20,11 +21,33 @@ func _ready() -> void:
 	white.fill(Color.WHITE)
 	texture = ImageTexture.create_from_image(white)
 	scale = WORLD_SIZE
-	mist = ShaderMaterial.new()
-	mist.shader = MIST
-	mist.set_shader_parameter("clear_radius", CLEAR_RADIUS)
-	mist.set_shader_parameter("reveal_radius", REVEAL_RADIUS)
+	mist = make_blur_material(7.5,true)
 	material = mist
+	# Each early pass has four bilinear samples. The explicit copy between
+	# passes avoids browser-dependent screen mip chains and large sample grids.
+	for i in 3:
+		var pass_sprite := Sprite2D.new()
+		pass_sprite.name = "MistBlur%d" % (i+1)
+		pass_sprite.centered = false
+		pass_sprite.texture = texture
+		pass_sprite.material = make_blur_material([0.5,1.5,3.5][i],false)
+		pass_sprite.z_index = -6+i*2
+		add_child(pass_sprite)
+		var screen_copy := BackBufferCopy.new()
+		screen_copy.name = "MistCopy%d" % (i+1)
+		screen_copy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT
+		screen_copy.z_index = -5+i*2
+		add_child(screen_copy)
+
+func make_blur_material(offset: float, tint: bool) -> ShaderMaterial:
+	var result := ShaderMaterial.new()
+	result.shader = MIST
+	result.set_shader_parameter("clear_radius", CLEAR_RADIUS)
+	result.set_shader_parameter("reveal_radius", REVEAL_RADIUS)
+	result.set_shader_parameter("blur_offset", offset)
+	result.set_shader_parameter("apply_tint", tint)
+	blur_materials.append(result)
+	return result
 
 func observe(map_id: int, point: Vector2) -> void:
 	if not maps.has(map_id):
@@ -36,13 +59,15 @@ func observe(map_id: int, point: Vector2) -> void:
 	var switched := active_map != map_id
 	if switched:
 		active_map = map_id
-		mist.set_shader_parameter("revealed_mask", maps[map_id].texture)
 		var colours := [Color("8ca29c"),Color("455754"),Color("a1bac2"),Color("4f6575"),Color("b39a78"),Color("55413a"),
 			Color("759885"),Color("635246"),Color("859b88"),Color("a5a58b"),Color("91978a"),Color("485e6c"),
 			Color("a1bac2"),Color("4f6575"),Color("a0adc6"),Color("b0a8c3"),Color("a1bbc9"),Color("665b7e"),
 			Color("b39a78"),Color("55413a"),Color("b3a384"),Color("b18b79"),Color("8c8078"),Color("63433c")]
-		mist.set_shader_parameter("mist_colour", colours[map_id])
-	mist.set_shader_parameter("scout_position", point)
+		for pass_material in blur_materials:
+			pass_material.set_shader_parameter("revealed_mask", maps[map_id].texture)
+			pass_material.set_shader_parameter("mist_colour", colours[map_id])
+	for pass_material in blur_materials:
+		pass_material.set_shader_parameter("scout_position", point)
 	if switched or point.distance_to(maps[map_id].last_stamp) >= STAMP_DISTANCE:
 		_stamp(point)
 
