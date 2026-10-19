@@ -2,6 +2,8 @@
 extends Node2D
 
 const ART: Texture2D = preload("res://assets/goat_frames.png")
+const FACING = preload("res://environment/wildlife_facing.gd")
+const VERTICAL = preload("res://environment/wildlife_vertical.gd")
 const GROUND: Texture2D = preload("res://assets/green_planet_ground.png")
 const TERRAIN = preload("res://ore_spawns.gd")
 const WALK_FRAMES := [1, 0, 2, 0]
@@ -23,6 +25,7 @@ var rest_seconds := 2.0
 var walk_distance := 0.0
 var graze_count := 0
 var settled := false
+var facing := Vector2.RIGHT
 var tree_roots: Array[Vector2] = []
 
 func _ready() -> void:
@@ -35,6 +38,7 @@ func _ready() -> void:
 			tree_roots.append(item.position)
 	sprite = Sprite2D.new()
 	sprite.name = "IllustratedGoat"
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sprite.texture = ART
 	sprite.hframes = 3
 	sprite.vframes = 2
@@ -148,8 +152,7 @@ func advance(delta: float) -> void:
 				var movement := next - position
 				position = next
 				walk_distance += movement.length()
-				if absf(movement.x) > 0.01:
-					sprite.flip_h = movement.x < 0
+				facing = FACING.from_movement(movement, facing)
 				if position.distance_to(target) < 1:
 					state = "graze" if rng.randf() < 0.85 else "rest"
 					graze_count += 1 if state == "graze" else 0
@@ -161,16 +164,25 @@ func advance(delta: float) -> void:
 	update_pose()
 
 func update_pose() -> void:
+	var frame := 0
 	if state == "walk":
-		sprite.frame = WALK_FRAMES[int(walk_distance / 7.0) % WALK_FRAMES.size()]
+		frame = WALK_FRAMES[int(walk_distance / 7.0) % WALK_FRAMES.size()]
 		sprite.position.y = -absf(sin(walk_distance / 7.0 * PI)) * 0.5
 	elif state == "graze":
-		sprite.frame = GRAZE_FRAMES[int(state_time / 0.32) % GRAZE_FRAMES.size()]
+		frame = GRAZE_FRAMES[int(state_time / 0.32) % GRAZE_FRAMES.size()]
 		sprite.position.y = 0
 	else:
-		sprite.frame = 0
 		sprite.position.y = 0
-	sprite.offset = Vector2(0, 256 - FOOT_Y[sprite.frame])
+	if facing.y != 0:
+		VERTICAL.apply(sprite, VERTICAL.Species.GOAT, facing, frame, body_scale)
+	else:
+		sprite.texture = ART
+		sprite.hframes = 3
+		sprite.vframes = 2
+		sprite.frame = frame
+		sprite.flip_h = facing.x < 0
+		sprite.scale = Vector2.ONE * body_scale
+		sprite.offset = Vector2(0, 256 - FOOT_Y[frame])
 
 func _draw() -> void:
 	draw_set_transform(Vector2(0, -1), 0, Vector2(1, 0.3))

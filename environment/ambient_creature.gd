@@ -2,6 +2,8 @@ extends Node2D
 
 enum Kind { FROSTLING, DUNE_SPRITE, RAT, BAT }
 const ART: Texture2D = preload("res://assets/creatures/ambient_creatures.png")
+const FACING = preload("res://environment/wildlife_facing.gd")
+const VERTICAL = preload("res://environment/wildlife_vertical.gd")
 # The painted poses have different padding. Atlas regions and individual foot
 # anchors keep the body steady without trimming or resampling the source art.
 const ROWS := [Vector2(55,310),Vector2(397,310),Vector2(745,210),Vector2(980,220)]
@@ -36,7 +38,7 @@ var stops := 0
 var elapsed := 0.0
 var flight_phase := 0.0
 var settled := false
-var facing_left := false
+var facing := Vector2.RIGHT
 var size_variation := 1.0
 var speed := 23.0
 var current_frame := -1
@@ -143,7 +145,7 @@ func advance(delta: float) -> void:
 				var movement := next-position
 				position = next
 				walk_distance += movement.length()
-				if absf(movement.x) > 0.01: facing_left = movement.x < 0
+				facing = FACING.from_movement(movement, facing)
 				if position.distance_to(target) < 0.5: rest()
 		elif state_time >= rest_seconds:
 			choose_target()
@@ -167,17 +169,21 @@ func update_pose() -> void:
 	elif kind == Kind.RAT:
 		frame = 2 if fmod(state_time,1.2) > 0.9 else 0
 		tilt = sin(state_time*5)*0.012
-	if current_frame != frame:
-		current_frame = frame
+	current_frame = frame
+	var base_scale: float = ART_SCALES[kind]*size_variation
+	if facing.y != 0:
+		VERTICAL.apply(sprite, kind + VERTICAL.Species.FROSTLING, facing, frame, base_scale)
+	else:
 		sprite.texture = frames[kind][frame]
-	var region: Rect2 = frames[kind][frame].region
-	sprite.offset = region.size*0.5-(ANCHORS[kind][frame]-region.position)
-	if facing_left: sprite.offset.x = -sprite.offset.x
-	sprite.flip_h = facing_left
+		var region: Rect2 = frames[kind][frame].region
+		sprite.offset = region.size*0.5-(ANCHORS[kind][frame]-region.position)
+		if facing.x < 0: sprite.offset.x = -sprite.offset.x
+		sprite.flip_h = facing.x < 0
+		sprite.scale = Vector2.ONE*base_scale
 	sprite.position.y = -bob
 	sprite.rotation = tilt
 	var breathing := 1.0 if state == "walk" or kind == Kind.BAT else 1.0+sin(elapsed*2+flight_phase)*0.012
-	sprite.scale = Vector2(1,breathing)*ART_SCALES[kind]*size_variation
+	sprite.scale.y *= breathing
 
 func _draw() -> void:
 	var width := 11.0 if kind == Kind.RAT else (13.0 if kind == Kind.BAT else 18.0)
