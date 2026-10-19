@@ -1,4 +1,6 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://environment/green_planet.gd" id="8"]
 
 [ext_resource type="Texture2D" path="res://assets/green_planet_ground.png" id="1"]
 [ext_resource type="Shader" path="res://shaders/foliage_wind.gdshader" id="2"]
@@ -14,6 +16,7 @@ shader = ExtResource("2")
 
 [node name="GreenPlanetEnvironment" type="Node2D"]
 y_sort_enabled = true
+script = ExtResource("8")
 
 [node name="MountainGoat01" parent="." instance=ExtResource("7")]
 position = Vector2(680, 630)
@@ -279,7 +282,7 @@ maximum_jump_wait = 23.0
 position = Vector2(975, 970)
 
 [node name="Flowers01" parent="." instance=ExtResource("4")]
-position = Vector2(213.476, 480.458)
+position = Vector2(221.961273, 488.943298)
 scale = Vector2(0.075, 0.075)
 plant_style = 0
 wind_strength = 8.0
@@ -287,7 +290,7 @@ wind_speed = 0.90
 wind_phase = 0.00000
 
 [node name="Flowers02" parent="." instance=ExtResource("4")]
-position = Vector2(146.765, 447.092)
+position = Vector2(170.764999, 488.661224)
 scale = Vector2(0.084, 0.084)
 plant_style = 1
 wind_strength = 9.3
@@ -295,7 +298,7 @@ wind_speed = 0.96
 wind_phase = 2.39996
 
 [node name="Flowers03" parent="." instance=ExtResource("4")]
-position = Vector2(380.254, 453.765)
+position = Vector2(380.253998, 513.765015)
 scale = Vector2(0.093, 0.093)
 plant_style = 2
 wind_strength = 10.6
@@ -303,7 +306,7 @@ wind_speed = 1.02
 wind_phase = 4.79993
 
 [node name="Flowers04" parent="." instance=ExtResource("4")]
-position = Vector2(520.347, 473.785)
+position = Vector2(613.877747, 527.785034)
 scale = Vector2(0.102, 0.102)
 plant_style = 1
 wind_strength = 11.9
@@ -311,7 +314,7 @@ wind_speed = 1.08
 wind_phase = 0.91689
 
 [node name="Flowers05" parent="." instance=ExtResource("4")]
-position = Vector2(607.071, 507.150)
+position = Vector2(571.070984, 569.503845)
 scale = Vector2(0.111, 0.111)
 plant_style = 0
 wind_strength = 8.0
@@ -319,7 +322,7 @@ wind_speed = 1.14
 wind_phase = 3.31685
 
 [node name="Flowers06" parent="." instance=ExtResource("4")]
-position = Vector2(707.138, 647.283)
+position = Vector2(718.729126, 650.388855)
 scale = Vector2(0.075, 0.075)
 plant_style = 2
 wind_strength = 9.3
@@ -327,7 +330,7 @@ wind_speed = 0.90
 wind_phase = 5.71682
 
 [node name="Flowers07" parent="." instance=ExtResource("4")]
-position = Vector2(973.983, 540.515)
+position = Vector2(973.982971, 540.515015)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 10.6
@@ -335,7 +338,7 @@ wind_speed = 0.96
 wind_phase = 1.83378
 
 [node name="Flowers08" parent="." instance=ExtResource("4")]
-position = Vector2(813.876, 467.112)
+position = Vector2(822.361267, 475.597290)
 scale = Vector2(0.093, 0.093)
 plant_style = 5
 wind_strength = 11.9
@@ -343,7 +346,7 @@ wind_speed = 1.02
 wind_phase = 4.23374
 
 [node name="Flowers09" parent="." instance=ExtResource("4")]
-position = Vector2(907.272, 387.035)
+position = Vector2(919.271973, 387.035004)
 scale = Vector2(0.102, 0.102)
 plant_style = 2
 wind_strength = 8.0
@@ -351,7 +354,7 @@ wind_speed = 1.08
 wind_phase = 0.35071
 
 [node name="Flowers10" parent="." instance=ExtResource("4")]
-position = Vector2(993.996, 467.112)
+position = Vector2(993.995972, 467.112000)
 scale = Vector2(0.111, 0.111)
 plant_style = 1
 wind_strength = 9.3
@@ -359,7 +362,7 @@ wind_speed = 1.14
 wind_phase = 2.75067
 
 [node name="Flowers11" parent="." instance=ExtResource("4")]
-position = Vector2(600.400, 693.994)
+position = Vector2(611.991150, 697.099854)
 scale = Vector2(0.075, 0.075)
 plant_style = 1
 wind_strength = 10.6
@@ -367,7 +370,7 @@ wind_speed = 0.90
 wind_phase = 5.15063
 
 [node name="Flowers12" parent="." instance=ExtResource("4")]
-position = Vector2(453.636, 693.994)
+position = Vector2(453.635986, 705.994019)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 11.9
@@ -375,7 +378,7 @@ wind_speed = 0.96
 wind_phase = 1.26760
 
 [node name="Flowers13" parent="." instance=ExtResource("4")]
-position = Vector2(380.254, 787.417)
+position = Vector2(380.253998, 787.416992)
 scale = Vector2(0.093, 0.093)
 plant_style = 5
 wind_strength = 8.0
@@ -383,7 +386,7 @@ wind_speed = 1.02
 wind_phase = 3.66756
 
 [node name="Flowers14" parent="." instance=ExtResource("4")]
-position = Vector2(320.213, 867.493)
+position = Vector2(320.213013, 867.492981)
 scale = Vector2(0.102, 0.102)
 plant_style = 2
 wind_strength = 9.3
@@ -391,7 +394,7 @@ wind_speed = 1.08
 wind_phase = 6.06752
 
 [node name="Flowers15" parent="." instance=ExtResource("4")]
-position = Vector2(553.702, 867.493)
+position = Vector2(543.309692, 873.492981)
 scale = Vector2(0.111, 0.111)
 plant_style = 1
 wind_strength = 10.6
@@ -399,7 +402,7 @@ wind_speed = 1.14
 wind_phase = 2.18449
 
 [node name="Flowers16" parent="." instance=ExtResource("4")]
-position = Vector2(797.865, 940.896)
+position = Vector2(787.472656, 934.895996)
 scale = Vector2(0.075, 0.075)
 plant_style = 2
 wind_strength = 11.9
@@ -407,7 +410,7 @@ wind_speed = 0.90
 wind_phase = 4.58445
 
 [node name="Flowers17" parent="." instance=ExtResource("4")]
-position = Vector2(680.454, 1014.299)
+position = Vector2(711.630920, 1032.299072)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 8.0
@@ -415,7 +418,7 @@ wind_speed = 0.96
 wind_phase = 0.70141
 
 [node name="Flowers18" parent="." instance=ExtResource("4")]
-position = Vector2(800.534, 1114.395)
+position = Vector2(810.926331, 1120.395020)
 scale = Vector2(0.093, 0.093)
 plant_style = 5
 wind_strength = 9.3
@@ -423,7 +426,7 @@ wind_speed = 1.02
 wind_phase = 3.10137
 
 [node name="Flowers19" parent="." instance=ExtResource("4")]
-position = Vector2(933.956, 1167.779)
+position = Vector2(1017.955994, 1167.779053)
 scale = Vector2(0.102, 0.102)
 plant_style = 0
 wind_strength = 10.6
@@ -431,7 +434,7 @@ wind_speed = 1.08
 wind_phase = 5.50134
 
 [node name="Flowers20" parent="." instance=ExtResource("4")]
-position = Vector2(1220.814, 547.188)
+position = Vector2(1136.813965, 547.187988)
 scale = Vector2(0.111, 0.111)
 plant_style = 2
 wind_strength = 11.9
@@ -439,7 +442,7 @@ wind_speed = 1.14
 wind_phase = 1.61830
 
 [node name="Flowers21" parent="." instance=ExtResource("4")]
-position = Vector2(1440.961, 607.245)
+position = Vector2(1440.961060, 523.244995)
 scale = Vector2(0.075, 0.075)
 plant_style = 1
 wind_strength = 8.0
@@ -447,7 +450,7 @@ wind_speed = 0.90
 wind_phase = 4.01826
 
 [node name="Flowers22" parent="." instance=ExtResource("4")]
-position = Vector2(1601.067, 627.264)
+position = Vector2(1651.978760, 678.175659)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 9.3
@@ -455,7 +458,7 @@ wind_speed = 0.96
 wind_phase = 0.13523
 
 [node name="Flowers23" parent="." instance=ExtResource("4")]
-position = Vector2(1774.516, 600.572)
+position = Vector2(1746.563477, 704.892029)
 scale = Vector2(0.093, 0.093)
 plant_style = 5
 wind_strength = 10.6
@@ -463,7 +466,7 @@ wind_speed = 1.02
 wind_phase = 2.53519
 
 [node name="Flowers24" parent="." instance=ExtResource("4")]
-position = Vector2(1534.356, 734.032)
+position = Vector2(1534.355957, 746.031982)
 scale = Vector2(0.102, 0.102)
 plant_style = 2
 wind_strength = 11.9
@@ -471,7 +474,7 @@ wind_speed = 1.08
 wind_phase = 4.93515
 
 [node name="Flowers25" parent="." instance=ExtResource("4")]
-position = Vector2(1694.463, 787.417)
+position = Vector2(1694.463013, 787.416992)
 scale = Vector2(0.111, 0.111)
 plant_style = 1
 wind_strength = 8.0
@@ -479,7 +482,7 @@ wind_speed = 1.14
 wind_phase = 1.05212
 
 [node name="Flowers26" parent="." instance=ExtResource("4")]
-position = Vector2(1787.859, 960.915)
+position = Vector2(1811.859009, 960.914978)
 scale = Vector2(0.075, 0.075)
 plant_style = 0
 wind_strength = 9.3
@@ -487,7 +490,7 @@ wind_speed = 0.90
 wind_phase = 3.45208
 
 [node name="Flowers27" parent="." instance=ExtResource("4")]
-position = Vector2(1574.383, 1034.318)
+position = Vector2(1580.594727, 1011.135742)
 scale = Vector2(0.084, 0.084)
 plant_style = 2
 wind_strength = 10.6
@@ -495,7 +498,7 @@ wind_speed = 0.96
 wind_phase = 5.85204
 
 [node name="Flowers28" parent="." instance=ExtResource("4")]
-position = Vector2(1681.121, 1081.030)
+position = Vector2(1712.297852, 1063.030029)
 scale = Vector2(0.093, 0.093)
 plant_style = 5
 wind_strength = 11.9
@@ -503,7 +506,7 @@ wind_speed = 1.02
 wind_phase = 1.96901
 
 [node name="Flowers29" parent="." instance=ExtResource("4")]
-position = Vector2(1587.725, 1134.414)
+position = Vector2(1563.724976, 1134.413940)
 scale = Vector2(0.102, 0.102)
 plant_style = 0
 wind_strength = 8.0
@@ -511,7 +514,7 @@ wind_speed = 1.08
 wind_phase = 4.36897
 
 [node name="Flowers30" parent="." instance=ExtResource("4")]
-position = Vector2(1400.934, 1227.836)
+position = Vector2(1490.933960, 1071.951416)
 scale = Vector2(0.111, 0.111)
 plant_style = 1
 wind_strength = 9.3
@@ -519,7 +522,7 @@ wind_speed = 1.14
 wind_phase = 0.48593
 
 [node name="Flowers31" parent="." instance=ExtResource("4")]
-position = Vector2(1280.854, 1201.144)
+position = Vector2(1130.169556, 1160.768311)
 scale = Vector2(0.075, 0.075)
 plant_style = 2
 wind_strength = 10.6
@@ -527,7 +530,7 @@ wind_speed = 0.90
 wind_phase = 2.88590
 
 [node name="Flowers32" parent="." instance=ExtResource("4")]
-position = Vector2(1014.009, 1241.182)
+position = Vector2(1068.008911, 1147.651245)
 scale = Vector2(0.084, 0.084)
 plant_style = 5
 wind_strength = 11.9
@@ -535,7 +538,7 @@ wind_speed = 0.96
 wind_phase = 5.28586
 
 [node name="Flowers33" parent="." instance=ExtResource("4")]
-position = Vector2(1060, 1160)
+position = Vector2(1048.000000, 1180.784668)
 scale = Vector2(0.093, 0.093)
 plant_style = 0
 wind_strength = 8.0
@@ -543,7 +546,7 @@ wind_speed = 1.02
 wind_phase = 1.40282
 
 [node name="Flowers34" parent="." instance=ExtResource("4")]
-position = Vector2(733.823, 1201.144)
+position = Vector2(708.976379, 1108.415161)
 scale = Vector2(0.102, 0.102)
 plant_style = 2
 wind_strength = 9.3
@@ -551,7 +554,7 @@ wind_speed = 1.08
 wind_phase = 3.80279
 
 [node name="Flowers35" parent="." instance=ExtResource("4")]
-position = Vector2(507.005, 1114.395)
+position = Vector2(447.005005, 1010.471985)
 scale = Vector2(0.111, 0.111)
 plant_style = 1
 wind_strength = 10.6
@@ -559,7 +562,7 @@ wind_speed = 1.14
 wind_phase = 6.20275
 
 [node name="Flowers36" parent="." instance=ExtResource("4")]
-position = Vector2(453.636, 1040.991)
+position = Vector2(479.091827, 1015.535095)
 scale = Vector2(0.075, 0.075)
 plant_style = 0
 wind_strength = 11.9
@@ -567,7 +570,7 @@ wind_speed = 0.90
 wind_phase = 2.31971
 
 [node name="Flowers37" parent="." instance=ExtResource("4")]
-position = Vector2(240.160, 1081.030)
+position = Vector2(364.867645, 1009.030029)
 scale = Vector2(0.084, 0.084)
 plant_style = 1
 wind_strength = 8.0
@@ -575,7 +578,7 @@ wind_speed = 0.96
 wind_phase = 4.71968
 
 [node name="Flowers38" parent="." instance=ExtResource("4")]
-position = Vector2(106.738, 920.877)
+position = Vector2(245.831329, 883.607117)
 scale = Vector2(0.093, 0.093)
 plant_style = 2
 wind_strength = 9.3
@@ -583,7 +586,7 @@ wind_speed = 1.02
 wind_phase = 0.83664
 
 [node name="Flowers39" parent="." instance=ExtResource("4")]
-position = Vector2(280.187, 734.032)
+position = Vector2(292.187012, 734.031982)
 scale = Vector2(0.102, 0.102)
 plant_style = 0
 wind_strength = 10.6
@@ -591,7 +594,7 @@ wind_speed = 1.08
 wind_phase = 3.23660
 
 [node name="Flowers40" parent="." instance=ExtResource("4")]
-position = Vector2(580.387, 467.112)
+position = Vector2(580.387024, 599.112000)
 scale = Vector2(0.111, 0.111)
 plant_style = 5
 wind_strength = 11.9
@@ -599,7 +602,7 @@ wind_speed = 1.14
 wind_phase = 5.63657
 
 [node name="Flowers41" parent="." instance=ExtResource("4")]
-position = Vector2(653.769, 306.959)
+position = Vector2(653.768982, 306.959015)
 scale = Vector2(0.075, 0.075)
 plant_style = 1
 wind_strength = 8.0
@@ -607,7 +610,7 @@ wind_speed = 0.90
 wind_phase = 1.75353
 
 [node name="Flowers42" parent="." instance=ExtResource("4")]
-position = Vector2(847.231, 353.670)
+position = Vector2(836.838684, 347.670013)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 9.3
@@ -615,7 +618,7 @@ wind_speed = 0.96
 wind_phase = 4.15349
 
 [node name="Flowers43" parent="." instance=ExtResource("4")]
-position = Vector2(927.285, 326.978)
+position = Vector2(927.284973, 326.977997)
 scale = Vector2(0.093, 0.093)
 plant_style = 2
 wind_strength = 10.6
@@ -623,7 +626,7 @@ wind_speed = 1.02
 wind_phase = 0.27046
 
 [node name="Flowers44" parent="." instance=ExtResource("4")]
-position = Vector2(627.085, 86.749)
+position = Vector2(667.460815, 237.433411)
 scale = Vector2(0.102, 0.102)
 plant_style = 1
 wind_strength = 11.9
@@ -631,7 +634,7 @@ wind_speed = 1.08
 wind_phase = 2.67042
 
 [node name="Flowers45" parent="." instance=ExtResource("4")]
-position = Vector2(1614.410, 527.169)
+position = Vector2(1530.410034, 527.169006)
 scale = Vector2(0.111, 0.111)
 plant_style = 5
 wind_strength = 8.0
@@ -639,7 +642,7 @@ wind_speed = 1.14
 wind_phase = 5.07038
 
 [node name="Flowers46" parent="." instance=ExtResource("4")]
-position = Vector2(1867.912, 747.378)
+position = Vector2(1859.426758, 755.863281)
 scale = Vector2(0.075, 0.075)
 plant_style = 2
 wind_strength = 9.3
@@ -647,7 +650,7 @@ wind_speed = 0.90
 wind_phase = 1.18735
 
 [node name="Flowers47" parent="." instance=ExtResource("4")]
-position = Vector2(1934.623, 920.877)
+position = Vector2(1899.849731, 930.194519)
 scale = Vector2(0.084, 0.084)
 plant_style = 0
 wind_strength = 10.6
@@ -655,55 +658,15 @@ wind_speed = 0.96
 wind_phase = 3.58731
 
 [node name="Flowers48" parent="." instance=ExtResource("4")]
-position = Vector2(1841.227, 1261.201)
+position = Vector2(1789.265503, 1231.201050)
 scale = Vector2(0.093, 0.093)
 plant_style = 1
 wind_strength = 11.9
 wind_speed = 1.02
 wind_phase = 5.98727
 
-[node name="Flowers49" parent="." instance=ExtResource("4")]
-position = Vector2(1547.698, 1334.604)
-scale = Vector2(0.102, 0.102)
-plant_style = 2
-wind_strength = 8.0
-wind_speed = 1.08
-wind_phase = 2.10424
-
-[node name="Flowers50" parent="." instance=ExtResource("4")]
-position = Vector2(960.640, 1334.604)
-scale = Vector2(0.111, 0.111)
-plant_style = 0
-wind_strength = 9.3
-wind_speed = 1.14
-wind_phase = 4.50420
-
-[node name="Flowers51" parent="." instance=ExtResource("4")]
-position = Vector2(773.849, 1347.950)
-scale = Vector2(0.075, 0.075)
-plant_style = 1
-wind_strength = 10.6
-wind_speed = 0.90
-wind_phase = 0.62116
-
-[node name="Flowers52" parent="." instance=ExtResource("4")]
-position = Vector2(573.716, 1307.912)
-scale = Vector2(0.084, 0.084)
-plant_style = 5
-wind_strength = 11.9
-wind_speed = 0.96
-wind_phase = 3.02112
-
-[node name="Flowers53" parent="." instance=ExtResource("4")]
-position = Vector2(133.422, 1294.566)
-scale = Vector2(0.093, 0.093)
-plant_style = 0
-wind_strength = 8.0
-wind_speed = 1.02
-wind_phase = 5.42109
-
 [node name="Flowers54" parent="." instance=ExtResource("4")]
-position = Vector2(1801.201, 1114.395)
+position = Vector2(1826.656860, 1139.850830)
 scale = Vector2(0.102, 0.102)
 plant_style = 2
 wind_strength = 9.3
@@ -711,7 +674,7 @@ wind_speed = 1.08
 wind_phase = 1.53805
 
 [node name="Flowers55" parent="." instance=ExtResource("4")]
-position = Vector2(1154.103, 1121.068)
+position = Vector2(1019.003052, 1043.067993)
 scale = Vector2(0.111, 0.111)
 plant_style = 5
 wind_strength = 10.6

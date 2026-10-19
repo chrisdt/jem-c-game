@@ -7,6 +7,7 @@ const LAVA_FLOW = preload("res://shaders/lava_flow.gdshader")
 const EARTH_WATER = preload("res://environment/earth_water.gd")
 const AMBIENT_LIFE = preload("res://environment/ambient_life.gd")
 const PASTURES = preload("res://environment/earth_pastures.gd")
+const FLOWERS = preload("res://environment/flower_placement.gd")
 
 var REGIONS = preload("res://earth_regions.gd")
 const TREE: PackedScene = preload("res://environment/wind_tree.tscn")
@@ -220,6 +221,9 @@ func show_area(region: int, cave: bool) -> void:
 			flow.set_shader_parameter("lava_mask",ImageTexture.create_from_image(mask))
 			ground.material = flow
 	if not cave:
+		var flower_placement: RefCounted
+		if not REGIONS is OUTER_REGIONS:
+			flower_placement = FLOWERS.new(textures[key],REGIONS.SIZE,func(point: Vector2) -> bool: return REGIONS.floor_contains(region,false,point))
 		var index := 0
 		for placement in REGIONS.TREES[region]:
 			var tree := TREE.instantiate()
@@ -229,12 +233,15 @@ func show_area(region: int, cave: bool) -> void:
 			tree.wind_strength = 3.0
 			tree.wind_phase = index * 2.1
 			scenery.add_child(tree)
-			var plant := PLANT.instantiate()
-			plant.position = tree.position+Vector2(90,45)
-			plant.scale = Vector2.ONE * 0.13
-			plant.plant_style = (index+region) % 3
-			plant.wind_strength = 6
-			scenery.add_child(plant)
+			var point: Vector2 = tree.position+Vector2(90,45)
+			if flower_placement != null: point = flower_placement.place(point,0.13)
+			if point.is_finite():
+				var plant := PLANT.instantiate()
+				plant.position = point
+				plant.scale = Vector2.ONE * 0.13
+				plant.plant_style = (index+region) % 3
+				plant.wind_strength = 6
+				scenery.add_child(plant)
 			index += 1
 	max_install_ms = maxf(max_install_ms,(Time.get_ticks_usec()-started)/1000.0)
 
