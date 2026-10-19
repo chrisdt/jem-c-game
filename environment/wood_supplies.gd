@@ -44,7 +44,7 @@ func sync_area() -> void:
 
 func clear_floor(point: Vector2) -> bool:
 	if not game.gardens.clear_floor(point): return false
-	if game.earth_region == 0 and game.ORE_SPAWNS.starting_view(Vector2(560,550)).grow(45).has_point(point): return false
+	if game.earth_region == 0 and game.ORE_SPAWNS.starting_view(game.EARTH_START).grow(45).has_point(point): return false
 	for plant in game.gardens.plants:
 		if point.distance_to(plant.position) < 115: return false
 	for pile in piles:

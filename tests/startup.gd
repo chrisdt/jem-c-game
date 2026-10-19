@@ -73,7 +73,8 @@ func run() -> void:
 		var game = current_scene
 		assert(root.content_scale_aspect == original_aspect,"Welcome resizing changed the gameplay camera aspect")
 		assert(game.world == 0 and not game.underground)
-		assert(game.player.is_equal_approx(Vector2(560,550)) and game.mining_target == -1)
+		assert(game.player.is_equal_approx(game.EARTH_START) and game.mining_target == -1)
+		assert(game.player.distance_to(game.CAMP) < 140 and game.trial.safe_at(game.player),"Scout must start safely in front of camp")
 		assert(game.scout.sprite_frames == game.MINER_FRAMES)
 		assert(game.rocks.all(func(rock): return not rock.discovered),"Starting the game immediately revealed minerals")
 	print("PASS: full-window welcome artwork, wide/tablet/portrait resize, single-line logo, guide before Earth, keyboard/touch starts without visible minerals, one load and restored gameplay aspect")

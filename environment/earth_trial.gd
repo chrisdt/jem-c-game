@@ -223,7 +223,7 @@ func hurt_player(amount: int) -> bool:
 	if health == 0:
 		if game.mining_target >= 0: game.cancel_mining()
 		jab_time = -1
-		game.player = game.mine_spawn_position() if game.underground else (Vector2(560,550) if game.earth_region == 0 else game.EARTH.arrival(game.earth_region,game.EARTH.LINKS[game.earth_region][0].side))
+		game.player = game.mine_spawn_position() if game.underground else (game.EARTH_START if game.earth_region == 0 else game.EARTH.arrival(game.earth_region,game.EARTH.LINKS[game.earth_region][0].side))
 		game.scout.position = game.player
 		health = MAX_HEALTH
 		invulnerable = 2.5

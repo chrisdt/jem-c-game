@@ -10,6 +10,8 @@ The next features and small implementation steps from Chris and Jeremy’s 19 Oc
 
 Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the illustrated explorer's guide, then choose **Start exploring**. **Enter / Space** also starts. Running `main.tscn` directly with **F6** skips the welcome screen for development.
 
+New games and confirmed resets place Scout on the clear ground directly in front of the camp workbench. Earth's safe recovery uses the same spot. Ore and fallen wood stay outside this opening camera view.
+
 The loading and welcome screens share one illustrated logo: **Planet Adventures** is a smaller, centred subtitle beneath **Sunny Scout**, using matching gold lettering and a teal outline.
 
 - **WASD / arrow keys:** move

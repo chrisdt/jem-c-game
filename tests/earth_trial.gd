@@ -184,7 +184,7 @@ func run() -> void:
 	trial.invulnerable = 0
 	game.ore = 4
 	trial.hurt_player(1)
-	check(trial.health == 10 and game.player == Vector2(560,550) and game.ore == 4 and game.upgraded,"Camp recovery lost inventory or left Scout defeated")
+	check(trial.health == 10 and game.player == game.EARTH_START and game.ore == 4 and game.upgraded,"Camp recovery lost inventory or left Scout defeated")
 	trial.invulnerable = 0
 	check(not trial.hurt_player(1),"The camp's safe area still permits a bite")
 	# Menu/help/loading pause the encounter. The prototype is only home surface.
@@ -202,7 +202,7 @@ func run() -> void:
 	living.seen = true
 	living.fade = 1
 	living.show()
-	game.player = Vector2(560,550)
+	game.player = game.EARTH_START
 	for i in 3600:
 		living.advance(1.0/60.0)
 		check(living.can_stand(living.position),"Slithering crossed blocked terrain")
@@ -239,7 +239,7 @@ func run() -> void:
 	# Actual independent touch fingers can equip and jab while walking.
 	living.state = "gone"
 	living.health = 0
-	game.player = Vector2(560,550)
+	game.player = game.EARTH_START
 	trial.jab_time = -1
 	trial.jab_cooldown = 0
 	trial.selected_tool = 0

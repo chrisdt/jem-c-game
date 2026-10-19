@@ -46,7 +46,7 @@ func run() -> void:
 	check(not game.ORE_SPAWNS.clear_of_landmarks(1,false,game.FROST_LAYOUT.from_art(Vector2(290,690)),game.tree_cover()),"Frost ore can overlap the camp dome roof")
 	for world in 3:
 		game.world = world
-		game.player = [Vector2(560,550),Vector2(390,1120),game.DESERT_LAYOUT.ARRIVAL][world]
+		game.player = [game.EARTH_START,Vector2(390,1120),game.DESERT_LAYOUT.ARRIVAL][world]
 		game.camera.position = game.player
 		game.camera.reset_smoothing()
 		game.camera.force_update_scroll()

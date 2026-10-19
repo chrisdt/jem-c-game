@@ -2,6 +2,7 @@ extends Node2D
 
 const SPEED := 235.0
 const CAMP := Vector2(470, 400)
+const EARTH_START := Vector2(515, 430) # Clearing in front of the camp workbench.
 const CAVE := Vector2(1480, 340)
 const MINE_EXIT := Vector2(150, 610)
 const MINE_SPAWN := Vector2(420, 620)
@@ -63,7 +64,7 @@ var ice_won := false
 var gold_ore := 0
 var rubies := 0
 var desert_won := false
-var player := Vector2(560, 550)
+var player := EARTH_START
 const EARTH = preload("res://earth_regions.gd")
 const OUTER = preload("res://outer_regions.gd")
 var world_regions := [EARTH,OUTER.new(1),OUTER.new(2)]
@@ -268,7 +269,7 @@ func reset_rocks() -> void:
 	if current_region() > 0:
 		rocks = regions().generate(current_region(),ore_rng)
 	else:
-		var entries: Array[Vector2] = [[Vector2(560,550),Vector2(390,1120),DESERT_LAYOUT.ARRIVAL][world],mine_spawn_position()]
+		var entries: Array[Vector2] = [[EARTH_START,Vector2(390,1120),DESERT_LAYOUT.ARRIVAL][world],mine_spawn_position()]
 		rocks = ORE_SPAWNS.generate(world,ore_rng,entries,tree_cover(),Vector2(COPPER_SECONDS,CRYSTAL_SECONDS))
 	district_rocks()[current_region()] = rocks
 

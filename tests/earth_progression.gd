@@ -39,7 +39,7 @@ func run() -> void:
 			var painting: Texture2D = game.green_surface.get_node("Ground").texture if region == 0 else game.earth_stream.textures[game.EARTH.key(region,false)]
 			var grass = load("res://environment/flower_placement.gd").new(painting,game.EARTH.SIZE,game.gardens.clear_floor)
 			check(grass.fits(pile.position,0.12),"Fallen wood is on a path or rock instead of grass")
-			if region == 0: check(not game.ORE_SPAWNS.starting_view(Vector2(560,550)).grow(45).has_point(pile.position),"Wood starts inside the opening camera view")
+			if region == 0: check(not game.ORE_SPAWNS.starting_view(game.EARTH_START).grow(45).has_point(pile.position),"Wood starts inside the opening camera view")
 			game.player = pile.position
 			game.update_exploration()
 			game.wood_supplies._process(0.75)

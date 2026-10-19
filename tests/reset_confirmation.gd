@@ -167,6 +167,7 @@ func run() -> void:
 	check(fresh.ore == 0 and fresh.blue_crystals == 0 and not fresh.upgraded and not fresh.trial.sword_owned and fresh.trial.wood == 0,"Yes kept old inventory or upgrade")
 	check(fresh.trial.health == 10 and fresh.trial.snakes[0].health == 9 and not fresh.gardens.plants[0].picked,"Yes kept old health, enemies or harvested state")
 	check(fresh.world == 0 and fresh.flight == fresh.Flight.IDLE and fresh.mining_target == -1,"Reset did not return to the initial playable world")
+	check(fresh.player == fresh.EARTH_START,"Reset did not return Scout to the clearing in front of camp")
 	# Standalone cleanup must restore the pause state it originally owned.
 	paused = true
 	fresh.reset_confirmation.open()
