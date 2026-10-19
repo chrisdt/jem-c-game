@@ -827,7 +827,6 @@ func _draw() -> void:
 			for radius in [25, 40, 58]:
 				draw_circle(lamp, radius, Color(1.0, 0.65, 0.22, flicker))
 		label_at(exit_position() + Vector2(-85, -95 if world > 0 or earth_region > 0 else 80), "WALK TO SURFACE", Color("ffe4ac"), 16)
-		draw_arc(exit_position(), 35, 0, TAU, 40, Color(1.0, 0.89, 0.63, 0.6), 2)
 	else:
 		if world == 1 and current_region() == 0:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
@@ -837,15 +836,11 @@ func _draw() -> void:
 			label_at(camp_position()+Vector2(-70,-110),"CAMP / DRILL",Color("f6e5b8"),14)
 			if flight == Flight.IDLE:
 				label_at(ship_position()+Vector2(-65,80),"[E] ROCKET",Color("ffe4ac"),14)
-			for point in [camp_position(),ship_position()]:
-				draw_arc(point,36,0,TAU,40,Color(1,0.89,0.63,0.55+sin(elapsed*2)*0.15),2)
 		if regions().has_mine(current_region()):
 			label_at(cave_position()+Vector2(-65,-140),mine_name().to_upper(),Color("f6e5b8"),14)
-			draw_arc(cave_position()+Vector2(0,85),36,0,TAU,40,Color(1,0.89,0.63,0.6),2)
 		for link in regions().LINKS[current_region()]:
 			var point: Vector2 = regions().portal(current_region(),link.side)
 			label_at(point+Vector2(-240 if link.side == "east" else -70,-70),"To "+regions().NAMES[link.target],Color("fff0cc"),16)
-			draw_arc(point,32,0,TAU,32,Color(0.95,0.83,0.54,0.55),2)
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]
@@ -860,10 +855,6 @@ func _draw() -> void:
 		if world == 2:
 			ore_art = RUBY_ART if rock.hard else GOLD_ART
 		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false, Color(1, 1, 1, reveal_alpha))
-		if player.distance_to(p) < 100:
-			var highlight := Color("ffe4a0")
-			highlight.a = reveal_alpha
-			draw_arc(p, 43, 0, TAU, 40, highlight, 2)
 	if flight == Flight.IDLE:
 		ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
 	if mining_target >= 0:
