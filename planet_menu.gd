@@ -10,6 +10,10 @@ const DESCRIPTIONS := CATALOG.DESCRIPTIONS
 var buttons: Array[Button] = []
 var thumbnails: Array[TextureRect] = []
 var panel: Panel
+var cards: Array[Panel] = []
+var close_button: Button
+var cancel_button: Button
+var touch_mode := false
 
 func _ready() -> void:
 	layer = 3
@@ -22,10 +26,11 @@ func _ready() -> void:
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var detail := STYLE.label(panel,"Choose your next adventure",Vector2(60,46),Vector2(600,20),14)
 	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var close_button := STYLE.button(panel,"×",Vector2(670,15),Vector2(32,32),20)
+	close_button = STYLE.button(panel,"×",Vector2(670,15),Vector2(32,32),20)
 	close_button.pressed.connect(dismiss)
 	for i in NAMES.size():
 		var card := STYLE.panel(panel,Vector2(18+i*234,72),Vector2(216,224))
+		cards.append(card)
 		var name_label := STYLE.label(card,NAMES[i],Vector2(10,8),Vector2(196,25),18,true)
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		thumbnails.append(STYLE.icon(card,CATALOG.planet_icon(i),Vector2(58,34),Vector2(100,92)))
@@ -36,14 +41,29 @@ func _ready() -> void:
 		var button := STYLE.button(card,"",Vector2(15,181),Vector2(186,32),15)
 		button.pressed.connect(choose.bind(i))
 		buttons.append(button)
-	var cancel := STYLE.button(panel,"Esc   Stay here",Vector2(270,311),Vector2(180,34),15)
-	cancel.pressed.connect(dismiss)
+	cancel_button = STYLE.button(panel,"Esc   Stay here",Vector2(270,311),Vector2(180,34),15)
+	cancel_button.pressed.connect(dismiss)
 	visible = false
+
+func set_touch_mode(value: bool) -> void:
+	if touch_mode == value:
+		return
+	touch_mode = value
+	panel.position.y = 202 if value else 220
+	panel.size.y = 396 if value else 360
+	for i in cards.size():
+		cards[i].size.y = 244 if value else 224
+		buttons[i].size.y = 56 if value else 32
+	close_button.position = Vector2(646,10) if value else Vector2(670,15)
+	close_button.size = Vector2(56,56) if value else Vector2(32,32)
+	cancel_button.position = Vector2(245,330) if value else Vector2(270,311)
+	cancel_button.size = Vector2(230,52) if value else Vector2(180,34)
+	cancel_button.text = "Stay here" if value else "Esc   Stay here"
 
 func open(current_world: int) -> void:
 	for i in buttons.size():
 		buttons[i].disabled = i == current_world
-		buttons[i].text = "You are here" if i == current_world else "%d   Fly here" % (i+1)
+		buttons[i].text = "You are here" if i == current_world else ("Fly here" if touch_mode else "%d   Fly here" % (i+1))
 	visible = true
 	buttons[1 if current_world == 0 else 0].grab_focus()
 

@@ -6,6 +6,7 @@ const PANEL: Texture2D = preload("res://assets/ui/panel.png")
 const PANEL_REGION := Rect2i(20,244,1948,292)
 const HEADING: Font = preload("res://assets/ui/heading.ttf")
 const BODY: Font = preload("res://assets/ui/body.ttf")
+const TOUCH_BUTTON = preload("res://ui/touch_button.gd")
 const CREAM := Color("fff0cc")
 const MUTED := Color("c6ccb7")
 const GOLD := Color("d6ad58")
@@ -64,7 +65,7 @@ static func icon(parent: Node, texture: Texture2D, at: Vector2, dimensions: Vect
 	return node
 
 static func button(parent: Node, text: String, at: Vector2, dimensions: Vector2, font_size := 16) -> Button:
-	var node := Button.new()
+	var node := TOUCH_BUTTON.new()
 	node.text = text
 	node.position = at
 	node.size = dimensions

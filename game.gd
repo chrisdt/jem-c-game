@@ -176,6 +176,8 @@ func _ready() -> void:
 	hud_layer = hud
 	action_button = hud.context_button
 	hud.action_requested.connect(interact)
+	if hud.touch_mode:
+		message = "Drag the pad to walk. Tap action buttons to mine. Explore trails to find 5 copper for your drill."
 	var travel_layer := CanvasLayer.new()
 	travel_layer.layer = 2
 	add_child(travel_layer)
@@ -422,6 +424,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
+	direction += hud.touch_controls.direction
 	move_player(direction, delta)
 	advance_mining(delta)
 	camera.position = player
@@ -667,7 +670,8 @@ func start_mining(index: int) -> void:
 	walk_distance = 0.0
 	walking = false
 	face_direction(rock.pos - player)
-	message = ("Drilling %s. Walk or press E again to cancel." if upgraded else "Mining %s. Walk or press E again to cancel.") % material_name(rock)
+	var cancel_hint := "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E again to cancel."
+	message = "%s %s. %s" % ["Drilling" if upgraded else "Mining",material_name(rock),cancel_hint]
 	update_mining_visual()
 
 func cancel_mining() -> void:
@@ -770,6 +774,7 @@ func refresh_ui() -> void:
 	rocket.visible = not underground and has_base()
 	if hud == null:
 		return
+	planet_menu.set_touch_mode(hud.touch_mode)
 	var flying := flight != Flight.IDLE or earth_transition
 	hud_layer.visible = not flying
 	flight_caption_panel.visible = flying
@@ -835,7 +840,7 @@ func _draw() -> void:
 		if has_base():
 			label_at(camp_position()+Vector2(-70,-110),"CAMP / DRILL",Color("f6e5b8"),14)
 			if flight == Flight.IDLE:
-				label_at(ship_position()+Vector2(-65,80),"[E] ROCKET",Color("ffe4ac"),14)
+				label_at(ship_position()+Vector2(-65,80),"ROCKET" if hud != null and hud.touch_mode else "[E] ROCKET",Color("ffe4ac"),14)
 		if regions().has_mine(current_region()):
 			label_at(cave_position()+Vector2(-65,-140),mine_name().to_upper(),Color("f6e5b8"),14)
 		for link in regions().LINKS[current_region()]:

@@ -11,10 +11,11 @@ Import `project.godot` in Godot 4.6.3 and press **F6** with `main.tscn` open, or
 - **WASD / arrow keys:** move
 - **E / Space / MINE button:** start mining, use workbench or rocket
 - **Mine doorways:** walk into an entrance or exit to change areas automatically
+- **iPad / touch:** drag the pad at bottom left to walk; tap the action at bottom right to mine, cancel, upgrade or open the rocket. Tap a world card's **Fly here** button to travel.
 - While mining, **E / Space / Cancel button** or movement cancels and resets that attempt.
 - **R:** restart
 
-Explore Earth’s signed trails to collect five copper deposits (2 seconds each), return to the camp workbench for a hand drill, then enter the Moss Mine at the northeast and mine a blue crystal (9 seconds; requires the hand drill). Press once to start: mining continues automatically until complete or cancelled. Directional pick-swing poses show starter mining; the upgrade fits a teal-and-brass drill gauntlet and switches to a braced, vibrating drill animation with more frequent dust and sparks. Rock tremors and the progress bar remain visible. The upgrade unlocks crystal mining; copper remains 2 seconds. Durations are set by `COPPER_SECONDS` and `CRYSTAL_SECONDS` in `game.gd`. You can continue exploring after completing the mission. The original meadow pond blocks movement; its trees and small decorative rocks currently do not. New districts also block their ponds, stream, cliffs and solid outcrops. Underground, walls, pillars and water block movement; small decorative props are part of the background. No enemies, saving, sound, touch movement, or spaceflight minigame yet.
+Explore Earth’s signed trails to collect five copper deposits (2 seconds each), return to the camp workbench for a hand drill, then enter the Moss Mine at the northeast and mine a blue crystal (9 seconds; requires the hand drill). Press once to start: mining continues automatically until complete or cancelled. Directional pick-swing poses show starter mining; the upgrade fits a teal-and-brass drill gauntlet and switches to a braced, vibrating drill animation with more frequent dust and sparks. Rock tremors and the progress bar remain visible. The upgrade unlocks crystal mining; copper remains 2 seconds. Durations are set by `COPPER_SECONDS` and `CRYSTAL_SECONDS` in `game.gd`. You can continue exploring after completing the mission. The original meadow pond blocks movement; its trees and small decorative rocks currently do not. New districts also block their ponds, stream, cliffs and solid outcrops. Underground, walls, pillars and water block movement; small decorative props are part of the background. No enemies, saving, sound, or spaceflight minigame yet.
 
 ## Illustrated HUD and drill upgrade
 
@@ -103,6 +104,10 @@ Every new game creates new ore locations. Returning to a map keeps its existing 
 The mist radius is controlled by `CLEAR_RADIUS` and `REVEAL_RADIUS` in `exploration_fog.gd`. Discovery uses small reusable texture masks, with the mist drawn above the world and below the HUD. The mist shader blurs a screen copy using filtered mipmaps; undiscovered ore is omitted from rendering and interaction. Run `tests/exploration.gd` and `tests/ore_spawns.gd` with the same headless command as the other gameplay checks to verify discovery/travel/reset behaviour and 100 seeded ore layouts.
 
 ## Browser build
+
+The same browser build supports iPad touch controls and desktop keyboard/mouse controls. On an iPad, open the hosted HTTPS game URL in Safari and turn the device sideways for the clearest view. Touch hardware is detected automatically, including iPads that request desktop websites. A left thumb pad handles walking; larger contextual action, help and world-selection buttons handle the rest. The guide shows touch instructions and the page can be reloaded to start a new session. The game retains its wide landscape layout when the browser changes size or orientation.
+
+`ui/touch_controls.gd` owns one movement finger and clears it on release, cancellation, focus loss, resize, menus or travel. `ui/touch_button.gd` handles other fingers independently and suppresses emulated mouse duplicates, so a tap can mine or choose a world while another finger rests on the pad. `tests/touch_controls.gd` exercises the actual input dispatcher through walking, mining/cancellation, drill purchase, multitouch rocket/world selection and return to desktop layout. Browser touch emulation complements those checks; a physical iPad Safari playtest is still needed for device-specific rendering and performance.
 
 Install the matching Godot 4.6.3 export templates. Export using the **Web** preset, or:
 

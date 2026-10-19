@@ -4,6 +4,10 @@ signal action_requested
 
 const STYLE = preload("res://ui/expedition_style.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
+const TOUCH_CONTROLS = preload("res://ui/touch_controls.gd")
+var touch_controls: TOUCH_CONTROLS
+var touch_mode := false
+var touch_blocked := false
 var location_panel: Panel
 var resource_panel: Panel
 var location_title: Label
@@ -19,6 +23,7 @@ var notice: Panel
 var notice_label: Label
 var help_button: Button
 var help: Panel
+var help_text: Label
 var last_message := ""
 var notice_seconds := 0.0
 var blocked := false
@@ -59,8 +64,22 @@ func _ready() -> void:
 	help_button.pressed.connect(func(): help.visible = not help.visible)
 	help = STYLE.panel(self, Vector2(922,574), Vector2(340,158))
 	STYLE.label(help,"EXPLORER'S GUIDE",Vector2(18,12),Vector2(300,24),16,true)
-	STYLE.label(help,"WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Start a new game",Vector2(18,43),Vector2(306,104),14)
+	help_text = STYLE.label(help,"",Vector2(18,43),Vector2(306,104),14)
 	help.visible = false
+	touch_controls = TOUCH_CONTROLS.new()
+	add_child(touch_controls)
+	touch_controls.touch_detected.connect(func(): set_touch_mode(true))
+	set_touch_mode(TOUCH_CONTROLS.device_uses_touch())
+
+func set_touch_mode(value: bool) -> void:
+	touch_mode = value
+	context_button.size.y = 64 if value else 40
+	context_button.position.y = 704 if value else 742
+	help_button.position = Vector2(1194,622) if value else Vector2(1230,746)
+	help_button.size = Vector2(68,60) if value else Vector2(32,34)
+	help.position = Vector2(922,454) if value else Vector2(922,574)
+	help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if value else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Start a new game"
+	touch_controls.set_active(value and not touch_blocked)
 
 func present(state: Dictionary) -> void:
 	var world: int = state.world
@@ -75,17 +94,19 @@ func present(state: Dictionary) -> void:
 	equipment.tooltip_text = "Hand drill fitted — ready for every mineral" if state.upgraded else "Starter pick — build a hand drill at camp for 5 copper"
 	objective.text = state.objective
 	objective.visible = not state.menu
-	context_button.text = state.context
+	context_button.text = state.context.trim_prefix("E   ") if touch_mode else state.context
 	context_button.disabled = state.flying or state.menu or not state.actionable
 	# Keep the control logically enabled in open ground, while hiding it when
 	# there is nothing nearby to interact with. Flight always locks input.
 	if state.context.is_empty() and not state.flying and not state.menu:
 		context_button.disabled = false
-	var width := clampf(STYLE.HEADING.get_string_size(state.context,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x + 42,230,470)
+	var width := clampf(STYLE.HEADING.get_string_size(context_button.text,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x + 42,230,320 if touch_mode else 470)
 	context_button.size.x = width
-	context_button.position.x = (1280 - width) * 0.5
+	context_button.position.x = 1262-width if touch_mode else (1280-width)*0.5
 	context_button.visible = not state.flying and not state.menu and not state.context.is_empty()
 	blocked = state.menu or state.mining or state.flying
+	touch_blocked = state.menu or state.flying
+	touch_controls.set_active(touch_mode and not touch_blocked)
 	help_button.visible = not state.menu
 	if state.menu:
 		help.visible = false
