@@ -6,6 +6,8 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 ## Play
 
+The proposed next features and small implementation steps from Chris and Jeremy’s 19 October discussion are in [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md). This is a planning backlog; the combat, health and inventory additions are not implemented yet.
+
 Import `project.godot` in Godot 4.6.3 and press **F5 / Run Project** to open the illustrated explorer's guide, then choose **Start exploring**. **Enter / Space** also starts. Running `main.tscn` directly with **F6** skips the welcome screen for development.
 
 The loading and welcome screens share one illustrated logo: **Planet Adventures** is a smaller, centred subtitle beneath **Sunny Scout**, using matching gold lettering and a teal outline.
