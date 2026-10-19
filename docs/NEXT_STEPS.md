@@ -15,7 +15,7 @@ This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adven
 
 **Earth task list, in suggested working order**
 
-All tasks are pending. “Requested” means the feature is a clear direction from the discussion, not that its detailed rules have been approved. “Idea” marks a tentative mechanic. Completion checks below are proposed implementation boundaries.
+E02 now has [desktop/iPad HUD mockups and Earth illustration concepts ready for review](concepts/earth-hud-v1/README.md). It remains open until the design is reviewed; the other implementation tasks are pending. “Requested” means the feature is a clear direction from the discussion, not that its detailed rules have been approved. “Idea” marks a tentative mechanic. Completion checks below are proposed implementation boundaries.
 
 | ID | Task | Basis / transcript time | Complete when |
 | --- | --- | --- | --- |
