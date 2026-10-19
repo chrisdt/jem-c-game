@@ -26,4 +26,4 @@ The build contains 28 files in total. Replace the existing browser build as a co
 
 Open https://www.digitalthing.com.au/jem/ in a desktop browser. Refresh the page after uploading. This image should also open directly: https://www.digitalthing.com.au/jem/earth_chunks/pinewood.jpg
 
-The build was exported using Godot 4.6.3 from gameplay source commit `2cdceb7`. It has been tested in a browser under `/jem/`, including walking into Pinewood Trail and downloading its scenery. No Godot installation is required to upload or play it. Progress lasts for the current play session.
+The build was exported using Godot 4.6.3 from gameplay source commit `5e8f2b4`. It has been tested in a browser under `/jem/`, including walking into Pinewood Trail and downloading its scenery. Each surface area now contains just two common deposits; each mine contains one common and one rare deposit. There are 16 deposits per planet, about 73% fewer across the game. Explore multiple Earth districts to gather five copper for the drill. No Godot installation is required to upload or play it. Progress lasts for the current play session.
