@@ -36,14 +36,24 @@ func run() -> void:
 	var connected := {
 		1:reachable(game.MINE_LAYOUT,game.MINE_SPAWN,false,true),
 		2:reachable(game.FROST_LAYOUT,Vector2(390,1120),true,false),
-		3:reachable(game.FROST_LAYOUT,game.ICE_SPAWN,true,true)
+		3:reachable(game.FROST_LAYOUT,game.ICE_SPAWN,true,true),
+		4:reachable(game.DESERT_LAYOUT,game.DESERT_LAYOUT.ARRIVAL,true,false),
+		5:reachable(game.DESERT_LAYOUT,game.DESERT_LAYOUT.MINE_SPAWN,true,true)
 	}
 	var seen := {}
 	for painted_rock in [Vector2(430,575),Vector2(555,890),Vector2(1340,340)]:
 		check(not game.ORE_SPAWNS.footprint_fits(1,false,game.FROST_LAYOUT.from_art(painted_rock)),"Frost ore can overlap a painted rock outcrop")
 	check(not game.ORE_SPAWNS.clear_of_landmarks(1,false,game.FROST_LAYOUT.from_art(Vector2(290,690)),game.tree_cover()),"Frost ore can overlap the camp dome roof")
-	for world in [0,1]:
+	for world in 3:
 		game.world = world
+		game.player = [Vector2(560,550),Vector2(390,1120),game.DESERT_LAYOUT.ARRIVAL][world]
+		game.camera.position = game.player
+		game.camera.reset_smoothing()
+		game.camera.force_update_scroll()
+		await process_frame
+		# Measure the actual camera, including its shift against the map edges.
+		var opening_view: Rect2 = game.get_canvas_transform().affine_inverse() * game.get_viewport_rect()
+		check(opening_view.has_point(game.player),"Opening camera lost the landing position")
 		for trial in 50:
 			game.ore_rng.seed = trial * 1009 + 17
 			game.reset_rocks()
@@ -56,10 +66,13 @@ func run() -> void:
 			for i in game.rocks.size():
 				var rock: Dictionary = game.rocks[i]
 				check(not rock.discovered,"Random generation pre-discovered ore")
-				check(rock.seconds == ((10.0 if rock.hard else 3.0) if world == 1 else (9.0 if rock.hard else 2.0)),"Random generation changed mining times")
+				check(rock.seconds == ((10.0 if rock.hard else 3.0) if world > 0 else (9.0 if rock.hard else 2.0)),"Random generation changed mining times")
 				surface_count += 0 if rock.cave else 1
 				hard_count += 1 if rock.hard else 0
 				var area: int = world * 2 + int(rock.cave)
+				if not rock.cave:
+					var artwork := Rect2(rock.pos + Vector2(-50,-52),Vector2(100,86))
+					check(not opening_view.grow(32).intersects(artwork),"Deposit artwork overlaps the opening view: world=%d seed=%d at %s" % [world,trial,rock.pos])
 				if area != 0:
 					var cell := Vector2i((rock.pos / 16).round())
 					check(connected[area].has(cell),"Ore spawned outside connected walkable floor: %s" % rock.pos)
@@ -88,5 +101,5 @@ func run() -> void:
 		check(surface_common == 10 and surface_common >= 5,"Surface exploration cannot fund the starter drill")
 		check(total.filter(func(rock): return rock.hard).size() == 3,"A planet lost its three rare mine deposits")
 	if failures == 0:
-		print("PASS: 100 distinct seeded layouts, connected reachable ore, sparse mineral supplies, correct mining times, hidden initial state and separated deposits clear of pond/tree cover")
+		print("PASS: 150 distinct seeded layouts across all three planets, full artwork outside the opening camera view, connected reachable ore, sparse supplies, mining times and separated deposits clear of pond/tree cover")
 	quit(1 if failures else 0)

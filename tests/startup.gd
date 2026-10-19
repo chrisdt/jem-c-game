@@ -75,5 +75,6 @@ func run() -> void:
 		assert(game.world == 0 and not game.underground)
 		assert(game.player.is_equal_approx(Vector2(560,550)) and game.mining_target == -1)
 		assert(game.scout.sprite_frames == game.MINER_FRAMES)
-	print("PASS: full-window welcome artwork, wide/tablet/portrait resize, single-line logo, guide before Earth, keyboard/touch starts, one load and restored gameplay aspect")
+		assert(game.rocks.all(func(rock): return not rock.discovered),"Starting the game immediately revealed minerals")
+	print("PASS: full-window welcome artwork, wide/tablet/portrait resize, single-line logo, guide before Earth, keyboard/touch starts without visible minerals, one load and restored gameplay aspect")
 	quit()

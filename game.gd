@@ -870,7 +870,7 @@ func _draw() -> void:
 		var ore_art: Texture2D = (AMETHYST_ART if rock.hard else BLUE_ORE_ART) if world == 1 else (BLUE_ORE_ART if rock.hard else COPPER_ART)
 		if world == 2:
 			ore_art = RUBY_ART if rock.hard else GOLD_ART
-		draw_texture_rect(ore_art, Rect2(p + Vector2(-50, -52), Vector2(100, 86)), false, Color(1, 1, 1, reveal_alpha))
+		draw_texture_rect(ore_art, Rect2(p + ORE_SPAWNS.ART_BOUNDS.position, ORE_SPAWNS.ART_BOUNDS.size), false, Color(1, 1, 1, reveal_alpha))
 	if flight == Flight.IDLE:
 		ellipse(player + Vector2(0, 20), Vector2(23, 9), Color(0, 0, 0, 0.25))
 	if mining_target >= 0:

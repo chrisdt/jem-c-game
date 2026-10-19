@@ -7,6 +7,8 @@ const DENSITY = preload("res://ore_density.gd")
 const GRID := 16.0
 const SPACING := 150.0
 const FOOTPRINT := [Vector2.ZERO, Vector2(-38,0), Vector2(38,0), Vector2(0,-20), Vector2(0,20)]
+const ART_BOUNDS := Rect2(-50,-52,100,86)
+const START_VIEW_MARGIN := 32.0
 
 # Open grass and paths in the painting. The cliff, border forest and southern
 # rock outcrops are outside this region; individual boulders are cut out below.
@@ -54,16 +56,25 @@ static var point_cache: Dictionary = {}
 
 static func generate(world: int, rng: RandomNumberGenerator, entries: Array[Vector2], tree_cover: Array[Rect2], green_times: Vector2) -> Array[Dictionary]:
 	var deposits: Array[Dictionary] = []
+	var clear_view := starting_view(entries[0]).grow(START_VIEW_MARGIN)
 	for cave in [false, true]:
 		var candidates := candidate_points(world, cave, entries[int(cave)])
 		var basic_count: int = DENSITY.MINE_COMMON if cave else DENSITY.SURFACE_COMMON
 		for i in DENSITY.count(cave):
 			var hard := i >= basic_count
-			var point := choose_point(candidates, world, cave, hard, deposits, rng, entries[int(cave)], tree_cover, i == 0 and world == 0 and not cave)
+			var point := choose_point(candidates, world, cave, hard, deposits, rng, entries[int(cave)], tree_cover, clear_view)
 			assert(point.is_finite(), "No reachable space for a required ore deposit")
 			var seconds := (10.0 if hard else 3.0) if world > 0 else (green_times.y if hard else green_times.x)
 			deposits.append({"pos":point, "hp":4 if hard else 2, "seconds":seconds, "hard":hard, "cave":cave, "discovered":false})
 	return deposits
+
+static func starting_view(entry: Vector2) -> Rect2:
+	# Gameplay keeps this logical viewport on desktop and tablet. Camera limits
+	# shift its centre near map edges, so a radius around Scout is not enough.
+	var size := Vector2(ProjectSettings.get_setting("display/window/size/viewport_width",1280),
+		ProjectSettings.get_setting("display/window/size/viewport_height",800)).min(FROST.WORLD_SIZE)
+	var top_left := (entry - size * 0.5).clamp(Vector2.ZERO,FROST.WORLD_SIZE - size)
+	return Rect2(top_left,size)
 
 static func can_walk(world: int, cave: bool, point: Vector2) -> bool:
 	if world == 2:
@@ -130,7 +141,7 @@ static func candidate_points(world: int, cave: bool, entry: Vector2) -> PackedVe
 	point_cache[key] = points
 	return points
 
-static func choose_point(points: PackedVector2Array, world: int, cave: bool, hard: bool, placed: Array[Dictionary], rng: RandomNumberGenerator, entry: Vector2, tree_cover: Array[Rect2], starter: bool) -> Vector2:
+static func choose_point(points: PackedVector2Array, world: int, cave: bool, hard: bool, placed: Array[Dictionary], rng: RandomNumberGenerator, entry: Vector2, tree_cover: Array[Rect2], clear_view: Rect2) -> Vector2:
 	var first := rng.randi_range(0, points.size() - 1)
 	for offset in points.size():
 		var point := points[(first + offset) % points.size()] + Vector2(rng.randf_range(-6,6),rng.randf_range(-6,6))
@@ -138,7 +149,7 @@ static func choose_point(points: PackedVector2Array, world: int, cave: bool, har
 			continue
 		if hard and point.distance_to(entry) < 400:
 			continue
-		if starter and point.distance_to(Vector2(560,550)) > 430:
+		if not cave and clear_view.intersects(Rect2(point + ART_BOUNDS.position,ART_BOUNDS.size)):
 			continue
 		if not clear_of_landmarks(world, cave, point, tree_cover):
 			continue
