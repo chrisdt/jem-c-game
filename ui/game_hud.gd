@@ -23,20 +23,16 @@ var counts: Array[Label] = []
 var equipment: TextureRect
 var objective: Label
 var context_button: Button
-var notice: Panel
-var notice_label: Label
 var help_button: Button
 var help: Panel
 var help_text: Label
-var last_message := ""
-var notice_seconds := 0.0
-var blocked := false
 var trial_active := false
 var health_panel: Panel
 var health_hearts: Array[TextureRect] = []
 var mission_panel: Panel
 var mission_labels: Array[Label] = []
 var mission_checks: Array[Line2D] = []
+var rowan_progress: Label
 var equip_slots: Array[Button] = []
 var equip_icons: Array[TextureRect] = []
 var equip_marks: Array[Panel] = []
@@ -69,12 +65,6 @@ func _ready() -> void:
 	context_button = STYLE.button(self, "", Vector2(450,742), Vector2(380,40))
 	context_button.focus_mode = Control.FOCUS_NONE
 	context_button.pressed.connect(func(): action_requested.emit())
-	notice = STYLE.panel(self, Vector2(345,684), Vector2(590,46))
-	notice_label = STYLE.label(notice, "", Vector2(15,5), Vector2(560,36), 13)
-	notice_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	notice_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notice_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notice.visible = false
 	help_button = STYLE.button(self, "?", Vector2(1230,746), Vector2(32,34), 17)
 	help_button.focus_mode = Control.FOCUS_NONE
 	help_button.tooltip_text = "Controls"
@@ -110,6 +100,8 @@ func make_trial_hud() -> void:
 			mark.antialiased = true
 			mission_panel.add_child(mark)
 			mission_checks.append(mark)
+	rowan_progress = STYLE.label(mission_panel,"",Vector2(13,74),Vector2(250,22),13)
+	rowan_progress.hide()
 	for i in 2:
 		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
 		button.focus_mode = Control.FOCUS_NONE
@@ -194,7 +186,6 @@ func present(state: Dictionary) -> void:
 	context_button.position.x = 1262-width if touch_mode else (1280-width)*0.5
 	context_button.visible = not state.flying and not state.menu and not state.context.is_empty()
 	context_button.position.y = (599 if touch_mode else 638) if trial_active else (704 if touch_mode else 742)
-	blocked = state.menu or state.mining or state.flying
 	touch_blocked = state.menu or state.flying
 	touch_controls.set_active(touch_mode and not touch_blocked)
 	help_button.visible = not state.menu
@@ -207,15 +198,9 @@ func present(state: Dictionary) -> void:
 		# Keep remaining health readable while searching other districts for
 		# scarce fruit, without adding combat controls outside the meadow trial.
 		health_panel.visible = state.get("health",10) < 10 and not state.menu and not state.flying
-		notice.position.y = 684
 		set_touch_layout_positions()
 	present_health(state.get("health",10))
 	objective.position.y = 123 if health_panel.visible else 83
-	if state.message != last_message:
-		last_message = state.message
-		notice_label.text = state.message
-		notice_seconds = 4.5
-	notice.visible = notice_seconds > 0 and not blocked and not state.message.is_empty()
 
 func set_touch_layout_positions() -> void:
 	help_button.position = Vector2(1194,622) if touch_mode else Vector2(1230,746)
@@ -223,7 +208,7 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen missions for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Earth missions   E · use"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen missions for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Earth missions   E · talk / use"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
@@ -231,9 +216,14 @@ func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)
 	mission_labels[0].text = "Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % mini(state.inventory.x,5)
 	var owned: bool = state.get("sword_owned",false)
-	mission_labels[1].text = "Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)]
+	var rowan_started: bool = state.get("rowan_mission",false)
+	mission_labels[1].text = state.rowan_title if rowan_started else ("Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)])
+	rowan_progress.visible = rowan_started
+	rowan_progress.text = state.get("rowan_progress","")
+	mission_panel.size.y = 128 if rowan_started else 106
+	mission_labels[2].position.y = 96 if rowan_started else 74
 	for i in 2:
-		mission_checks[i].visible = state.upgraded if i == 0 else owned
+		mission_checks[i].visible = state.upgraded if i == 0 else (state.get("rowan_complete",false) if rowan_started else owned)
 		mission_labels[i].position.x = 32 if mission_checks[i].visible else 13
 		mission_labels[i].size.x = 231 if mission_checks[i].visible else 250
 	mission_labels[2].text = state.get("earth_next","Earth explored · %d / 5" % state.get("earth_explored",1))
@@ -256,7 +246,6 @@ func present_trial(state: Dictionary) -> void:
 	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"
 	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
 	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
-	notice.position.y = 580 if not touch_mode else 627
 	if touch_mode:
 		help_button.position = Vector2(1194,515)
 		help.position = Vector2(922,343)
@@ -267,7 +256,3 @@ func present_health(health: int) -> void:
 		var units := clampi(health-i*2,0,2)
 		health_hearts[i].texture = TRIAL_ART.icon(1 if units == 2 else (2 if units == 1 else 3))
 	health_panel.tooltip_text = "%.1f / 5 hearts" % (health*0.5)
-
-func _process(delta: float) -> void:
-	notice_seconds = maxf(0, notice_seconds - delta)
-	notice.visible = notice_seconds > 0 and not blocked and visible

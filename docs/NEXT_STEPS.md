@@ -1,5 +1,7 @@
 **Sunny Scout — next steps from Chris and Jeremy’s discussion, 19 October 2026**
 
+The subsequent [Earth NPC and mission task plan](EARTH_STORY.md) breaks the new story into character mockups, mission scripts and one-character implementations. Rowan's **R06 Ready for the Trail** has been reviewed. Bea's look and position are approved, and [B04 adds her greeting and Talk interaction to the main game](BEA_MISSION.md). Test in Pinewood's lower-right fallen-tree clearing before B05 adds the encounter, supply box and mission. Rowan's reopenable log (R07) remains pending. Test gameplay with F5 → Start exploring; use screenshots for placement reviews. The quarry rockfall, later upgrades, spacesuit and final rocket repair follow in their own tasks.
+
 The next playable loop is: explore Earth → collect resources → craft equipment → mine → respond to a snake → resume mining → find fruit to heal. Build and playtest this in small steps before extending combat to the other worlds.
 
 This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adventures - 19 October 2026.srt`, against the project. The recording is supporting evidence, rather than an instruction to implement every idea. Chris and Jeremy subsequently approved the concepts and requested the [first-screen animation trial](FIRST_SCREEN_TRIAL.md), now expanded in the Earth rollout. The attached MP4 could not be inspected because it exceeds the environment’s 32 MiB transfer limit; precise walking-problem locations still need visual review.

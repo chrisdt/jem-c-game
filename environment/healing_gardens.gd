@@ -82,6 +82,7 @@ func sync_area() -> void:
 func clear_floor(point: Vector2) -> bool:
 	var district: int = game.current_region()
 	var catalog = game.regions()
+	if game.world == 0 and not game.EARTH.clear_of_people(district,point): return false
 	if district == 0:
 		if not game.trial.floor_at(point): return false
 	elif not catalog.can_walk(district,false,point): return false

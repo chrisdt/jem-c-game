@@ -315,7 +315,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0,-1),0,Vector2(1,0.3))
 	draw_circle(Vector2.ZERO,17,Color(0.08,0.14,0.06,0.14))
 	draw_set_transform(Vector2.ZERO)
-	if bark_remaining > 0:
+	if bark_remaining > 0 and not game.dialogue_open():
 		var bubble := Rect2(-29,-75,58,24)
 		draw_style_box(bark_bubble,bubble)
 		draw_colored_polygon(PackedVector2Array([Vector2(-5,-52),Vector2(4,-52),Vector2(0,-46)]),Color("fff0cc"))

@@ -121,9 +121,11 @@ func run() -> void:
 	check(not game.action_button.visible and not game.hud.objective.visible,"Gameplay prompts obscure the destination picker")
 	game.planet_menu.dismiss()
 	check(not game.planet_menu.visible and game.action_button.visible,"Closing travel menu did not restore rocket controls")
-	game.hud.notice_seconds = 0.1
-	game.hud._process(0.2)
-	check(not game.hud.notice.visible,"Notifications remained as a permanent bottom overlay")
+	game.message = "Ready for another adventure."
+	game.refresh_ui()
+	check(game.character_bubble.anchor == game.scout,"Notifications are not anchored to Scout")
+	game.character_bubble._process(5)
+	check(not game.character_bubble.visible,"Notifications remained as a permanent overlay")
 	var fresh = load("res://main.tscn").instantiate()
 	root.add_child(fresh)
 	await process_frame
