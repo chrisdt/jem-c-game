@@ -6,7 +6,7 @@ const STYLE = preload("res://ui/expedition_style.gd")
 const MAX_HEALTH := 9
 const POSE_SCALES := [0.20,0.15,0.15]
 const SPEED := 57.0
-const REACH := 62.0
+const REACH := 88.0
 var trial: Node
 var home := Vector2.ZERO
 var target := Vector2.ZERO
@@ -97,6 +97,11 @@ func advance(delta: float) -> void:
 	var distance := position.distance_to(player)
 	var safe: bool = trial.safe_at(player) or trial.invulnerable > 0.7
 	match state:
+		"stir":
+			# A mining alert is visible for over a second before any chase.
+			if clock >= 1.25:
+				state = "chase"
+				clock = 0
 		"hurt":
 			if clock > 0.22:
 				state = "recover"
@@ -114,7 +119,7 @@ func advance(delta: float) -> void:
 			move_towards(target,130,delta)
 			if not bitten and clock >= 0.07:
 				bitten = true
-				if position.distance_to(player) < 52: trial.hurt_player(1)
+				if position.distance_to(player) < 90 and trial.clear_line(position,player): trial.hurt_player(1)
 			if clock >= 0.18:
 				state = "recover"
 				clock = 0
@@ -123,7 +128,7 @@ func advance(delta: float) -> void:
 				state = "roam"
 				clock = 0
 		"roam", "chase":
-			if distance < 190 and not safe and player.distance_to(home) < 210 and clear_route(player):
+			if distance < 190 and not safe and player.distance_to(home) < 210 and trial.clear_line(position,player):
 				state = "chase"
 				if distance < REACH:
 					state = "warn"
@@ -195,7 +200,7 @@ func _draw() -> void:
 		draw_circle(Vector2(0,8-16*t),15+10*t,Color(0.90,0.91,0.85,(1-t)*0.60))
 		return
 	if not seen or health <= 0: return
-	if state == "warn":
+	if state in ["warn","stir"]:
 		draw_string(STYLE.HEADING,Vector2(-4,-35),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
 	if health_seconds > 0:
 		draw_rect(Rect2(-18,-30,36,5),Color("143638"))

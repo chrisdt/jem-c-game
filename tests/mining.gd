@@ -10,6 +10,7 @@ func run() -> void:
 	game.set_process(false)
 	# Directional mining poses and the impact event agree with the swing cycle.
 	for sample in [[Vector2(-70, 0), &"side", false], [Vector2(70, 0), &"side", true], [Vector2(0, 70), &"up", false], [Vector2(0, -70), &"down", false]]:
+		game.rocks[0]["work"] = 0.0
 		game.player = game.rocks[0].pos + sample[0]
 		game.update_exploration()
 		game.start_mining(0)
@@ -29,6 +30,7 @@ func run() -> void:
 	game.update_particles(1.0)
 	assert(game.particles.is_empty())
 	# Copper takes the full two seconds, then awards only once.
+	game.rocks[0]["work"] = 0.0
 	game.player = game.rocks[0].pos + Vector2(-70, 0)
 	game.update_exploration()
 	game.start_mining(0)
@@ -39,7 +41,7 @@ func run() -> void:
 	game.advance_mining(20.0)
 	game.start_mining(0)
 	assert(game.ore == 1 and game.mining_target == -1)
-	# Keyboard/button cancellation and movement discard partial progress.
+	# Keyboard/button cancellation and movement retain Earth deposit work.
 	game.player = game.rocks[1].pos + Vector2(-70, 0)
 	game.update_exploration()
 	game.cooldown = 0
@@ -49,8 +51,8 @@ func run() -> void:
 	game.advance_mining(4.0)
 	assert(game.mining_target == -1 and game.ore == 1)
 	game.start_mining(1)
-	assert(game.mining_elapsed == 0)
-	game.advance_mining(1.0)
+	assert(game.mining_elapsed == 1.0)
+	game.advance_mining(0.2)
 	game.move_player(Vector2.LEFT, 0.1)
 	assert(game.mining_target == -1 and game.ore == 1)
 	# A target becoming out of reach or in another scene cannot keep progressing.
@@ -98,5 +100,5 @@ func run() -> void:
 		assert(game.ore == before + 1)
 	game.update_particles(1.0)
 	assert(game.particles.is_empty())
-	print("PASS: directional mining, impact effects, 2s/9s timing, cancellation, tool restrictions, one-time rewards, frame-rate independence and cleanup")
+	print("PASS: directional mining, impact effects, 2s/9s timing, paused Earth work, tool restrictions, one-time rewards, frame-rate independence and cleanup")
 	quit()

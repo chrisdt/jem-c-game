@@ -17,7 +17,7 @@ This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adven
 
 The [Earth crafting/combat rollout](EARTH_ADVENTURE.md) now implements the approved HUD, locked/owned equipment, health, sparse Earth-only healing, fallen-wood gathering, both camp recipes, directional attacks and surface/mine combat. The confirmed sword recipe is **3 copper + 2 wood**; the drill remains **5 copper**. Snakes live across all five Earth districts, and rats/bats attack in all three Earth mines and can be defeated or scared away by Buddy. These systems are excluded from the other planets. Completed crafting missions persist after spending their ingredients. Jeremy's complete Earth playtest is the next review checkpoint.
 
-E03–E05, E07–E10 and E12 now have playable implementations; food randomization/balance remains a tuning choice. E06's retained mining progress and E11's mining-triggered spawning remain ideas to test, rather than changes included in this rollout. E01 still needs the visual walking-problem locations. “Requested” means a clear direction from the discussion, while “Idea” marks a tentative mechanic.
+E02–E12 now have playable Earth implementations. E06 retains each deposit’s work through interruptions and travel. E11 adds occasional warned mining alerts with per-deposit checks and one alert per area; nearby creatures are reused and populations stay bounded. Food positions vary within their assigned districts while keeping two trees/two bushes in total. The Earth journal tracks eight missions and an optional healing snack. E01 still needs the visual walking-problem locations. “Requested” means a clear direction from the discussion, while “Idea” marks a tentative mechanic.
 
 The latest review specifies **straight jabs**, **no sound**, **one heart per berry bush** and **two hearts per apple tree**. Those choices supersede the earlier example values below.
 
@@ -37,7 +37,7 @@ The latest review specifies **straight jabs**, **no sound**, **one heart per ber
 | E12 | Add the Earth mission checklist and update the guide | Requested, 05:27–05:53 | The brass panel tracks “Build the hand drill” and “Build a sword,” with material progress and lasting completion ticks. Spending the ingredients does not undo completion. The guide explains equipping, combat, healing and resumed mining. |
 | E13 | Playtest and tune one complete Earth loop | Requested incremental approach, 05:13–05:26 | Jeremy can find materials/food, craft both items, face a snake, heal and resume a deposit. Then extend the proven behaviour across Earth’s five districts and three mines. Verify browser/iPad input, area loading, session state and performance. |
 
-E01 can progress independently when the walking-problem locations are available. The approved E02 artwork now supports the Earth rollout. Review E13 with Jeremy before tuning the remaining E06 mining-progress and E11 encounter-spawning ideas or extending combat to other planets.
+E01 can progress independently when the walking-problem locations are available. The latest request approves finishing Earth missions and characters, and explicitly defers other-world creatures and fishing/cooking. Jeremy can now review E13 with retained mining and bounded encounters in the complete Earth loop.
 
 **Suggested starting rules — recommendations, not decisions from the recording**
 
@@ -66,4 +66,4 @@ The current game remembers progress only while the session remains open. This pr
 
 **Current review checkpoint**
 
-Play the complete [Earth adventure](EARTH_ADVENTURE.md): gather resources, craft both tools, fight a surface snake and a mine rat/bat, use fruit, find Buddy and revisit unloaded areas. Tune resource spacing, warning times and damage with Jeremy before adding later-world combat or the remaining mining-progress/spawning ideas.
+Play the complete [Earth adventure](EARTH_ADVENTURE.md): open the mission journal with J / Open, craft both tools, respond to a warned mining encounter, resume that deposit, fight a surface snake and clear a mine rat/bat, use fruit, find Buddy, and explore all five districts and three mines. Tune spacing, warning times and damage with Jeremy. Other planets, fishing and cooking stay deferred at the user’s request; full tree chopping, travel gates and browser saving still need their own decisions.

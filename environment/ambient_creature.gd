@@ -203,6 +203,8 @@ func advance_hostile(delta: float) -> void:
 		var safe: bool = trial.safe_at(player) or trial.invulnerable > 0.7
 		var revealed: bool = game.fog.is_revealed(scare_area,position)
 		match state:
+			"alert":
+				if state_time >= 1.25: rest()
 			"hurt":
 				if state_time > 0.22:
 					state = "recover"
@@ -264,6 +266,7 @@ func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
 
 func remember_removed() -> void:
 	if is_instance_valid(game) and game.has_method("area_id") and scare_area >= 0 and scare_id >= 0:
+		if is_instance_valid(game.get("missions")): game.missions.cleared(kind)
 		if not game.scared_wildlife.has(scare_area): game.scared_wildlife[scare_area] = {}
 		game.scared_wildlife[scare_area][scare_id] = true
 
@@ -371,7 +374,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 	if hostile:
 		var y := -82.0 if kind == Kind.BAT else -30.0
-		if state == "warn": draw_string(STYLE.HEADING,Vector2(-4,y),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
+		if state in ["warn","alert"]: draw_string(STYLE.HEADING,Vector2(-4,y),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
 		if health_seconds > 0:
 			draw_rect(Rect2(-16,y,32,5),Color("143638"))
 			draw_rect(Rect2(-15,y+1,30*float(health)/max_health(),3),Color("d9ae58"))

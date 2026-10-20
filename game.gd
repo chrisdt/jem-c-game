@@ -27,6 +27,10 @@ const WOOD_SUPPLIES = preload("res://environment/wood_supplies.gd")
 var wood_supplies: Node2D
 const CAMP_MENU = preload("res://ui/camp_workbench.gd")
 var camp_menu: CAMP_MENU
+const EARTH_MISSIONS = preload("res://environment/earth_missions.gd")
+const MISSION_JOURNAL = preload("res://ui/mission_journal.gd")
+var missions: EARTH_MISSIONS
+var mission_journal: MISSION_JOURNAL
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -239,6 +243,12 @@ func _ready() -> void:
 	wood_supplies = WOOD_SUPPLIES.new()
 	wood_supplies.game = self
 	add_child(wood_supplies)
+	missions = EARTH_MISSIONS.new()
+	missions.game = self
+	mission_journal = MISSION_JOURNAL.new()
+	mission_journal.game = self
+	add_child(mission_journal)
+	hud.missions_requested.connect(mission_journal.open)
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
 	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
@@ -287,7 +297,7 @@ func has_base() -> bool:
 	return current_region() == 0
 
 func menu_open() -> bool:
-	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible)
+	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or (is_instance_valid(mission_journal) and mission_journal.visible)
 
 func at_workbench() -> bool:
 	return not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
@@ -314,6 +324,8 @@ func clear_touch_gestures() -> void:
 	hud.touch_controls.clear()
 	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
 	if is_instance_valid(camp_menu): buttons += camp_menu.buttons + [camp_menu.close_button]
+	buttons.append(hud.missions_button)
+	if is_instance_valid(mission_journal): buttons.append(mission_journal.close_button)
 	for button in buttons: button.release_touch()
 
 func update_exploration() -> void:
@@ -704,6 +716,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			clear_touch_gestures()
 			reset_confirmation.open()
 			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_J and is_instance_valid(mission_journal):
+			mission_journal.open()
+			get_viewport().set_input_as_handled()
 		elif not earth_transition and not menu_open() and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
 			trial.equip(0 if event.keycode == KEY_1 else 1)
 		elif event.keycode == KEY_SPACE and trial.is_active():
@@ -779,16 +794,21 @@ func start_mining(index: int) -> void:
 		message = "Too tough! Bring 5 copper from Earth to a workbench for a hand drill."
 		return
 	mining_target = index
-	mining_elapsed = 0.0
-	next_strike = 0.08 if upgraded else IMPACT_PHASE
+	mining_elapsed = rock.get("work",0.0) if world == 0 else 0.0
+	var first_strike := 0.08 if upgraded else IMPACT_PHASE
+	var interval := 0.12 if upgraded else STRIKE_SECONDS
+	next_strike = first_strike if mining_elapsed < first_strike else first_strike+(floorf((mining_elapsed-first_strike)/interval)+1)*interval
 	walk_distance = 0.0
 	walking = false
 	face_direction(rock.pos - player)
-	var cancel_hint := "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E / Space to cancel."
+	var cancel_hint := "Move or tap Pause; this deposit keeps your progress." if hud.touch_mode else "Walk or press E / Space to pause; this deposit keeps your progress."
+	if world != 0: cancel_hint = "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E / Space to cancel."
 	message = "%s %s. %s" % ["Drilling" if upgraded else "Mining",material_name(rock),cancel_hint]
 	update_mining_visual()
 
 func cancel_mining() -> void:
+	var paused := world == 0 and mining_target >= 0 and mining_target < rocks.size()
+	if paused: rocks[mining_target]["work"] = mining_elapsed
 	mining_target = -1
 	mining_elapsed = 0.0
 	impact_flash = 0.0
@@ -797,7 +817,7 @@ func cancel_mining() -> void:
 	restore_walk_visual()
 	scout.animation = StringName("idle_" + str(facing))
 	scout.flip_h = facing_left
-	message = "Mining cancelled. You can start again whenever you're ready."
+	message = "Mining paused. Return to this deposit to continue where you stopped." if paused else "Mining cancelled. You can start again whenever you're ready."
 
 func update_mining_visual() -> void:
 	var phase := fmod(mining_elapsed,STRIKE_SECONDS)
@@ -832,6 +852,9 @@ func advance_mining(delta: float) -> void:
 		cancel_mining()
 		return
 	mining_elapsed = minf(mining_elapsed + delta, rock.seconds)
+	if world == 0:
+		rock["work"] = mining_elapsed
+		if mining_elapsed >= 0.6: trial.mining_encounter(rock)
 	while next_strike <= mining_elapsed:
 		emit_impact(rock, false)
 		impact_flash = 0.16
@@ -839,6 +862,7 @@ func advance_mining(delta: float) -> void:
 	update_mining_visual()
 	if mining_elapsed >= rock.seconds:
 		rock.hp = 0
+		if world == 0: rock["work"] = rock.seconds
 		emit_impact(rock, true)
 		mining_target = -1
 		mining_elapsed = 0.0
@@ -858,7 +882,7 @@ func advance_mining(delta: float) -> void:
 		elif rock.hard:
 			blue_crystals += 1
 			won = blue_crystals >= 1
-			message = "MISSION COMPLETE! You discovered blue crystal! Visit the rocket to explore Frost Canyon."
+			message = "Mission complete: blue crystal discovered! Open Earth missions to see your next adventure."
 		else:
 			ore += 1
 			total_mined += 1
@@ -886,6 +910,7 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(gardens): gardens.sync_area()
 	if is_instance_valid(wood_supplies): wood_supplies.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
@@ -919,7 +944,7 @@ func refresh_ui() -> void:
 	var actionable := true
 	if mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
-		context = "E / Space   Cancel %s · %.1fs" % ["drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
+		context = "E / Space   %s %s · %.1fs" % ["Pause" if world == 0 else "Cancel","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
 		context = "E   Choose a world"
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
@@ -931,7 +956,8 @@ func refresh_ui() -> void:
 		actionable = false
 	elif nearest_rock() >= 0:
 		var rock: Dictionary = rocks[nearest_rock()]
-		context = "E / Space   %s %s · %ds" % ["Drill" if upgraded else "Mine",material_name(rock),int(rock.seconds)]
+		var saved: float = rock.get("work",0.0) if world == 0 else 0.0
+		context = "E / Space   %s %s · %.1fs" % ["Resume" if saved > 0 else ("Drill" if upgraded else "Mine"),material_name(rock),rock.seconds-saved]
 		if rock.hard and not upgraded:
 			context = "Hand drill needed · build at camp"
 			actionable = false
@@ -944,6 +970,7 @@ func refresh_ui() -> void:
 		"flying":flying,"menu":menu_open(),"mining":mining_target >= 0,"message":message,
 		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
 		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
+		"earth_next":missions.next_hint() if is_instance_valid(missions) and world == 0 else "",
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})

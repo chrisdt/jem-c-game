@@ -62,7 +62,10 @@ func sync_area() -> void:
 		var district: int = game.current_region()
 		if not SITES[game.world].has(district): return
 		var site: Vector3 = SITES[game.world][district]
-		var point := find_site(Vector2(site.x,site.y),bool(site.z))
+		var preferred := Vector2(site.x,site.y)
+		var offset := Vector2(game.ore_rng.randf_range(-95,95),game.ore_rng.randf_range(-75,75))
+		var point := find_site(preferred+offset,bool(site.z))
+		if not point.is_finite(): point = find_site(preferred,bool(site.z))
 		if point.is_finite():
 			records[area].append({"position":point,"apple":bool(site.z),"picked":false,"discovered":false,"fade":0.0})
 	for record in records[area]:

@@ -38,10 +38,14 @@ var active_area := -1
 var records: Dictionary = {}
 var mine_health: Dictionary = {}
 var mine_defeated := 0
+var encounter_areas: Dictionary = {}
+var encounter_rng := RandomNumberGenerator.new()
+var encounter_count := 0
 
 func _ready() -> void:
 	name = "EarthAdventure"
 	y_sort_enabled = true
+	encounter_rng.randomize()
 	sync_area()
 
 func sync_area() -> void:
@@ -121,7 +125,55 @@ func is_active() -> bool:
 	return game.world == 0
 
 func blocked() -> bool:
-	return game.get_tree().paused or game.flight != 0 or game.earth_transition or game.planet_menu.visible or game.camp_menu.visible or game.hud.help.visible
+	return game.get_tree().paused or game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible
+
+func mining_encounter(rock: Dictionary) -> bool:
+	# One chance per deposit, and at most one mining alert per area. Resuming
+	# work, visiting another district or flying home cannot farm encounters.
+	if not is_active() or blocked() or not sword_owned or safe_at(game.player) or rock.get("encounter_checked",false): return false
+	rock["encounter_checked"] = true
+	if encounter_areas.has(game.area_id()) or encounter_rng.randf() >= 0.35: return false
+	var enemy: Node2D
+	var nearby := 0
+	for candidate in targets():
+		if candidate.health <= 0 or candidate.state in ["gone","puff","flee"]: continue
+		var distance: float = candidate.position.distance_to(game.player)
+		if distance < 230: nearby += 1
+		if distance < 185 and game.fog.is_revealed(game.area_id(),candidate.position) and clear_line(candidate.position,game.player):
+			enemy = candidate
+	# Avoid adding another threat to an existing close fight.
+	if nearby > 1: return false
+	if enemy == null and not game.underground:
+		if snakes.filter(func(s): return s.health > 0).size() >= 4: return false
+		var snake := SNAKE.new()
+		snake.trial = self
+		for ring in [140.0,165.0,185.0]:
+			for ray in 24:
+				var point: Vector2 = game.player+Vector2.from_angle(ray*TAU/24.0)*ring
+				snake.home = point
+				if snake.can_stand(point) and clear_line(point,game.player) and game.fog.is_revealed(game.area_id(),point):
+					snake.position = point
+					enemy = snake
+					break
+			if enemy != null: break
+		if enemy == null:
+			snake.free()
+			return false
+		add_child(snake)
+		snakes.append(snake)
+	if enemy == null: return false
+	if game.underground:
+		enemy.state = "alert"
+		enemy.state_time = 0
+	else:
+		enemy.seen = true
+		enemy.state = "stir"
+		enemy.clock = 0
+		enemy.update_pose()
+	encounter_areas[game.area_id()] = true
+	encounter_count += 1
+	game.message = "Something stirred nearby! Move to pause mining, defend yourself, then return to finish this deposit."
+	return true
 
 func sword_equipped() -> bool:
 	return is_active() and sword_owned and selected_tool == 1
@@ -218,6 +270,7 @@ func hurt_player(amount: int) -> bool:
 	if not is_active() or blocked() or invulnerable > 0 or amount <= 0: return false
 	if safe_at(game.player): return false
 	health = maxi(0,health-amount)
+	if game.mining_target >= 0: game.cancel_mining()
 	invulnerable = 1.3
 	game.message = "A small bite! Berries heal one heart; apples heal two."
 	if health == 0:

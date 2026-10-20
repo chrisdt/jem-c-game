@@ -56,6 +56,7 @@ func collect() -> bool:
 	var amount := 4 if apple else 2
 	if trial.heal(amount) <= 0: return false
 	picked = true
+	if is_instance_valid(garden.game.missions): garden.game.missions.fruit_used = true
 	rustle = 0.5
 	update_art()
 	garden.add_heal_effect(position,2 if apple else 1)

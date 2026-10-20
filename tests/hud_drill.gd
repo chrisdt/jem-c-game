@@ -101,8 +101,9 @@ func run() -> void:
 		var i: int = game.rocks.find_custom(func(rock): return rock.hard)
 		game.player = game.rocks[i].pos
 		game.update_exploration()
+		var remaining: float = game.rocks[i].seconds-game.rocks[i].get("work",0.0)
 		game.start_mining(i)
-		game.advance_mining(8.99)
+		game.advance_mining(remaining-0.01)
 		check(game.rocks[i].hp > 0,"Drill changed the full rare-material mining duration")
 		game.advance_mining(0.02)
 	game.refresh_ui()

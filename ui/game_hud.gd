@@ -3,6 +3,7 @@ extends CanvasLayer
 signal action_requested
 signal equipment_requested(index: int)
 signal attack_requested
+signal missions_requested
 
 const STYLE = preload("res://ui/expedition_style.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
@@ -42,6 +43,7 @@ var equip_marks: Array[Panel] = []
 var equip_labels: Array[Label] = []
 var equipped_label: Label
 var attack_button: Button
+var missions_button: Button
 
 func _ready() -> void:
 	location_panel = STYLE.panel(self, Vector2(18,18), Vector2(242,58))
@@ -86,6 +88,7 @@ func _ready() -> void:
 	touch_controls.touch_detected.connect(func(): set_touch_mode(true))
 	set_touch_mode(TOUCH_CONTROLS.device_uses_touch())
 	make_trial_hud()
+	set_touch_mode(touch_mode)
 
 func make_trial_hud() -> void:
 	health_panel = STYLE.panel(self,Vector2(18,84),Vector2(198,34))
@@ -93,6 +96,9 @@ func make_trial_hud() -> void:
 		health_hearts.append(STYLE.icon(health_panel,TRIAL_ART.icon(1),Vector2(10+i*36,4),Vector2(31,26)))
 	mission_panel = STYLE.panel(self,Vector2(18,124),Vector2(276,106))
 	STYLE.label(mission_panel,"MISSIONS",Vector2(13,7),Vector2(246,18),12,true)
+	missions_button = STYLE.button(mission_panel,"Open · J",Vector2(183,3),Vector2(80,27),11)
+	missions_button.focus_mode = Control.FOCUS_NONE
+	missions_button.pressed.connect(func(): missions_requested.emit())
 	for i in 3:
 		mission_labels.append(STYLE.label(mission_panel,"",Vector2(13,30+i*22),Vector2(250,22),13))
 		if i < 2:
@@ -150,6 +156,10 @@ func set_touch_mode(value: bool) -> void:
 	help.position = Vector2(922,454) if value else Vector2(922,574)
 	update_help_copy()
 	touch_controls.set_active(value and not touch_blocked)
+	if is_instance_valid(missions_button):
+		missions_button.text = "Open" if value else "Open · J"
+		missions_button.size = Vector2(78,44) if value else Vector2(80,27)
+		missions_button.position = Vector2(202,-44) if value else Vector2(183,3)
 
 func present(state: Dictionary) -> void:
 	trial_active = state.get("trial_active",false)
@@ -213,7 +223,7 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nTap tool, then Attack / Jab\nCraft your sword at camp" if touch_mode else "WASD / arrows · walk\n1 · tool   2 · crafted sword\nE · use   Space · mine / attack\nCraft your sword at camp"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen missions for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Earth missions   E · use"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
@@ -226,7 +236,11 @@ func present_trial(state: Dictionary) -> void:
 		mission_checks[i].visible = state.upgraded if i == 0 else owned
 		mission_labels[i].position.x = 32 if mission_checks[i].visible else 13
 		mission_labels[i].size.x = 231 if mission_checks[i].visible else 250
-	mission_labels[2].text = "Earth explored · %d / 5" % state.get("earth_explored",1)
+	mission_labels[2].text = state.get("earth_next","Earth explored · %d / 5" % state.get("earth_explored",1))
+	mission_labels[2].add_theme_font_size_override("font_size",12)
+	mission_labels[2].text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	missions_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
+	missions_button.tooltip_text = "Earth expedition journal · 8 missions and an optional healing snack"
 	equip_icons[0].texture = CATALOG.tool_icon(state.upgraded)
 	var selected: int = state.get("selected_tool",0)
 	for i in 2:
