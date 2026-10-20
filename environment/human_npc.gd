@@ -8,16 +8,21 @@ var height := 0.0
 var home_region := 0
 var greeted := false
 var introduced := false
+const SCOUT_HEAD_WIDTH := 200.0
+var head_width := 0.0
 
-func fit_sprite(source: Texture2D, source_region := Rect2i()) -> void:
-	var scout_art: Texture2D = game.MINER_FRAMES.get_frame_texture(&"idle_down",0)
-	height = visible_bounds(scout_art.get_image()).size.y*0.15
+func fit_sprite(source: Texture2D, source_region := Rect2i(), source_head_width := 200.0) -> void:
+	# Face/ear width is measured in each original painting. Matching total
+	# height made the adults' smaller head proportions look tiny beside Scout.
+	head_width = SCOUT_HEAD_WIDTH*0.15
+	var art_scale := head_width/source_head_width
 	var source_image := source.get_image()
 	var origin := Vector2i.ZERO
 	if source_region.has_area():
 		source_image = source_image.get_region(source_region)
 		origin = source_region.position
 	var bounds := visible_bounds(source_image)
+	height = bounds.size.y*art_scale
 	var atlas := AtlasTexture.new()
 	atlas.atlas = source
 	atlas.region = Rect2(bounds.position+origin,bounds.size)
@@ -26,7 +31,7 @@ func fit_sprite(source: Texture2D, source_region := Rect2i()) -> void:
 	illustration.texture = atlas
 	illustration.centered = false
 	illustration.offset = Vector2(-bounds.size.x*0.5,-bounds.size.y)
-	illustration.scale = Vector2.ONE*(height/bounds.size.y)
+	illustration.scale = Vector2.ONE*art_scale
 	add_child(illustration)
 
 static func visible_bounds(image: Image) -> Rect2i:

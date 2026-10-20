@@ -72,7 +72,7 @@ func run() -> void:
 	game.camp_menu.craft("drill")
 	check(game.ore == 0 and game.camp_menu.buttons.all(func(b): return b.disabled),"Completed craft can be bought again")
 	game.camp_menu.dismiss()
-	check(game.hud.mission_checks[0].visible and game.hud.mission_checks[1].visible,"Spending ingredients undid completed missions")
+	check(game.upgraded and game.trial.sword_owned,"Spending ingredients undid completed missions")
 	check(game.hud.counts[2].text == str(wood_found-2),"Wood is missing from the compact inventory")
 	game.trial.equip(0)
 	check(game.scout.sprite_frames == game.DRILL_VISUAL.WALK[0],"Crafted drill is not visibly equipped")

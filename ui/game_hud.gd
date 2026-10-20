@@ -30,9 +30,6 @@ var trial_active := false
 var health_panel: Panel
 var health_hearts: Array[TextureRect] = []
 var mission_panel: Panel
-var mission_labels: Array[Label] = []
-var mission_checks: Array[Line2D] = []
-var rowan_progress: Label
 var equip_slots: Array[Button] = []
 var equip_icons: Array[TextureRect] = []
 var equip_marks: Array[Panel] = []
@@ -84,24 +81,15 @@ func make_trial_hud() -> void:
 	health_panel = STYLE.panel(self,Vector2(18,84),Vector2(198,34))
 	for i in 5:
 		health_hearts.append(STYLE.icon(health_panel,TRIAL_ART.icon(1),Vector2(10+i*36,4),Vector2(31,26)))
-	mission_panel = STYLE.panel(self,Vector2(18,124),Vector2(276,106))
-	STYLE.label(mission_panel,"MISSIONS",Vector2(13,7),Vector2(246,18),12,true)
-	missions_button = STYLE.button(mission_panel,"Open · J",Vector2(183,3),Vector2(80,27),11)
+	mission_panel = Panel.new()
+	mission_panel.position = Vector2(18,124)
+	mission_panel.size = Vector2(144,44)
+	mission_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mission_panel.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
+	add_child(mission_panel)
+	missions_button = STYLE.button(mission_panel,"Quests · J",Vector2.ZERO,Vector2(144,44),17)
 	missions_button.focus_mode = Control.FOCUS_NONE
 	missions_button.pressed.connect(func(): missions_requested.emit())
-	for i in 3:
-		mission_labels.append(STYLE.label(mission_panel,"",Vector2(13,30+i*22),Vector2(250,22),13))
-		if i < 2:
-			var mark := Line2D.new()
-			mark.position = Vector2(14,36+i*22)
-			mark.points = PackedVector2Array([Vector2(0,4),Vector2(4,8),Vector2(12,0)])
-			mark.width = 2
-			mark.default_color = STYLE.GOLD
-			mark.antialiased = true
-			mission_panel.add_child(mark)
-			mission_checks.append(mark)
-	rowan_progress = STYLE.label(mission_panel,"",Vector2(13,74),Vector2(250,22),13)
-	rowan_progress.hide()
 	for i in 2:
 		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
 		button.focus_mode = Control.FOCUS_NONE
@@ -149,9 +137,10 @@ func set_touch_mode(value: bool) -> void:
 	update_help_copy()
 	touch_controls.set_active(value and not touch_blocked)
 	if is_instance_valid(missions_button):
-		missions_button.text = "Open" if value else "Open · J"
-		missions_button.size = Vector2(78,44) if value else Vector2(80,27)
-		missions_button.position = Vector2(202,-44) if value else Vector2(183,3)
+		missions_button.text = "Quests" if value else "Quests · J"
+		missions_button.size = Vector2(144,52) if value else Vector2(144,44)
+		mission_panel.size = missions_button.size
+		missions_button.position = Vector2.ZERO
 
 func present(state: Dictionary) -> void:
 	trial_active = state.get("trial_active",false)
@@ -208,29 +197,15 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen missions for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Earth missions   E · talk / use"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Quests   E · talk / use"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
 func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)
-	mission_labels[0].text = "Hand drill built" if state.upgraded else "Build hand drill · %d / 5 copper" % mini(state.inventory.x,5)
 	var owned: bool = state.get("sword_owned",false)
-	var rowan_started: bool = state.get("rowan_mission",false)
-	mission_labels[1].text = state.rowan_title if rowan_started else ("Copper sword crafted" if owned else "Sword · %d/3 copper + %d/2 wood" % [mini(state.inventory.x,3),mini(state.get("wood",0),2)])
-	rowan_progress.visible = rowan_started
-	rowan_progress.text = state.get("rowan_progress","")
-	mission_panel.size.y = 128 if rowan_started else 106
-	mission_labels[2].position.y = 96 if rowan_started else 74
-	for i in 2:
-		mission_checks[i].visible = state.upgraded if i == 0 else (state.get("rowan_complete",false) if rowan_started else owned)
-		mission_labels[i].position.x = 32 if mission_checks[i].visible else 13
-		mission_labels[i].size.x = 231 if mission_checks[i].visible else 250
-	mission_labels[2].text = state.get("earth_next","Earth explored · %d / 5" % state.get("earth_explored",1))
-	mission_labels[2].add_theme_font_size_override("font_size",12)
-	mission_labels[2].text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	missions_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
-	missions_button.tooltip_text = "Earth expedition journal · 7 character missions and optional exploration"
+	missions_button.tooltip_text = "Quests · expand a title for instructions and progress"
 	equip_icons[0].texture = CATALOG.tool_icon(state.upgraded)
 	var selected: int = state.get("selected_tool",0)
 	for i in 2:

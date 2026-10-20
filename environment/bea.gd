@@ -8,7 +8,7 @@ func _ready() -> void:
 	name = "Bea"
 	home_region = 1
 	position = FOOT
-	fit_sprite(PORTRAIT)
+	fit_sprite(PORTRAIT,Rect2i(),340.0)
 	sync_area()
 
 func greeting_text() -> String:

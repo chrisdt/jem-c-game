@@ -9,16 +9,17 @@ const PEOPLE := {
 	"otis":{"region":1,"foot":Vector2(1660,790)},
 	"mara":{"region":4,"foot":Vector2(1040,550)},
 	"iris":{"region":3,"foot":Vector2(1370,600)},
-	"finn":{"region":2,"foot":Vector2(1530,720)},
-	"nova":{"region":0,"foot":Vector2(345,510)},
+	"finn":{"region":2,"foot":Vector2(1187,853)},
+	"nova":{"region":0,"foot":Vector2(195,470)},
 }
 const PROPS := {
-	"supplies":{"region":1,"cave":false,"foot":Vector2(1440,1000),"cell":0,"width":58.0},
-	"rockfall":{"region":1,"cave":false,"foot":Vector2(1815,674),"cell":1,"width":172.0},
-	"locker":{"region":3,"cave":false,"foot":Vector2(1560,365),"cell":2,"width":68.0},
-	"seals":{"region":2,"cave":false,"foot":Vector2(1180,600),"cell":3,"width":48.0},
+	"supplies":{"region":1,"cave":false,"foot":Vector2(1480,847),"cell":0,"width":58.0},
+	"rockfall":{"region":1,"cave":false,"foot":Vector2(1815,760),"cell":1,"width":340.0},
+	"locker":{"region":3,"cave":false,"foot":Vector2(1600,345),"cell":2,"width":68.0},
+	"seals":{"region":0,"cave":true,"foot":Vector2(910,530),"cell":3,"width":48.0},
 	"engine":{"region":4,"cave":true,"foot":Vector2(1230,440),"cell":4,"width":54.0},
 }
+const ROCKFALL_BARRIER := Rect2(1735,555,200,255)
 var game: Node
 var accepted: Dictionary = {}
 var complete: Dictionary = {}
@@ -118,7 +119,7 @@ func pages(role: String) -> Array[String]:
 			if damaged_suit and navigation_part: return ["An old spacesuit and a navigation unit! Finn can repair the suit beside Willow Marsh's bridge."]
 			return ["There's an expedition locker at the circular ruins. A snake has made its home nearby.","With Mara's upgraded tools, deal with the ruins snake and drill open the locker. Bring me news of what you find."]
 		"finn":
-			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit on the dry bank near the bridge. Bring it, the damaged suit and 2 fallen wood for the repair frame.","You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." % mini(game.trial.wood,2)]
+			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit in Moss Mine, the first mine near camp. Bring it, the damaged suit and 2 fallen wood for the repair frame.","You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." % mini(game.trial.wood,2)]
 		"nova":
 			return ["We've nearly got a space explorer! The last engine component is in Crystal Depths.","Recover it with the upgraded drill. Bring the navigation unit from Iris and fuel regulator from Finn.","Then we'll fit the parts, check both upgraded tools and your sealed spacesuit, and repair the rocket together."]
 	return []
@@ -193,7 +194,7 @@ func entries() -> Array[Dictionary]:
 		"otis":"Pinewood's quarry trail: craft the 5-copper hand drill, drill away the rockfall, then report to Otis.",
 		"mara":"Old Quarry, beside the rails: bring 4 copper and 2 blue crystals to upgrade both your drill and sword.",
 		"iris":"Sunstone Ridge: use the upgraded tools, defeat the ruins snake and open the expedition locker. Report to Iris.",
-		"finn":"Willow Marsh: bring the damaged spacesuit, seal kit from the bridge bank and 2 fallen wood. Finn repairs your suit.",
+		"finn":"Find Finn on the grassy bank below Willow Marsh's bridge. Bring the damaged spacesuit, seal kit from Moss Mine and 2 fallen wood.",
 		"nova":"Camp rocket: recover the engine part in Crystal Depths. Bring it, the navigation unit and Finn's regulator for launch checks.",
 	}
 	for role in ORDER:
@@ -206,7 +207,7 @@ func prop_exists(id: String) -> bool:
 	match id:
 		"supplies": return not cache_held and not done("bea")
 		"rockfall": return not quarry_open
-		"locker": return not damaged_suit and not done("iris") and not suit_ready
+		"locker": return drill_improved and sword_improved and not damaged_suit and not done("iris") and not suit_ready
 		"seals": return not seal_kit and not suit_ready
 		"engine": return not engine_part and not rocket_repaired
 	return false
@@ -287,14 +288,17 @@ func _process(delta: float) -> void:
 func nearest_prop() -> String:
 	if not visible: return ""
 	var best := ""
-	var distance := 105.0
+	var distance := 1.0
 	for id in props:
 		if not prop_exists(id) or not prop_seen.get(id,false): continue
-		var d: float = game.player.distance_to(props[id].position)
+		var d: float = game.player.distance_to(props[id].position)/prop_reach(id)
 		if d < distance:
 			best = id
 			distance = d
 	return best
+
+func prop_reach(id: String) -> float:
+	return 165.0 if id == "rockfall" else 105.0
 
 func prop_prompt(id: String) -> String:
 	return {"supplies":"Recover Bea's supplies","rockfall":"Drill the rockfall","locker":"Open expedition locker","seals":"Recover seal kit","engine":"Recover engine component"}.get(id,"")
@@ -310,7 +314,7 @@ func cancel_work() -> void:
 
 func advance_actions(delta: float) -> void:
 	if not working() or game.menu_open() or game.get_tree().paused or game.flight != 0 or game.earth_transition: return
-	if not props.has(job) or game.player.distance_to(props[job].position) >= 110:
+	if not props.has(job) or game.player.distance_to(props[job].position) >= prop_reach(job)+5:
 		cancel_work()
 		return
 	job_progress[job] = minf(2,job_progress.get(job,0.0)+delta)

@@ -17,11 +17,15 @@ func _ready() -> void:
 					break
 			if found: break
 	if role == "otis":
-		fit_sprite(load("res://assets/npcs/earth_people_concept.png"),Rect2i(768,0,768,1024))
+		fit_sprite(load("res://assets/npcs/earth_people_concept.png"),Rect2i(768,0,768,1024),220.0)
 	else:
 		var index: int = ["mara","iris","finn","nova"].find(role)
-		fit_sprite(load("res://assets/npcs/earth_neighbours.png"),Rect2i((index%2)*768,(index/2)*512,768,512))
+		fit_sprite(load("res://assets/npcs/earth_neighbours.png"),Rect2i((index%2)*768,(index/2)*512,768,512),140.0)
 	sync_area()
+
+func sync_area() -> void:
+	super.sync_area()
+	if role == "nova": visible = visible and game.story.available("nova")
 
 func greeting_text() -> String:
 	return {"otis":"Mind the rockfall! Come talk before heading to the quarry.","mara":"Looking for stronger tools? I can help.","iris":"There's a story hidden in these ruins.","finn":"Every explorer needs a well-sealed spacesuit.","nova":"One day this rocket will take us to other worlds!"}[role]

@@ -63,7 +63,7 @@ func run() -> void:
 	var bubble = game.character_bubble
 	check(rowan.visible and rowan.position == Vector2(590,454),"Rowan is missing from her approved camp position")
 	var scout_bounds: Rect2i = rowan.visible_bounds(game.MINER_FRAMES.get_frame_texture(&"idle_down",0).get_image())
-	check(absf(rowan.height-scout_bounds.size.y*0.15) < 0.01,"Rowan is larger than Scout")
+	check(is_equal_approx(rowan.head_width,30.0) and rowan.height > scout_bounds.size.y*0.15,"Rowan does not share Scout's head scale")
 	check(absf(rowan.illustration.texture.region.size.y*rowan.illustration.scale.y-rowan.height) < 0.01,"Rowan's fitted art does not match the measured height")
 	check(rowan.greeted and bubble.anchor == rowan and not game.menu_open(),"Camp greeting is missing or blocks gameplay")
 	check(not game.trial.sword_owned and game.ore == 0 and game.trial.wood == 0,"Meeting Rowan granted ingredients or equipment")

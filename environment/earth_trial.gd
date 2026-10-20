@@ -57,7 +57,7 @@ func sync_area() -> void:
 	if active_area >= 0:
 		records[active_area] = []
 		for snake in snakes:
-			records[active_area].append({"spawn_id":snake.spawn_id,"home":snake.home,"position":snake.position,"health":snake.health,"seen":snake.seen,"fade":snake.fade,"phase":snake.phase})
+			records[active_area].append({"spawn_id":snake.spawn_id,"home":snake.home,"position":snake.position,"health":snake.health,"seen":snake.seen,"fade":snake.fade,"phase":snake.phase,"fear_seconds":snake.fear_seconds,"scare_cooldown":snake.scare_cooldown,"target":snake.target})
 	for snake in snakes:
 		remove_child(snake)
 		snake.free()
@@ -77,7 +77,10 @@ func sync_area() -> void:
 			snake.seen = record.seen
 			snake.fade = record.fade
 			snake.phase = record.phase
-			snake.state = "gone" if snake.health <= 0 else "recover"
+			snake.fear_seconds = record.get("fear_seconds",0.0)
+			snake.scare_cooldown = record.get("scare_cooldown",0.0)
+			snake.target = record.get("target",record.position)
+			snake.state = "gone" if snake.health <= 0 else ("flee" if snake.fear_seconds > 0 else "recover")
 			snake.visible = snake.health > 0
 			snake.update_pose()
 			snakes.append(snake)

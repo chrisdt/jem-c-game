@@ -1,6 +1,7 @@
 extends Node2D
 
 const ART: Texture2D = preload("res://assets/rocket.png")
+const BROKEN_ART: Texture2D = preload("res://assets/rocket_damaged.png")
 const ART_SCALE := 220.0 / 1331.0
 var body: Sprite2D
 var altitude := 0.0
@@ -9,32 +10,45 @@ var frost := false
 var clock := 0.0
 var dust_clock := 0.0
 var dust: Array[Dictionary] = []
-var damaged := false
-var service_hatch: Node2D
+var damaged := false:
+	set(value):
+		damaged = value
+		if is_instance_valid(body): body.texture = broken_cutout if damaged else working_cutout
+		if not damaged:
+			smoke.clear()
+			smoke_clock = 0
+			if is_instance_valid(smoke_effect): smoke_effect.queue_redraw()
+var working_cutout: AtlasTexture
+var broken_cutout: AtlasTexture
+var smoke_effect: Node2D
+var smoke: Array[Dictionary] = []
+var smoke_clock := 0.0
 
 func _ready() -> void:
 	name = "ScoutRocket"
 	z_index = 2
-	var cutout := AtlasTexture.new()
-	cutout.atlas = ART
-	cutout.region = Rect2(40, 25, 990, 1350)
+	working_cutout = AtlasTexture.new()
+	working_cutout.atlas = ART
+	working_cutout.region = Rect2(40,25,990,1350)
+	broken_cutout = AtlasTexture.new()
+	broken_cutout.atlas = BROKEN_ART
+	broken_cutout.region = working_cutout.region
 	body = Sprite2D.new()
-	body.texture = cutout
+	body.texture = broken_cutout if damaged else working_cutout
 	body.centered = false
 	body.scale = Vector2.ONE * ART_SCALE
 	add_child(body)
-	service_hatch = Node2D.new()
-	service_hatch.draw.connect(func():
-		service_hatch.draw_rect(Rect2(-20,-105,38,26),Color("233232"))
-		service_hatch.draw_rect(Rect2(-20,-105,38,26),Color("987343"),false,2)
-		service_hatch.draw_polyline(PackedVector2Array([Vector2(-9,-90),Vector2(8,-84),Vector2(24,-96),Vector2(32,-73)]),Color("c9854a"),3,true))
-	add_child(service_hatch)
+	smoke_effect = Node2D.new()
+	smoke_effect.draw.connect(draw_smoke)
+	add_child(smoke_effect)
 	set_flight(0, 0)
 
 func reset_pad(point: Vector2, icy: bool) -> void:
 	position = point
 	frost = icy
 	dust.clear()
+	smoke.clear()
+	smoke_clock = 0
 	dust_clock = 0
 	set_flight(0, 0)
 
@@ -46,10 +60,10 @@ func set_flight(height: float, power: float) -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
-	service_hatch.visible = damaged and altitude == 0
 	if not is_visible_in_tree():
 		return
 	clock += delta
+	advance_smoke(delta)
 	if thrust > 0.1 and altitude < 140:
 		dust_clock += delta
 		while dust_clock >= 0.035:
@@ -68,6 +82,28 @@ func _process(delta: float) -> void:
 			puff.pos += puff.velocity * delta
 			puff.velocity *= exp(-delta * 1.5)
 	queue_redraw()
+
+func advance_smoke(delta: float) -> void:
+	if not damaged or altitude > 0:
+		smoke.clear()
+		smoke_clock = 0
+	else:
+		smoke_clock += delta
+		while smoke_clock >= 0.3:
+			smoke_clock -= 0.3
+			if smoke.size() < 10: smoke.append({"time":0.0,"phase":clock})
+	for puff in smoke: puff.time += delta
+	smoke = smoke.filter(func(p): return p.time < 2.4)
+	smoke_effect.queue_redraw()
+
+func draw_smoke() -> void:
+	for puff in smoke:
+		var t: float = puff.time/2.4
+		var at := Vector2(14,-43)+Vector2(-25*t+sin(puff.phase*2+t*4)*5,-62*t)
+		var alpha: float = sin(t*PI)*0.31
+		for i in 3:
+			var offset := Vector2.from_angle(i*TAU/3+puff.phase)*4
+			smoke_effect.draw_circle(at+offset,4+9*t,Color(0.60,0.62,0.60,alpha*0.65))
 
 func oval(center: Vector2, radius: Vector2, tint: Color) -> void:
 	var points := PackedVector2Array()

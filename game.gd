@@ -418,7 +418,7 @@ func clear_touch_gestures() -> void:
 	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
 	if is_instance_valid(camp_menu): buttons += camp_menu.buttons + [camp_menu.close_button]
 	buttons.append(hud.missions_button)
-	if is_instance_valid(mission_journal): buttons += [mission_journal.close_button,mission_journal.up_button,mission_journal.down_button]
+	if is_instance_valid(mission_journal): buttons += [mission_journal.close_button,mission_journal.up_button,mission_journal.down_button]+mission_journal.headers
 	for button in buttons: button.release_touch()
 
 func update_exploration() -> void:
@@ -474,7 +474,7 @@ func arrival_message() -> String:
 
 func open_planet_menu() -> void:
 	if world == 0 and is_instance_valid(story) and not story.launch_ready():
-		message = "This rocket needs repairs. Talk to Nova beside it and follow the Earth missions."
+		message = "This rocket needs repairs. Follow the Earth quests to prepare your tools and suit; Nova will meet you here for repairs."
 		refresh_ui()
 		return
 	walking = false
@@ -687,7 +687,7 @@ func move_player(direction: Vector2, delta: float) -> void:
 		next = player
 	var travelled := player.distance_to(next)
 	if world == 0 and earth_region == 1 and not underground and not story.quarry_open:
-		var barrier := Rect2(1755,570,150,205)
+		var barrier: Rect2 = story.ROCKFALL_BARRIER
 		var intersects := false
 		var steps := maxi(1,ceili(player.distance_to(next)/6.0))
 		for step in range(1,steps+1):
@@ -1010,7 +1010,7 @@ func advance_mining(delta: float) -> void:
 		elif rock.hard:
 			blue_crystals += 1
 			won = blue_crystals >= 1
-			message = "Mission complete: blue crystal discovered! Open Earth missions to see your next adventure."
+			message = "Mission complete: blue crystal discovered! Open Quests to see your next adventure."
 		else:
 			ore += 1
 			total_mined += 1
@@ -1045,8 +1045,6 @@ func refresh_ui() -> void:
 		for npc in npcs:
 			if is_instance_valid(npc): npc.sync_area()
 		story.sync_area()
-		rocket.body.modulate = Color.WHITE if world != 0 or story.rocket_repaired else Color(0.65,0.65,0.60)
-		rocket.body.rotation = 0 if world != 0 or story.rocket_repaired else -0.04
 		rocket.damaged = world == 0 and not story.rocket_repaired
 	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(rowan):

@@ -43,10 +43,10 @@ const DENSITY = preload("res://ore_density.gd")
 const FOOT_OFFSET := Vector2(0,20)
 const BEA_FOOT := Vector2(1632,1138)
 const NPC_CLEARANCE := {
-	0:[Vector2(590,454),Vector2(345,510)],
-	1:[BEA_FOOT,Vector2(1660,790),Vector2(1440,1000)],
-	2:[Vector2(1530,720),Vector2(1180,600)],
-	3:[Vector2(1370,600),Vector2(1560,365)],
+	0:[Vector2(590,454),Vector2(195,470)],
+	1:[BEA_FOOT,Vector2(1660,790),Vector2(1480,847)],
+	2:[Vector2(1187,853)],
+	3:[Vector2(1370,600),Vector2(1600,345)],
 	4:[Vector2(1040,550)],
 }
 

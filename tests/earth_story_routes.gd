@@ -42,6 +42,8 @@ func run() -> void:
 	await process_frame
 	game.set_process(false)
 	game.story.set_process(false)
+	game.story.drill_improved = true
+	game.story.sword_improved = true
 	for region in 5:
 		await TRAVEL.enter(game,region,false)
 		var points := reachable(game)
@@ -53,13 +55,15 @@ func run() -> void:
 		if region == 2:
 			var water: Image = WATER.mask_for("willow").image
 			var finn = game.npcs.filter(func(n): return n.name == "Finn")[0]
-			for point in [finn.position,game.story.props.seals.position]:
+			for point in [finn.position]:
 				var pixel := Vector2i(point/game.EARTH.SIZE*Vector2(water.get_size()))
 				check(water.get_pixelv(pixel).r < 0.5,"Finn or his seal kit is standing in painted water")
+	await TRAVEL.enter(game,0,true)
+	check(near_route(reachable(game),game.story.props.seals.position),"Seal kit is disconnected from Moss Mine arrival")
 	await TRAVEL.enter(game,4,true)
 	check(near_route(reachable(game),game.story.props.engine.position),"Engine part is disconnected from Crystal Depths arrival")
 	check(game.earth_stream.textures.size() <= game.earth_stream.MAX_TEXTURES,"Story props bypassed the scenery cache")
 	game.queue_free()
 	await process_frame
-	if failures == 0: print("PASS: seven NPCs and every surface quest prop connect to real arrival routes, Finn/seal kit stay off painted water, engine recovery is reachable in Crystal Depths and scenery cache remains bounded")
+	if failures == 0: print("PASS: seven NPCs and every surface quest prop connect to real arrival routes, Finn stays off painted water and the seal kit is reachable in Moss Mine, engine recovery is reachable in Crystal Depths and scenery cache remains bounded")
 	quit(1 if failures else 0)

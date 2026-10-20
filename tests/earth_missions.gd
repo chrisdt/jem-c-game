@@ -73,7 +73,7 @@ func run() -> void:
 	game.companion.set_process(false)
 	game.gardens.set_process(false)
 	check(game.missions.completed() == 0 and game.missions.entries().size() == 11,"Fresh expedition inherited completed missions")
-	check(game.hud.mission_panel.size.y == 106,"Mission HUD became a large overlay")
+	check(game.hud.mission_panel.size.y <= 52,"Mission HUD became a large overlay")
 	# Follow the normal journal shortcut. Opening pauses mining and all combat.
 	var index: int = game.rocks.find_custom(func(r): return not r.cave)
 	game.player = game.rocks[index].pos+Vector2(-65,0)
@@ -229,7 +229,7 @@ func run() -> void:
 	game.companion.recruited = true
 	check(game.missions.entries().filter(func(e): return e.id in ["trails","mines","buddy"]).all(func(e): return e.done),"Optional exploration objectives did not finish")
 	game.mission_journal.open()
-	check(game.mission_journal.summary.text.contains("/ 7 story missions"),"Journal failed to display the character mission count")
+	check(game.mission_journal.summary.text.contains("/ 7 story quests"),"Journal failed to display the character mission count")
 	game.mission_journal.dismiss()
 	game.queue_free()
 	await process_frame

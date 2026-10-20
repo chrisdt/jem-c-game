@@ -100,7 +100,7 @@ func set_touch_mode(value: bool) -> void:
 	touch_mode = value
 	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
 	mine_text.text = "Tap action to mine. Move away to pause.\nReturn to resume; build a drill at camp." if value else "E / Space mines nearby ore. Move to pause.\nReturn to resume; build a drill at camp."
-	combat_text.text = "Gather 3 copper + 2 wood; craft at camp.\nTap Attack / Jab. Open missions for more." if value else "E gathers wood; craft with 3 copper + 2 wood.\n1 tool, 2 sword; Space attacks. J: missions."
+	combat_text.text = "Gather 3 copper + 2 wood; craft at camp.\nTap Attack / Jab. Open Quests for more." if value else "E gathers wood; craft with 3 copper + 2 wood.\n1 tool, 2 sword; Space attacks. J: Quests."
 	footer.text = ("Best on iPad in landscape. Tap ? in game for controls." if value else "Enter / Space to start. Open ? in game for controls.") + "\nProgress lasts while this game is open."
 
 func start_exploring() -> void:

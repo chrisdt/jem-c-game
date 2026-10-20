@@ -27,6 +27,8 @@ var pictures: Array[Sprite2D] = []
 var current_frame := 0
 var last_jab := -1
 var damage_taken := 0
+var fear_seconds := 0.0
+var scare_cooldown := 0.0
 
 func _ready() -> void:
 	rng.randomize()
@@ -68,6 +70,30 @@ func choose_target() -> void:
 			return
 	target = position
 
+func scare_from(origin: Vector2) -> bool:
+	if health <= 0 or not seen or state in ["flee","puff","gone"] or scare_cooldown > 0: return false
+	var away := (position-origin).normalized()
+	if away.is_zero_approx(): away = Vector2.RIGHT
+	var escape := position
+	var score := 0.0
+	for ray in 16:
+		var direction := away.rotated(ray*TAU/16)
+		if direction.dot(away) < 0: continue
+		for distance in [180.0,135.0,90.0,45.0]:
+			var candidate: Vector2 = position+direction*distance
+			var candidate_score: float = (candidate-position).dot(away)+distance*0.1
+			if candidate_score > score and clear_route(candidate):
+				escape = candidate
+				score = candidate_score
+	if score <= 0: return false
+	target = escape
+	state = "flee"
+	fear_seconds = 5.0
+	scare_cooldown = 8.0
+	clock = 0
+	bitten = true
+	return true
+
 func move_towards(point: Vector2, speed: float, delta: float) -> void:
 	var previous := position
 	var next := position.move_toward(point,speed*delta)
@@ -83,6 +109,8 @@ func advance(delta: float) -> void:
 	clock += delta
 	hit_flash = maxf(0,hit_flash-delta)
 	health_seconds = maxf(0,health_seconds-delta)
+	fear_seconds = maxf(0,fear_seconds-delta)
+	scare_cooldown = maxf(0,scare_cooldown-delta)
 	if state == "puff":
 		if clock >= 0.7:
 			state = "gone"
@@ -98,6 +126,12 @@ func advance(delta: float) -> void:
 	var distance := position.distance_to(player)
 	var safe: bool = trial.safe_at(player) or trial.invulnerable > 0.7
 	match state:
+		"flee":
+			# Keep the living snake in this district: no smoke, damage or quest credit.
+			move_towards(target,95,delta)
+			if fear_seconds <= 0:
+				state = "roam"
+				clock = 0
 		"stir":
 			# A mining alert is visible for over a second before any chase.
 			if clock >= 1.25:
@@ -105,7 +139,7 @@ func advance(delta: float) -> void:
 				clock = 0
 		"hurt":
 			if clock > 0.22:
-				state = "recover"
+				state = "flee" if fear_seconds > 0 else "recover"
 				clock = 0
 		"warn":
 			if distance > 100 or safe:

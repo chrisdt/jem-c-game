@@ -268,21 +268,26 @@ func advance(delta: float) -> void:
 	queue_redraw()
 
 func try_bark() -> bool:
-	if not recruited or game.world != 0 or not game.underground or not is_visible_in_tree() or game.earth_transition or game.flight != 0 or game.menu_open() or game.hud.help.visible or bark_cooldown > 0: return false
-	var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
-	if habitat == null: return false
+	if not recruited or game.world != 0 or not is_visible_in_tree() or game.earth_transition or game.flight != 0 or game.menu_open() or game.hud.help.visible or bark_cooldown > 0: return false
+	var candidates: Array = []
+	if game.underground:
+		var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
+		if habitat == null: return false
+		for creature in habitat.creatures:
+			if creature.kind in [CREATURE.Kind.RAT,CREATURE.Kind.BAT]: candidates.append(creature)
+	else:
+		candidates = game.trial.snakes
 	var nearby: Array[Node2D] = []
-	for creature in habitat.creatures:
+	for creature in candidates:
 		if not is_instance_valid(creature) or not creature.is_visible_in_tree(): continue
-		if creature.kind not in [CREATURE.Kind.RAT,CREATURE.Kind.BAT] or creature.state in ["flee","puff","gone"]: continue
+		if creature.state in ["flee","puff","gone"]: continue
 		if position.distance_to(creature.position) > BARK_RADIUS: continue
 		if not game.fog.is_revealed(game.area_id(),creature.position): continue
 		if not clear_route(position,creature.position,false): continue
-		nearby.append(creature)
+		if creature.scare_from(position): nearby.append(creature)
 	if nearby.is_empty(): return false
 	nearby.sort_custom(func(a,b): return position.distance_squared_to(a.position) < position.distance_squared_to(b.position))
 	facing = FACING.from_movement(nearby[0].position-position,facing)
-	for creature in nearby: creature.scare_from(position)
 	state = "bark"
 	bark_remaining = BARK_SECONDS
 	bark_cooldown = BARK_COOLDOWN

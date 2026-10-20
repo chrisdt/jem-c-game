@@ -73,7 +73,8 @@ func use_prop(game, id: String) -> void:
 	check(game.story.props.has(id),"Missing reachable quest prop: "+id)
 	if not game.story.props.has(id): return
 	var prop = game.story.props[id]
-	position_player(game,prop.position+Vector2(-65,0))
+	var approach := Vector2(-105,-110) if id == "rockfall" else Vector2(-65,0)
+	position_player(game,prop.position+approach)
 	game.trial.selected_tool = 0
 	game.interact()
 	check(not game.dialogue_open(),"An NPC stole the quest prop interaction: "+id)
@@ -81,7 +82,7 @@ func use_prop(game, id: String) -> void:
 		game.story.advance_actions(0.7)
 		game.move_player(Vector2.LEFT,0.01)
 		check(not game.story.working() and is_equal_approx(game.story.job_progress[id],0.7),"Moving did not pause a world drilling job")
-		position_player(game,prop.position+Vector2(-65,0))
+		position_player(game,prop.position+approach)
 		game.interact()
 		game.story.advance_actions(1.31)
 		check(not game.story.working(),"World drilling did not resume and finish")
@@ -119,7 +120,7 @@ func run() -> void:
 	game.travel_to_other_planet(1)
 	check(game.flight == 0 and game.world == 0,"The broken rocket can launch before the story")
 	for npc in game.npcs:
-		check(absf(npc.height-game.rowan.height) < 0.01,"A new character is larger than Scout: "+str(npc.name))
+		check(absf(npc.head_width-game.rowan.head_width) < 0.01,"A new character has a different head size: "+str(npc.name))
 	# Rowan's accepted craft still owns its original recipe and reward.
 	talk(game,"rowan")
 	finish_dialogue(game)
@@ -222,9 +223,10 @@ func run() -> void:
 	talk(game,"iris")
 	finish_dialogue(game)
 	check(game.story.done("iris"),"Discovery report did not complete Iris")
-	await TRAVEL.enter(game,2,false)
+	await TRAVEL.enter(game,0,true)
 	use_prop(game,"seals")
-	check(game.story.seal_kit,"Waterside seal kit could not be recovered")
+	check(game.story.seal_kit,"Moss Mine seal kit could not be recovered")
+	await TRAVEL.enter(game,2,false)
 	var wood: int = game.trial.wood
 	talk(game,"finn")
 	finish_dialogue(game)
