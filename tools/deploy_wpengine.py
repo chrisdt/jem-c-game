@@ -248,6 +248,7 @@ def connect(host_key_only=False):
         return
     client = paramiko.SSHClient()
     client.load_system_host_keys()
+    client.load_host_keys(str(REPO / "tools/wpengine_known_hosts"))
     known = REPO / ".deploy/known_hosts"
     if known.exists():
         client.load_host_keys(str(known))

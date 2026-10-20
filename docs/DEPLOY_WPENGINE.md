@@ -26,17 +26,21 @@ SHA instead of the moving branch name.
 The target account is `sunnyscout-git@sunnyscout.sftp.wpengine.com:2222`.
 The password supplied for setup must be stored as the repository Actions secret
 **`WPE_SFTP_PASSWORD`**. It is not recorded in this document or source control.
-Set the repository Actions variable **`WPE_SFTP_KNOWN_HOSTS`** to the verified
-OpenSSH host-key line, in this form:
+The public server key is pinned in `tools/wpengine_known_hosts`, retrieved by
+the read-only [host-key check](https://github.com/chrisdt/jem-c-game/actions/runs/39369381897)
+on 20 October 2026. Its fingerprint is
+`SHA256:kp6D7jBrR02Z/SuQtH89kLGnkm2sODLmQX87GjVm1cM`.
+No Actions variable is needed for the current server key. If WP Engine rotates
+it, verify the replacement before updating the file or setting the optional
+Actions variable **`WPE_SFTP_KNOWN_HOSTS`** to the replacement OpenSSH line:
 
 ```text
 [sunnyscout.sftp.wpengine.com]:2222 KEY_TYPE PUBLIC_HOST_KEY
 ```
 
 The `host-key` operation retrieves this public information and its fingerprint
-without authentication. Record the initial key from that read-only run; later
-password authentication uses the pinned key. An unexpected key stops the
-connection. Setup can save the key as a repository variable once API access works.
+without authentication. Password authentication uses the pinned key; an
+unexpected key stops the connection.
 
 The tool detects the web root by finding `wp-admin`, `wp-content` and
 `wp-includes` together. It checks the SFTP login directory, `/sites/sunnyscout`,
@@ -44,13 +48,12 @@ The tool detects the web root by finding `wp-admin`, `wp-content` and
 Actions variable **`WPE_WEB_ROOT`** after the read-only check. The destination is
 always that root's **`play`** subdirectory, never the WordPress root itself.
 
-The current cloud environment blocked both SFTP host resolution and the GitHub
-Actions API during setup. Domain additions have been saved in the environment
-configuration draft for `api.github.com`, `playsunnyscout.com`,
-`www.playsunnyscout.com` and `sunnyscout.sftp.wpengine.com`. Saving the draft does
-not apply it. Review/save and publish the environment, then retry the GitHub API
-and read-only connection check. GitHub-hosted Actions provides the SFTP runner
-when this cloud runtime cannot open outbound SSH connections. Credentials and
+On 20 October 2026 the GitHub-hosted runner reached the SFTP server, while
+direct SFTP from the cloud runtime was refused. The connection check stopped
+because `WPE_SFTP_PASSWORD` was empty. The GitHub integration can dispatch
+workflows but returns HTTP 403 for secret management, so the repository owner
+must add the password under Settings → Secrets and variables → Actions.
+After that, rerun `check` and then the authorized deployment. Authentication and
 the actual server web root have not yet been verified.
 
 ## Local command
@@ -70,8 +73,9 @@ authenticates and checks the destination without changing server files. `deploy`
 is the write operation. Use `--build-dir PATH` for an unzipped browser-build
 folder. The default is this checkout's `build/web`.
 
-For local use, pin the verified host key in `.deploy/known_hosts` (ignored by Git)
-or supply `WPE_SFTP_KNOWN_HOSTS`. Supply `WPE_SFTP_PASSWORD` securely as an
+Local commands use the same bundled public server key. A verified replacement
+can be supplied in `.deploy/known_hosts` (ignored by Git) or
+`WPE_SFTP_KNOWN_HOSTS`. Supply `WPE_SFTP_PASSWORD` securely as an
 environment variable, or let the command prompt without echoing it. Never put a
 literal password in a shell command. Cloud proxy secret placeholders are not raw
 SFTP passwords; use a supported runner with a real runtime secret.
