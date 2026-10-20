@@ -1,47 +1,33 @@
-# Sunny Scout — browser testing build
+# Sunny Scout — Earth story browser build
 
-This branch contains the complete playable browser build for Earth, Frost Canyon and Ember Dunes. The editable Godot project is on `main`. Exported with Godot 4.6.3 from source commit `bc71041`.
+The complete browser game, exported with Godot 4.6.3 from source commit `d6974b19a453b6983592274ab9e70871f9677ec6`. The editable Godot project is on `main`.
 
-## Download and upload
+## Upload
 
-Use **Code → Download ZIP**, then unzip it. Upload **everything inside `build/web/`** into your server's `/jem/` folder. Replace the complete set of 30 files, keeping all three scenery folders:
+Download this branch with **Code → Download ZIP** and unzip it. Upload **everything inside `build/web/`** into your website's game folder, such as `/play/`. Replace the entire set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs in each). Keep the two hashed `scout-backdrop-*.jpg` / `scout-logo-*.png` loading assets. Serve over HTTPS; opening `index.html` directly as a local file will not run the game.
 
-```text
-jem/
-  index.html
-  index.js
-  index.wasm
-  index.pck
-  scout-backdrop-*.jpg
-  scout-logo-*.png
-  ...other exported files...
-  earth_chunks/   (6 JPG files)
-  frost_chunks/   (6 JPG files)
-  ember_chunks/   (6 JPG files)
-```
+The intended site is https://playsunnyscout.com/play/. Publishing this build branch does not upload it to WP Engine. Manual deployment instructions are in `docs/DEPLOY_WPENGINE.md` on `main`.
 
-Then open https://www.digitalthing.com.au/jem/ and hard-refresh. No Godot installation is needed to upload or play. Use landscape mode on an iPad. This image should also open directly after upload: https://www.digitalthing.com.au/jem/earth_chunks/pinewood.jpg
+## Play Earth's story
 
-## Earth adventure
+Start exploring, then talk to **Rowan** beside camp with **E** or the touch action. **J / Open missions** recalls the seven character missions:
 
-Scout starts on the clear ground directly in front of the camp workbench, matching the chosen camp view. New games, confirmed resets and Earth camp recovery use this position. Mineral and wood placement excludes the actual opening camera view.
+1. Rowan — craft the copper sword (3 copper + 2 fallen wood).
+2. Bea — deal with her designated snake, recover the woodland supply box and return it.
+3. Otis — build the hand drill (5 copper), drill away the rockfall and open Old Quarry.
+4. Mara — bring 4 copper + 2 blue crystals to upgrade both tools together.
+5. Iris — explore the circular ruins, defeat the ruins snake and open the expedition locker.
+6. Finn — recover the seal kit and bring the damaged suit plus 2 wood to repair the spacesuit.
+7. Nova — recover the engine part in Crystal Depths and fit the navigation unit, regulator and engine component to repair the rocket.
 
-- Start with a pick and a locked sword. Explore the five Earth districts for copper and six illustrated fallen branches/logs. **E** or the contextual touch action gathers wood.
-- Open the **Camp workbench** to craft a **copper sword for 3 copper + 2 wood**, and a **hand drill for 5 copper**, in either order. Crafted equipment and completed mission checks persist after spending ingredients.
-- **1** selects the pick/fitted drill; **2** selects the crafted sword. **Space** mines a nearby revealed deposit when the mining tool is selected, and cancels an active attempt. Away from ore it attacks. With the sword selected, Space jabs. **E** can also start/cancel mining, open camp and use the rocket. Touch has separate movement, equipment, contextual action and Attack/Jab controls.
-- Eleven small snakes roam Earth's surface districts. Its three mines each have two hostile rats and three hostile bats. All warn before attacking for half a heart. Sword hits deal three damage; pick/drill hits deal one. Snakes have nine health, rats six and bats three. Defeat uses a silent smoke puff. Buddy still interrupts and scares mine foes away.
-- Only Earth has snakes, wood, two apple trees and two berry bushes. Landing Meadow has one bush and no fruit tree. Berries heal one heart and apples two; full health preserves fruit. The other planets keep their friendly alien wildlife and existing mining loop.
-- Camp, trail mouths and mine arrivals are safe. Losing all hearts restores Scout at a safe arrival while retaining resources and crafted equipment. Collected wood, picked fruit, partially hurt enemies and defeated/scared enemies remain remembered during the session and through area unloading.
-- **R** asks before resetting, with No selected by default. Closing/reloading starts fresh; there is no disk saving. The game is silent.
+Earth has enough materials for every recipe, with supplies left over. Early kills, pickups and crafts count. Closing a conversation preserves items; returns, upgrades and repairs happen only on their explicit final actions. The quarry stays open and the repaired rocket unlocks travel. Other planets retain their existing friendly aliens and mining objectives; no new off-world enemies, fishing or cooking are included.
 
-The build retains the illustrated viewport-filling loading screen and welcome guide, fitted wooden signs, exploration mist, sparse random minerals, animated water and wildlife, Buddy's random hiding spot/following/sitting/barking, rocket travel and streamed scenery. It does not download unvisited maps for the new Earth systems; only active-area actors and small session records are retained.
+**WASD / arrows** walks. **1** selects the mining tool; **2** selects the owned sword. **Space** mines nearby ore with the mining tool or attacks; **E** gathers, talks and uses objects. The reinforced sword deals 5 damage instead of 3, and the upgraded drill completes Earth mining 25% sooner. On Earth, movement, damage, changing tools or pausing keeps each deposit's work. Returning resumes the remaining time. Rockfall/locker/engine drilling also pauses and resumes. **R** asks before a new game.
 
-## Validation
+Use landscape on iPad: a thumb pad handles movement; separate action, equipment and attack buttons work with other fingers. The mission journal has Up/Down buttons as well as scrolling. Berries heal one heart, apples two. Buddy can be found outside Landing Meadow and follows you into mines, where he scares rats and bats away. Snakes and food plants remain Earth-only. The game stays silent. Progress lasts while the session is open; reloading starts fresh.
 
-Native checks cover real resource gathering and randomized wood availability, exact one-time recipes, lasting missions, directional attacks, walls/terrain, safe arrivals, warned damage/recovery, persistent enemy damage/removal, Buddy's scare interruption, Earth-only food/enemies, mining timing and E/Space cross-cancellation, drill gates, touch crafting, reset, startup and planet travel. Browser review covers the actual rendered workbench purchases and wood pickup, Space mining, Pinewood sword attacks, hostile rat/bat warning/damage/smoke in all three mines, off-world exclusion and two-finger tablet crafting. The final production build passes normal welcome/start, locked sword, camp and Pinewood streaming under `/jem/`, with desktop and tablet emulation and no script/download errors. A physical iPad Safari playtest is still needed.
+The illustrated loading screen, wooden signs, exploration mist, sparse randomized minerals, water/wildlife animation and bounded scenery streaming are retained. Story actors and quest objects use fitted art and small session records; opening the journal never downloads distant maps. Review scenes/screenshots and test code are excluded from the playable export.
 
-Camp spawn update: native checks cover guide starts, confirmed reset, safe recovery, 150 random mineral layouts and Earth wood/crafting progression. The production browser build was reviewed on desktop and tablet emulation for the new camp position, opening the workbench without walking and returning there after reset.
+## Checked
 
-Equipment thumbnails now show only 1 and 2 on desktop and touch layouts. The selected equipment name stays above the slots; the uncrafted sword keeps its disabled, dimmed icon and recipe tooltip. Native HUD/drill checks and rendered desktop/tablet equipment review pass.
-
-Mist compatibility update: the screen blur uses four fixed, small base-level blur passes instead of browser-dependent screen mipmaps/textureLod. Blur radius stays consistent with world pixels on Retina displays, cloud noise avoids large sine hashes, and fully explored ground bypasses the blur. Discovery, hidden resources and per-map memory are unchanged. Native exploration and rendered desktop/Retina/tablet checks pass. Safari itself still needs an on-device check; this cloud runtime could not download WebKit.
+Native checks cover the full seven-character chain with real resource gathering and exact recipes, early actions/cancelled handoffs, stable snake identities, quarry collision and transition restrictions, actual upgrade speed/damage, unique suit/rocket parts, launch checks, connected routes, water-safe placement, persistent mining, warned/capped encounters, session reset and touch controls. Randomized wood placement is checked across sixteen fresh layouts. Browser review covers all seven character conversations in desktop/tablet emulation, the production welcome/start flow and mission journal. Physical iPad Safari testing remains useful for device-specific performance.
