@@ -19,9 +19,14 @@ const GAME_HUD = preload("res://ui/game_hud.gd")
 const RESET_CONFIRMATION = preload("res://ui/reset_confirmation.gd")
 var reset_confirmation: RESET_CONFIRMATION
 const CHARACTER_BUBBLE = preload("res://ui/character_bubble.gd")
+const HUMAN_NPC = preload("res://environment/human_npc.gd")
 const ROWAN = preload("res://environment/rowan.gd")
+const BEA = preload("res://environment/bea.gd")
 var character_bubble: CHARACTER_BUBBLE
 var rowan: ROWAN
+var bea: BEA
+var npcs: Array[HUMAN_NPC] = []
+var dialogue_npc: HUMAN_NPC
 var last_hint_message := ""
 var pending_hint := ""
 const DRILL_VISUAL = preload("res://drill_visual.gd")
@@ -246,6 +251,10 @@ func _ready() -> void:
 	rowan = ROWAN.new()
 	rowan.game = self
 	add_child(rowan)
+	bea = BEA.new()
+	bea.game = self
+	add_child(bea)
+	npcs.assign([rowan,bea])
 	character_bubble = CHARACTER_BUBBLE.new()
 	add_child(character_bubble)
 	character_bubble.opened.connect(conversation_opened)
@@ -301,12 +310,30 @@ func dialogue_open() -> bool:
 	return is_instance_valid(character_bubble) and character_bubble.is_dialogue_open()
 
 func talk_to_rowan() -> void:
-	if menu_open() or earth_transition or flight != Flight.IDLE or hud.help.visible or not rowan.can_talk(): return
+	talk_to_npc(rowan)
+
+func nearest_npc() -> HUMAN_NPC:
+	var closest: HUMAN_NPC
+	var distance := 100.0
+	for npc in npcs:
+		if not is_instance_valid(npc) or npc.is_queued_for_deletion() or not npc.can_talk(): continue
+		var candidate := player.distance_to(npc.position)
+		if candidate < distance:
+			closest = npc
+			distance = candidate
+	return closest
+
+func talk_to_npc(npc: HUMAN_NPC) -> void:
+	if not is_instance_valid(npc) or npc.is_queued_for_deletion(): return
+	if menu_open() or earth_transition or flight != Flight.IDLE or hud.help.visible or not npc.can_talk(): return
 	if trial.jab_time >= 0 or mining_target >= 0: return
 	character_bubble.set_touch_mode(hud.touch_mode)
-	if character_bubble.show_dialogue("Rowan",rowan.pages(),rowan,Vector2(0,-rowan.height),rowan.final_action()):
-		rowan.greeted = true
-		rowan.conversation_started()
+	dialogue_npc = npc
+	if character_bubble.show_dialogue(str(npc.name),npc.pages(),npc,Vector2(0,-npc.height),npc.final_action()):
+		npc.greeted = true
+		npc.conversation_started()
+	else:
+		dialogue_npc = null
 
 func conversation_opened() -> void:
 	clear_touch_gestures()
@@ -317,9 +344,11 @@ func conversation_opened() -> void:
 	refresh_ui()
 
 func conversation_closed(completed: bool) -> void:
+	var speaker := dialogue_npc
+	dialogue_npc = null
 	# Scene teardown can close an active bubble after siblings have been freed.
 	if is_queued_for_deletion() or not is_inside_tree() or not is_instance_valid(hud) or not is_instance_valid(planet_menu): return
-	if is_instance_valid(rowan): rowan.conversation_finished(completed)
+	if is_instance_valid(speaker): speaker.conversation_finished(completed)
 	clear_touch_gestures()
 	cooldown = 0.3
 	companion.queue_redraw()
@@ -340,9 +369,12 @@ func present_character_messages(flying: bool) -> void:
 	if not pending_hint.is_empty():
 		if character_bubble.show_hint(pending_hint,scout,Vector2(0,-70)):
 			pending_hint = ""
-	elif not rowan.greeted and rowan.is_visible_in_tree() and player.distance_to(rowan.position) < 160 and character_bubble.mode == CHARACTER_BUBBLE.Mode.CLOSED:
-		if character_bubble.show_hint("Need a hand getting ready for the trail? Come talk to me.",rowan,Vector2(0,-rowan.height)):
-			rowan.greeted = true
+	elif character_bubble.mode == CHARACTER_BUBBLE.Mode.CLOSED:
+		for npc in npcs:
+			if not is_instance_valid(npc) or npc.greeted or not npc.is_visible_in_tree() or player.distance_to(npc.position) >= 160: continue
+			if character_bubble.show_hint(npc.greeting_text(),npc,Vector2(0,-npc.height)):
+				npc.greeted = true
+				break
 
 func at_workbench() -> bool:
 	return not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
@@ -802,10 +834,11 @@ func interact() -> void:
 	if cooldown > 0:
 		return
 	cooldown = 0.3
+	var npc := nearest_npc()
 	if not underground and has_base() and player.distance_to(ship_position()) < 95:
 		open_planet_menu()
-	elif rowan.can_talk():
-		talk_to_rowan()
+	elif npc != null:
+		talk_to_npc(npc)
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		camp_menu.open()
 	elif is_instance_valid(wood_supplies) and wood_supplies.collect_nearby():
@@ -946,6 +979,7 @@ func refresh_ui() -> void:
 	if is_instance_valid(rowan):
 		rowan.sync_area()
 		rowan.sync_mission()
+	if is_instance_valid(bea): bea.sync_area()
 	if is_instance_valid(gardens): gardens.sync_area()
 	if is_instance_valid(wood_supplies): wood_supplies.sync_area()
 	if is_instance_valid(companion): companion.sync_area()
@@ -977,13 +1011,14 @@ func refresh_ui() -> void:
 			objective = "%s trails: %d / 5 discovered" % [PLANET_NAMES[world],visited_regions().size()]
 	var context := ""
 	var actionable := true
+	var npc := nearest_npc()
 	if mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
 		context = "E / Space   Cancel %s · %.1fs" % ["drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
 		context = "E   Choose a world"
-	elif rowan.can_talk():
-		context = "E   Talk to Rowan"
+	elif npc != null:
+		context = "E   Talk to "+str(npc.name)
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
 	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
@@ -998,7 +1033,7 @@ func refresh_ui() -> void:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and not rowan.can_talk() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and npc == null and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,

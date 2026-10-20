@@ -41,6 +41,13 @@ const MINE_SPAWNS := [Vector2(420,620),Vector2(750,745) / ART_SIZE * SIZE,Vector
 const MOTION = preload("res://floor_motion.gd")
 const DENSITY = preload("res://ore_density.gd")
 const FOOT_OFFSET := Vector2(0,20)
+const BEA_FOOT := Vector2(1632,1138)
+const NPC_CLEARANCE := {1:[BEA_FOOT]}
+
+static func clear_of_people(region: int, point: Vector2, radius := 120.0) -> bool:
+	for foot in NPC_CLEARANCE.get(region,[]):
+		if point.distance_to(foot-FOOT_OFFSET) < radius: return false
+	return true
 
 # Only solid side features are excluded; broad grassy clearings remain open.
 # The artwork and these outlines are reviewed together in earth_expansion.gd.
@@ -144,6 +151,7 @@ static func spawn_clear(region: int, cave: bool, point: Vector2, hard: bool) -> 
 			return false
 	if cave:
 		return point.distance_to(MINE_EXITS[region]) >= 210 and (not hard or point.distance_to(MINE_SPAWNS[region]) >= 450)
+	if not clear_of_people(region,point): return false
 	for link in LINKS[region]:
 		if point.distance_to(portal(region,link.side)) < 200:
 			return false

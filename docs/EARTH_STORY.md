@@ -2,7 +2,7 @@
 
 Build Earth's story one character and mission at a time. For each character, make a character mockup and an in-world dialogue mockup, write the mission, implement it, then playtest that complete interaction before starting the next character. Names and dialogue are working choices.
 
-Rowan's character, scale, camp interaction and **R06, Ready for the Trail**, have been reviewed. The user requested the next characters and missions. The current checkpoint is **Bea's character, placement screenshot and mission draft (B01–B03)** in [Woodland Supplies](BEA_MISSION.md). Approve the screenshot before B04 adds her to the main game. Rowan's reopenable mission log (R07) remains pending. Test all gameplay in the main game; character placement reviews use screenshots.
+Rowan's character, scale, camp interaction and **R06, Ready for the Trail**, have been reviewed. Bea's character and requested position below Pinewood's fallen tree are approved. **B04 places Bea in the main game**, with her greeting and keyboard/touch Talk interaction; see [Woodland Supplies](BEA_MISSION.md) for the test route. Review this interaction before B05 adds her encounter and supply box. Rowan's reopenable mission log (R07) remains pending. Test all gameplay in the main game; character placement reviews use screenshots.
 
 ## Story direction
 
@@ -15,7 +15,7 @@ Each landmark introduces a person with a practical problem. Helping them teaches
 | Order | Character and location | Mission | Result | Current task |
 | --- | --- | --- | --- | --- |
 | 1 | Rowan, camp craftsperson; beside the Landing Meadow workbench | Ready for the Trail: gather 3 copper and 2 wood, then craft the copper sword | Sword owned; introduction to Bea | R06 reviewed; R07 log pending |
-| 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | B01–B03 character/placement and mission draft for approval |
+| 2 | Bea, woodland ranger; by the fallen tree in Pinewood Trail | Woodland Supplies: deal with a nearby snake and recover a supply cache | Introduces the hand-drill recipe and Otis's quarry problem | B04 actor/Talk ready in the main game; B05 mission next |
 | 3 | Otis, quarry foreman; on the Pinewood side of the blocked quarry trail | Clear the Way: craft the hand drill for 5 copper and clear the rockfall | Old Quarry becomes accessible | Initial character exploration only |
 | 4 | Mara, quarry mechanic; beside the quarry rails and mine cart | Better Tools: use quarry minerals to upgrade both drill and sword | Equipment for hard rock and the ruins encounter | Design after Otis |
 | 5 | Iris, field researcher; at Sunstone Ridge's circular ruins | The Old Expedition: explore the ruins and recover an expedition locker | Damaged spacesuit and navigation component | Design after Mara |
@@ -125,7 +125,7 @@ Use the current session-memory scope for this rollout. Area unloading, mine visi
 
 ## Next handoff
 
-Rowan's **R06** main-game test has been approved. Continue with [Bea's B01–B03 design checkpoint](BEA_MISSION.md): review her character and the screenshot beside Pinewood's southeast fallen tree, then approve her look/placement before **B04** adds her greeting and Talk interaction to the main game. **B05** implements her designated encounter, persistent supply box and one-time return; **B06** playtests that mission before Otis.
+Review [Bea's B04 interaction](BEA_MISSION.md) in the main game: F5 → Start exploring → east trail into Pinewood → lower-right fallen-tree clearing → Talk to Bea. Check her approved position, matching height, greeting, dialogue controls and equipment advice. **B05** then implements her designated encounter, persistent supply box and one-time return; **B06** playtests that mission before Otis.
 
 Run `godot --headless --path . --script tests/rowan_mission.gd` for real mining/pickups, keyboard/touch acceptance and cancellation, drill-first resource availability, exact crafting costs, early-sword recognition, one-time ending, district/mine/planet memory and a confirmed reset. `tests/rowan_camp.gd` checks startup, camp placement and dialogue controls; `tests/character_bubble.gd` retains component edge and lifecycle checks.
 

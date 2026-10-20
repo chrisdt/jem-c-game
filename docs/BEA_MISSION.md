@@ -1,10 +1,21 @@
 # Bea: Woodland Supplies
 
-Proposed next character after Rowan's reviewed R06 mission. This is the B01–B03
-design checkpoint: approve Bea's look and landmark placement from screenshots,
-then implement and test her interaction and mission in the main game. No new
-NPC or quest is activated by this design step. Rowan's mission-log task (R07)
-remains pending while the requested rollout moves to the next character.
+Bea's character and placement in the requested clearing have been approved.
+**B04 is ready in the main game:** her fitted actor, fog discovery, greeting and
+keyboard/touch Talk interaction. This step gives ranger/equipment advice; the
+supply-box encounter and mission acceptance come in B05 after this interaction
+is reviewed. Rowan's mission-log task (R07) remains pending.
+
+## Test B04 in the main game
+
+Pull the latest `main`, press **F5 → Start exploring**, and follow the east/right
+trail from Landing Meadow into **Pinewood Trail**. Head to the **lower-right
+fallen-tree clearing**, beside the small stump. Approach Bea until **Talk to
+Bea** appears, then press **E** or tap the action. E / Enter / Next advances;
+Escape / × closes. Her introduction stays until completed, she remembers the
+conversation during the current session, and return visits give a short reminder
+based on your sword/drill equipment. Her greeting appears once without blocking
+walking. The supply-box mission is not offered in this step.
 
 ## Character and placement
 
@@ -15,9 +26,10 @@ supply satchel distinguish her from Scout, Rowan and Otis.
 Place her on the clear ground **below Pinewood Trail's southeast fallen tree,
 beside the small stump**, in the area the user circled in red. Requested world
 foot position: `(1632, 1138)`, corresponding to art position `(1224, 853.5)`.
-This moves her down and left from the initial position to the right of the log.
-Keep both approaches around the log usable; final ore, foliage and encounter
-clearance is part of B04.
+The playable actor uses this approved position. `earth_regions.gd` reserves
+120 world units around her ground position for randomized ore, flowers, food
+plants and fallen wood. She has no blocking collision, so both approaches
+around the log remain usable.
 
 Fit the character's visible alpha bounds to Scout's **87.45 world-unit** idle
 height, excluding transparent padding. Keep Scout visible at the same camera
@@ -102,17 +114,25 @@ another interaction with the same key or touch.
 
 | Task | Deliverable | Status |
 | --- | --- | --- |
-| B01 | Bea character concept at Scout's proportions | Ready for approval |
-| B02 | Landmark screenshot and measured same-height comparison | Ready for approval |
+| B01 | Bea character concept at Scout's proportions | Reviewed |
+| B02 | Landmark screenshot and measured same-height comparison | Reviewed; requested clearing approved |
 | B03 | Mission and dialogue draft, early-action rules and resource budget | Draft above |
-| B04 | Bea in the main game: fitted actor, greeting, discovery and Talk | After B01/B02 approval |
+| B04 | Bea in the main game: fitted actor, greeting, discovery and Talk | Implemented; main-game review |
 | B05 | Designated encounter, persistent supply box, mission state and one-time return | After B04 review |
 | B06 | Main-game keyboard/touch playtest and completion screenshots | After B05 |
 
-B04 must route the shared conversation's close/complete event to the NPC that
-opened it. The current main-game callback belongs to Rowan; talking to Bea must
-never accept, complete or acknowledge Rowan's mission. Choose the nearest valid
-NPC/station consistently for the on-screen action and the actual interaction.
+B04 routes the shared conversation's close/complete event to its actual speaker.
+Talking to Bea cannot accept, complete or acknowledge Rowan's mission. The same
+nearest-NPC selection drives both the on-screen action and actual interaction,
+while Rowan's nearer workbench keeps its existing priority. `human_npc.gd`
+shares the measured sprite fitting, visibility, greeting memory and foot anchor
+between both actors; each character retains its own dialogue and mission state.
+
+Run `godot --headless --path . --script tests/bea_trail.gd` for the approved
+position/scale, fog, one-time greeting, keyboard/touch controls, nearest-speaker
+selection, Rowan isolation, real crafting advice, travel memory, speaker removal,
+32 randomized ore layouts and a confirmed reset. Rowan's camp/mission tests
+remain separate regression checks.
 
 ## Required checks
 

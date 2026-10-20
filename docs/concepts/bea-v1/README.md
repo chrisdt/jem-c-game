@@ -1,8 +1,10 @@
 # Bea character and placement review
 
 Character concept and proposed placement for the [Woodland Supplies mission](../../BEA_MISSION.md).
-These screenshots are the approval checkpoint before Bea's main-game integration.
-No separate playable preview needs to be opened.
+The character and revised clearing placement have been approved. The original
+design screenshots remain here as reference; B04 now adds the real actor and Talk
+interaction to the main game. Test with F5 → Start exploring; no separate playable
+preview needs to be opened.
 
 ![Bea character concept](bea-character.png)
 
@@ -27,6 +29,18 @@ Fog is hidden in this screenshot arrangement to show the landmark clearly.
 The [scale check](scale-check.json) records the fitted sprite heights, foot
 positions and completed Pinewood transition used for these captures.
 
-The screenshot arrangement is a design mockup, not an implemented quest. The
-production startup, game scene and mission behavior are unchanged. The parent
-`docs/concepts/.gdignore` excludes the concept art from Godot imports/exports.
+The placement images above are design mockups. B04 uses the same character art
+and approved foot point for the playable actor; the supply-box mission remains
+the next implementation task. The parent `docs/concepts/.gdignore` excludes these
+presentation files from Godot imports/exports. The playable PNG lives separately
+in `assets/npcs/bea.png`.
+
+## B04 main-game captures
+
+These use the production actor, greeting/advice and Talk interaction in the main
+scene. Fog is hidden for the screenshots so the approved landmark is clear;
+normal play retains its discovery and fog rules.
+
+![Bea's playable introduction](bea-main-dialogue.png)
+
+![Bea with her normal Talk action](bea-main-placement.png)

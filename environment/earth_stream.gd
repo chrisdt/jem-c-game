@@ -223,7 +223,7 @@ func show_area(region: int, cave: bool) -> void:
 	if not cave:
 		var flower_placement: RefCounted
 		if not REGIONS is OUTER_REGIONS:
-			flower_placement = FLOWERS.new(textures[key],REGIONS.SIZE,func(point: Vector2) -> bool: return REGIONS.floor_contains(region,false,point))
+			flower_placement = FLOWERS.new(textures[key],REGIONS.SIZE,func(point: Vector2) -> bool: return REGIONS.floor_contains(region,false,point) and REGIONS.clear_of_people(region,point))
 		var index := 0
 		for placement in REGIONS.TREES[region]:
 			var tree := TREE.instantiate()
