@@ -37,6 +37,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	check(game.PLANET_NAMES[0] == "Earth" and game.hud.location_title.text == "EARTH" and game.planet_menu.NAMES[0] == "Earth","Earth name differs between gameplay and travel")
 	check(game.hud.location_panel.size.y <= 60 and game.hud.resource_panel.size.y <= 60 and game.action_button.size.y <= 42,"HUD grew back into a large overlay")
 	check(game.hud.planet.size.x <= 58 and game.hud.material_icons[0].size.x <= 40 and game.hud.equipment.size.x <= 48,"Imported icon dimensions leaked into the gameplay view")
@@ -101,7 +102,7 @@ func run() -> void:
 		var i: int = game.rocks.find_custom(func(rock): return rock.hard)
 		game.player = game.rocks[i].pos
 		game.update_exploration()
-		var remaining: float = game.rocks[i].seconds-game.rocks[i].get("work",0.0)
+		var remaining: float = (game.rocks[i].seconds-game.rocks[i].get("work",0.0))/(1.333333 if game.world == 0 and game.story.drill_improved else 1.0)
 		game.start_mining(i)
 		game.advance_mining(remaining-0.01)
 		check(game.rocks[i].hp > 0,"Drill changed the full rare-material mining duration")

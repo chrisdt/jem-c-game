@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -34,6 +36,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	assert(game.scout.sprite_frames == game.MINER_FRAMES)
 	game.player = game.rocks[0].pos
 	game.update_exploration()
@@ -135,7 +138,7 @@ func run() -> void:
 	game.advance_mining(0.5)
 	assert(game.amethysts == 1 and game.ice_won)
 	# Travel cannot interrupt an active mining session or teleport out of a mine.
-	game.travel_to_other_planet()
+	TRAVEL.depart(game)
 	assert(game.world == 1 and game.underground)
 	game.player = game.ICE_EXIT
 	game.update_exploration()

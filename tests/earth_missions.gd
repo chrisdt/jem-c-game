@@ -72,7 +72,7 @@ func run() -> void:
 	game.set_process(false)
 	game.companion.set_process(false)
 	game.gardens.set_process(false)
-	check(game.missions.completed() == 0 and game.missions.entries().size() == 9,"Fresh expedition inherited completed missions")
+	check(game.missions.completed() == 0 and game.missions.entries().size() == 11,"Fresh expedition inherited completed missions")
 	check(game.hud.mission_panel.size.y == 106,"Mission HUD became a large overlay")
 	# Follow the normal journal shortcut. Opening pauses mining and all combat.
 	var index: int = game.rocks.find_custom(func(r): return not r.cave)
@@ -116,12 +116,12 @@ func run() -> void:
 	game.cancel_mining()
 	await TRAVEL.enter(game,1,false)
 	await TRAVEL.enter(game,0,false)
-	game.travel_to_other_planet(1)
+	TRAVEL.depart(game,1)
 	game.advance_flight(10)
 	check(not game.hud.mission_panel.visible,"Earth journal leaked into Frost")
 	await press(KEY_J)
 	check(not game.mission_journal.visible,"Earth journal opened on another planet")
-	game.travel_to_other_planet(0)
+	TRAVEL.depart(game,0)
 	game.advance_flight(10)
 	check(is_equal_approx(game.rocks[index].work,1.1) and is_equal_approx(game.rocks[second].work,0.3),"Area unload or rocket trip reset deposit work")
 	game.player = game.rocks[index].pos
@@ -146,6 +146,23 @@ func run() -> void:
 	check(game.mining_target == -1 and is_equal_approx(game.rocks[second].work,0.5),"Sword switch discarded work")
 	game.trial.equip(0)
 	# Surface encounter uses the actual mining action and a seeded random roll.
+	# Keep this fixture independent of randomized ore landing beside two
+	# existing snakes (where the production crowding guard should refuse it).
+	var nearby_snake = game.trial.snakes[0]
+	for snake in game.trial.snakes:
+		snake.health = 0
+		snake.state = "gone"
+		snake.hide()
+	nearby_snake.health = 9
+	for ray in 24:
+		var point: Vector2 = game.player+Vector2.from_angle(ray*TAU/24)*145
+		nearby_snake.home = point
+		if nearby_snake.can_stand(point) and game.trial.clear_line(point,game.player):
+			nearby_snake.position = point
+			nearby_snake.state = "roam"
+			nearby_snake.show()
+			game.fog.observe(game.area_id(),point)
+			break
 	game.trial.encounter_rng.seed = 123
 	game.rocks[second].erase("encounter_checked")
 	next_alert(game.trial)
@@ -210,9 +227,9 @@ func run() -> void:
 	check(game.missions.mines.size() == 3 and game.earth_visited.size() == 5,"Earth exploration missions missed a district or mine")
 	game.trial.defeated = 1
 	game.companion.recruited = true
-	check(game.missions.completed() == 8,"Complete Earth expedition did not finish all eight missions")
+	check(game.missions.entries().filter(func(e): return e.id in ["trails","mines","buddy"]).all(func(e): return e.done),"Optional exploration objectives did not finish")
 	game.mission_journal.open()
-	check(game.mission_journal.summary.text.begins_with("8 / 8") and game.mission_journal.progress.slice(0,8).all(func(label): return label.text == "Complete"),"Journal failed to display final completion")
+	check(game.mission_journal.summary.text.contains("/ 7 story missions"),"Journal failed to display the character mission count")
 	game.mission_journal.dismiss()
 	game.queue_free()
 	await process_frame

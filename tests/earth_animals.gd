@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 const EARTH = preload("res://earth_regions.gd")
 const PASTURES = preload("res://environment/earth_pastures.gd")
 const ART = preload("res://environment/earth_animal_art.gd")
@@ -144,10 +146,10 @@ func run() -> void:
 	game.reset_rocks()
 	game.player = game.surface_arrival_position()
 	game.refresh_ui()
-	game.travel_to_other_planet(1)
+	TRAVEL.depart(game,1)
 	for frame in 40: game.advance_flight(0.2)
 	check(game.world == 1 and not dog.visible and dog.recruited,"Dog followed the rocket without a space suit or lost recruitment")
-	game.travel_to_other_planet(0)
+	TRAVEL.depart(game,0)
 	for frame in 40: game.advance_flight(0.2)
 	check(game.world == 0 and dog.visible and dog.recruited and dog.can_stand(dog.position),"Dog did not greet Scout on return to Earth")
 	game.free()

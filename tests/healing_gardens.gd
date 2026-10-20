@@ -22,7 +22,7 @@ func run() -> void:
 	var remembered := {}
 	for world in 3:
 		if world != game.world:
-			game.travel_to_other_planet(world)
+			TRAVEL.depart(game,world)
 			game.advance_flight(10)
 		var counts := Vector2i.ZERO
 		for region in 5:
@@ -71,7 +71,7 @@ func run() -> void:
 				await TRAVEL.enter(game,region,false)
 				for plant in game.gardens.plants: check(plant.picked,"Mine trip reset harvested fruit")
 	# Returning by rocket also keeps the first world's harvest state.
-	game.travel_to_other_planet(0)
+	TRAVEL.depart(game,0)
 	game.advance_flight(10)
 	check(game.gardens.plants.size() == 1 and game.gardens.plants[0].picked,"Rocket return reset Earth's starting bush")
 	check(game.trial.snakes.size() == 3 and game.trial.defeated == 0,"Sparse gardens altered the combat encounter")

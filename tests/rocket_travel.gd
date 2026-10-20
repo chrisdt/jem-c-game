@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 var failures := 0
 
 func _initialize() -> void:
@@ -24,6 +26,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	game.ore = 4
 	game.upgraded = true
 	game.rocks[0].hp = 0
@@ -41,7 +44,7 @@ func run() -> void:
 	game.interact()
 	game.action_button.pressed.emit()
 	game.start_mining(1)
-	game.travel_to_other_planet()
+	TRAVEL.depart(game)
 	check(game.player == departure and game.mining_target == -1 and game.flight_elapsed == time, "Movement, mining or repeated boarding interrupted flight")
 	game.advance_flight(game.FLIGHT_DURATIONS[game.Flight.IGNITION] - game.flight_elapsed + 0.01)
 	check(game.flight == game.Flight.ASCENT and game.world == 0, "Rocket did not start taking off on its original planet")
@@ -95,7 +98,7 @@ func run() -> void:
 	check(game.ore == 4 and game.upgraded and game.fog.is_revealed(0, departure), "Round trips lost inventory, upgrades or discovery")
 	game.underground = true
 	game.refresh_ui()
-	game.travel_to_other_planet()
+	TRAVEL.depart(game)
 	check(game.flight == game.Flight.IDLE and not game.rocket.visible, "Rocket appeared underground or launched out of a mine")
 	game.underground = false
 	game.refresh_ui()

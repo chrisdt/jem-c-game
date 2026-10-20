@@ -22,6 +22,7 @@ func fit_sprite(source: Texture2D, source_region := Rect2i()) -> void:
 	atlas.atlas = source
 	atlas.region = Rect2(bounds.position+origin,bounds.size)
 	illustration = Sprite2D.new()
+	illustration.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	illustration.texture = atlas
 	illustration.centered = false
 	illustration.offset = Vector2(-bounds.size.x*0.5,-bounds.size.y)

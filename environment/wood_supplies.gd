@@ -39,6 +39,19 @@ func sync_area() -> void:
 			for offset in [Vector2.ZERO,Vector2(-180,0),Vector2(180,0),Vector2(0,-180),Vector2(0,180),Vector2(-300,-160),Vector2(300,160)]:
 				point = placement.place(preferred+offset,0.12)
 				if point.is_finite(): break
+			if not point.is_finite():
+				# A new NPC or random deposit can occupy the few small grass
+				# patches near the preferred quarry site. Search the loaded
+				# painting more widely before dropping a crafting supply.
+				var alternatives: Array[Vector2] = []
+				for y in range(220,1280,32):
+					for x in range(120,1880,32): alternatives.append(Vector2(x,y))
+				alternatives.sort_custom(func(a,b): return a.distance_squared_to(preferred) < b.distance_squared_to(preferred))
+				for candidate in alternatives:
+					if placement.available(candidate,0.12):
+						point = candidate
+						placement.placed.append(point)
+						break
 			if point.is_finite(): piles.append({"position":point,"pose":(game.earth_region+piles.size())%3,"collected":false,"seen":false,"fade":0.0})
 	queue_redraw()
 

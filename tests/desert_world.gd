@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 const LAYOUT = preload("res://desert_layout.gd")
 var failures := 0
 
@@ -59,6 +61,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	game.player = game.SHIP
 	game.update_exploration()
 	game.cooldown = 0

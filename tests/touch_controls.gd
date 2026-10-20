@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -29,6 +31,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	assert(not game.hud.touch_mode and not game.hud.touch_controls.visible)
 	game.hud.set_touch_mode(true)
 	game.refresh_ui()

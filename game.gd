@@ -42,6 +42,8 @@ const EARTH_MISSIONS = preload("res://environment/earth_missions.gd")
 const MISSION_JOURNAL = preload("res://ui/mission_journal.gd")
 var missions: EARTH_MISSIONS
 var mission_journal: MISSION_JOURNAL
+const EARTH_STORY = preload("res://environment/earth_story.gd")
+var story: EARTH_STORY
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -263,6 +265,9 @@ func _ready() -> void:
 	add_child(character_bubble)
 	character_bubble.opened.connect(conversation_opened)
 	character_bubble.closed.connect(conversation_closed)
+	story = EARTH_STORY.new()
+	story.game = self
+	add_child(story)
 	missions = EARTH_MISSIONS.new()
 	missions.game = self
 	mission_journal = MISSION_JOURNAL.new()
@@ -337,6 +342,7 @@ func talk_to_npc(npc: HUMAN_NPC) -> void:
 	if not is_instance_valid(npc) or npc.is_queued_for_deletion(): return
 	if menu_open() or earth_transition or flight != Flight.IDLE or hud.help.visible or not npc.can_talk(): return
 	if trial.jab_time >= 0 or mining_target >= 0: return
+	if is_instance_valid(story) and story.working(): return
 	character_bubble.set_touch_mode(hud.touch_mode)
 	dialogue_npc = npc
 	if character_bubble.show_dialogue(str(npc.name),npc.pages(),npc,Vector2(0,-npc.height),npc.final_action()):
@@ -412,7 +418,7 @@ func clear_touch_gestures() -> void:
 	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
 	if is_instance_valid(camp_menu): buttons += camp_menu.buttons + [camp_menu.close_button]
 	buttons.append(hud.missions_button)
-	if is_instance_valid(mission_journal): buttons.append(mission_journal.close_button)
+	if is_instance_valid(mission_journal): buttons += [mission_journal.close_button,mission_journal.up_button,mission_journal.down_button]
 	for button in buttons: button.release_touch()
 
 func update_exploration() -> void:
@@ -467,6 +473,10 @@ func arrival_message() -> String:
 		"Ember Dunes! Follow the sand trails to explore five districts and three mines."][world]
 
 func open_planet_menu() -> void:
+	if world == 0 and is_instance_valid(story) and not story.launch_ready():
+		message = "This rocket needs repairs. Talk to Nova beside it and follow the Earth missions."
+		refresh_ui()
+		return
 	walking = false
 	walk_distance = 0
 	restore_walk_visual()
@@ -475,6 +485,10 @@ func open_planet_menu() -> void:
 	refresh_ui()
 
 func travel_to_other_planet(destination: int = -1) -> void:
+	if world == 0 and is_instance_valid(story) and not story.launch_ready():
+		message = "Finish Nova's launch checks, both tool upgrades and the spacesuit before leaving Earth."
+		refresh_ui()
+		return
 	if flight != Flight.IDLE or earth_transition or underground or mining_target >= 0 or dialogue_open():
 		return
 	if destination < 0:
@@ -642,6 +656,9 @@ func restore_walk_visual() -> void:
 func move_player(direction: Vector2, delta: float) -> void:
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
+	if is_instance_valid(story) and story.working():
+		if direction.is_zero_approx(): return
+		story.cancel_work()
 	if is_instance_valid(trial) and trial.is_active():
 		if trial.jab_time >= 0:
 			trial.update_jab_pose()
@@ -669,6 +686,14 @@ func move_player(direction: Vector2, delta: float) -> void:
 	elif ((next - Vector2(1270, 960)) / Vector2(173, 117)).length() < 1.0:
 		next = player
 	var travelled := player.distance_to(next)
+	if world == 0 and earth_region == 1 and not underground and not story.quarry_open:
+		var barrier := Rect2(1755,570,150,205)
+		var intersects := false
+		var steps := maxi(1,ceili(player.distance_to(next)/6.0))
+		for step in range(1,steps+1):
+			if barrier.has_point(player.lerp(next,float(step)/steps)): intersects = true
+		if intersects: next = player
+		travelled = player.distance_to(next)
 	player = next
 	walking = travelled > 0.001
 	if walking:
@@ -724,6 +749,9 @@ func check_earth_trail(previous: Vector2) -> void:
 			return
 
 func begin_earth_transition(region: int, cave: bool, arrival: Vector2, rollback: Vector2) -> void:
+	if world == 0 and region == 4 and not story.quarry_open:
+		message = "The quarry trail is blocked by a rockfall. Otis is waiting on the Pinewood side."
+		return
 	if earth_transition or flight != Flight.IDLE or menu_open():
 		return
 	if mining_target >= 0: cancel_mining()
@@ -816,6 +844,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func space_action() -> void:
 	if trial.blocked(): return
+	if story.working():
+		story.cancel_work()
+		return
 	if trial.sword_equipped():
 		trial.start_jab()
 	elif mining_target >= 0:
@@ -842,6 +873,10 @@ func interact() -> void:
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if trial.is_active() and (hud.help.visible or trial.jab_time >= 0): return
+	if is_instance_valid(story) and story.working():
+		story.cancel_work()
+		refresh_ui()
+		return
 	if mining_target >= 0:
 		cancel_mining()
 		refresh_ui()
@@ -856,6 +891,8 @@ func interact() -> void:
 		talk_to_npc(npc)
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		camp_menu.open()
+	elif is_instance_valid(story) and story.use_prop(story.nearest_prop()):
+		pass
 	elif is_instance_valid(wood_supplies) and wood_supplies.collect_nearby():
 		pass
 	else:
@@ -870,6 +907,7 @@ func interact() -> void:
 func start_mining(index: int) -> void:
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
+	if is_instance_valid(story) and story.working(): return
 	if is_instance_valid(trial) and trial.is_active() and trial.jab_time >= 0:
 		return
 	if is_instance_valid(trial) and trial.sword_equipped():
@@ -941,7 +979,7 @@ func advance_mining(delta: float) -> void:
 	if rock.hp <= 0 or rock.cave != underground or player.distance_to(rock.pos) >= 100:
 		cancel_mining()
 		return
-	mining_elapsed = minf(mining_elapsed + delta, rock.seconds)
+	mining_elapsed = minf(mining_elapsed + delta*mining_rate(), rock.seconds)
 	if world == 0:
 		rock["work"] = mining_elapsed
 		if mining_elapsed >= 0.6: trial.mining_encounter(rock)
@@ -978,6 +1016,9 @@ func advance_mining(delta: float) -> void:
 			total_mined += 1
 			message = "Copper collected! %d / 5 for your upgrade." % ore if not upgraded else "More copper for your next adventure!"
 
+func mining_rate() -> float:
+	return 1.333333 if world == 0 and is_instance_valid(story) and story.drill_improved else 1.0
+
 func emit_impact(rock: Dictionary, finished: bool) -> void:
 	var origin: Vector2 = rock.pos + (player - rock.pos).normalized() * 12 + Vector2(0, -25)
 	for i in (18 if finished else (5 if upgraded else 9)):
@@ -1000,6 +1041,13 @@ func update_particles(delta: float) -> void:
 			particle.pos += particle.velocity * delta
 
 func refresh_ui() -> void:
+	if is_instance_valid(story):
+		for npc in npcs:
+			if is_instance_valid(npc): npc.sync_area()
+		story.sync_area()
+		rocket.body.modulate = Color.WHITE if world != 0 or story.rocket_repaired else Color(0.65,0.65,0.60)
+		rocket.body.rotation = 0 if world != 0 or story.rocket_repaired else -0.04
+		rocket.damaged = world == 0 and not story.rocket_repaired
 	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(rowan):
 		rowan.sync_area()
@@ -1037,15 +1085,19 @@ func refresh_ui() -> void:
 	var context := ""
 	var actionable := true
 	var npc := nearest_npc()
-	if mining_target >= 0:
+	if story.working():
+		context = "E   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
+	elif mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
-		context = "E / Space   %s %s · %.1fs" % ["Pause" if world == 0 else "Cancel","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)]
+		context = "E / Space   %s %s · %.1fs" % ["Pause" if world == 0 else "Cancel","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)/mining_rate()]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
-		context = "E   Choose a world"
+		context = "E   Rocket needs repairs · talk to Nova" if world == 0 and not story.launch_ready() else "E   Choose a world"
 	elif npc != null:
 		context = "E   Talk to "+str(npc.name)
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
+	elif is_instance_valid(story) and not story.nearest_prop().is_empty():
+		context = "E   "+story.prop_prompt(story.nearest_prop())
 	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
 		context = "E   Pick up wood"
 	elif (not underground and regions().has_mine(current_region()) and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
@@ -1054,7 +1106,7 @@ func refresh_ui() -> void:
 	elif nearest_rock() >= 0:
 		var rock: Dictionary = rocks[nearest_rock()]
 		var saved: float = rock.get("work",0.0) if world == 0 else 0.0
-		context = "E / Space   %s %s · %.1fs" % ["Resume" if saved > 0 else ("Drill" if upgraded else "Mine"),material_name(rock),rock.seconds-saved]
+		context = "E / Space   %s %s · %.1fs" % ["Resume" if saved > 0 else ("Drill" if upgraded else "Mine"),material_name(rock),(rock.seconds-saved)/mining_rate()]
 		if rock.hard and not upgraded:
 			context = "Hand drill needed · build at camp"
 			actionable = false
@@ -1068,6 +1120,7 @@ func refresh_ui() -> void:
 		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
 		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
 		"earth_next":missions.next_hint() if is_instance_valid(missions) and world == 0 else "",
+		"improved_drill":story.drill_improved,"improved_sword":story.sword_improved,
 		"rowan_mission":rowan.mission != ROWAN.Mission.NOT_STARTED,"rowan_complete":rowan.mission == ROWAN.Mission.COMPLETE,
 		"rowan_title":ROWAN.MISSION_TITLE,"rowan_progress":rowan.progress_text(),
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,

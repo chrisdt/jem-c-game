@@ -96,7 +96,7 @@ func run() -> void:
 	check(game.trial.snakes[0].health == 0 and game.trial.snakes[0].state == "gone","A defeated snake returned after a mine trip")
 	await TRAVEL.enter(game,0,false)
 	for world in [1,2]:
-		game.travel_to_other_planet(world)
+		TRAVEL.depart(game,world)
 		game.advance_flight(10)
 		for region in 5:
 			if region != game.current_region(): await TRAVEL.enter(game,region,false)
@@ -106,7 +106,7 @@ func run() -> void:
 			check(game.wood_supplies.piles.is_empty() and not game.wood_supplies.visible,"Earth wood is on another planet")
 			check(game.trial.sword_owned and game.upgraded,"Rocket travel lost completed crafts")
 		await TRAVEL.enter(game,0,false)
-	game.travel_to_other_planet(0)
+	TRAVEL.depart(game,0)
 	game.advance_flight(10)
 	check(game.trial.is_active() and game.trial.sword_owned and game.upgraded,"Return to Earth lost equipment or combat controls")
 	check(game.wood_supplies.piles.all(func(p): return p.collected),"Rocket trip respawned collected wood")
@@ -115,11 +115,12 @@ func run() -> void:
 	await process_frame
 	# Ore is randomized, so its clearance can move a wood pile's preferred home.
 	# Every fresh layout must still provide the full, sparse crafting supply.
-	for layout in 6:
+	for layout in 16:
 		game = load("res://main.tscn").instantiate()
 		root.add_child(game)
 		await process_frame
 		game.set_process(false)
+		game.ore_rng.seed = 91000+layout
 		for region in 5:
 			if region > 0: await TRAVEL.enter(game,region,false)
 			check(game.wood_supplies.piles.size() == (2 if region == 1 else 1),"Fresh layout %d, district %d lost a wood supply to ore clearance" % [layout,region])

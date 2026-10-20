@@ -42,7 +42,13 @@ const MOTION = preload("res://floor_motion.gd")
 const DENSITY = preload("res://ore_density.gd")
 const FOOT_OFFSET := Vector2(0,20)
 const BEA_FOOT := Vector2(1632,1138)
-const NPC_CLEARANCE := {1:[BEA_FOOT]}
+const NPC_CLEARANCE := {
+	0:[Vector2(590,454),Vector2(345,510)],
+	1:[BEA_FOOT,Vector2(1660,790),Vector2(1440,1000)],
+	2:[Vector2(1530,720),Vector2(1180,600)],
+	3:[Vector2(1370,600),Vector2(1560,365)],
+	4:[Vector2(1040,550)],
+}
 
 static func clear_of_people(region: int, point: Vector2, radius := 120.0) -> bool:
 	for foot in NPC_CLEARANCE.get(region,[]):
@@ -150,6 +156,7 @@ static func spawn_clear(region: int, cave: bool, point: Vector2, hard: bool) -> 
 		if not can_walk(region,cave,point+offset):
 			return false
 	if cave:
+		if region == 4 and point.distance_to(Vector2(1230,440)) < 125: return false
 		return point.distance_to(MINE_EXITS[region]) >= 210 and (not hard or point.distance_to(MINE_SPAWNS[region]) >= 450)
 	if not clear_of_people(region,point): return false
 	for link in LINKS[region]:

@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 var failures := 0
 const OUTER = preload("res://outer_regions.gd")
 
@@ -150,6 +152,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	TRAVEL.arm_launch(game) # Campaign preconditions; full repair is tested in earth_story.gd.
 	game.upgraded = true
 	var ids := {}
 	for data in game.world_regions:

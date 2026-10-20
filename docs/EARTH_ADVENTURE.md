@@ -2,13 +2,17 @@
 
 Earth now has a complete resource-and-equipment loop across its five surface districts and three mines. Snakes, apple trees, berry bushes and fallen wood belong only to Earth. Other planets retain their existing friendly alien wildlife and mining/travel behaviour.
 
+## Earth story
+
+Follow the seven-character [Earth story](EARTH_STORY.md): Rowan → Bea → Otis → Mara → Iris → Finn → Nova. Their missions connect the existing gathering and combat systems to a visible quarry rockfall, upgraded tools, expedition supplies, spacesuit repairs and final rocket readiness. The journal tracks these seven story missions and optional exploration. Travel unlocks after Nova’s repair chain, with an affordable resource budget.
+
 ## Try it
 
 - Start with the pick. Explore the trails for copper and fallen branches/logs. Use **E** or the contextual touch action to gather wood; mining still runs automatically after starting it.
 - Return to the camp workbench and choose **Copper sword: 3 copper + 2 wood** or **Hand drill: 5 copper**. Either order works. Earth has thirteen copper deposits and six wood piles, enough to craft both with resources left over.
 - The sword starts locked. Crafting it unlocks the second equipment slot and selects it. **1** selects the pick/fitted drill, **2** selects the owned sword, and **Space** jabs with the sword. With the pick/drill selected, **Space** starts or cancels nearby revealed ore mining; away from ore it attacks. **E** and **Space** can cancel jobs started by either key. On touch, tap a tool and then **Attack / Jab**, or the contextual mining action. **E** remains the gathering/workbench/rocket action.
 - Both crafted items keep their mission ticks after their ingredients are spent. Drill and sword ownership are separate; changing tools never removes an upgrade. The compact Earth header shows copper, blue crystal and wood.
-- Press **J** or tap **Open** beside Missions for the Earth expedition journal. Its eight missions cover crafting both items, finding blue crystal, discovering five districts and three mines, defeating a snake, clearing a bat and a rat, and finding Buddy. Sword defeats and Buddy's scares both count for the mine creatures. A healing snack is an optional bonus; it cannot block finishing the expedition. The small HUD retains both crafting ticks and shows the next unfinished adventure objective.
+- Press **J** or tap **Open** beside Missions for the Earth expedition journal. Its seven story missions can be recalled after dialogue closes. District/mine exploration, finding Buddy and trying healing fruit are optional objectives.
 - On Earth, moving, pressing **E / Space / Pause**, changing tools, taking damage or opening the journal pauses mining. Each deposit retains its own seconds of completed work through district unloading, mine exits and rocket trips. The prompt shows **Resume** and the remaining time. Finishing pays once. A new game resets every deposit.
 - Snakes roam every outdoor Earth district: three in Landing Meadow and two in each later district. A sword defeats a snake in three hits; the pick or fitted drill takes nine. Sword artwork appears only during the jab.
 - Every Earth mine has two rats and three bats. They warn before a short attack. A rat takes two sword hits and a bat takes one; weaker pick/drill attacks also work. Defeated foes poof away silently.
@@ -34,4 +38,4 @@ The historical `environment/earth_trial.gd` now owns Earth-wide health, equipmen
 
 `tests/context_mining.gd` exercises the real E/Space dispatcher, exact rewards and mining times, cross-key cancellation, rare-material drill gate, equipment poses, menu blocking and off-world mining. The surrounding attack-pose, mining, HUD/drill, touch, reset, startup, planet travel, wildlife and Buddy checks protect the existing game. Touch verification includes both crafts while another thumb rests on the movement pad. Browser review complements native checks with the rendered workbench/HUD, pickup icons, Earth district and mine combat, off-world exclusion and the production welcome/start/streaming flow.
 
-Per the latest review, this rollout focuses on Earth. Later-world characters/equipment, fishing and cooking remain deferred. Full tree chopping, world-access gates and disk saving also remain separate backlog items. The existing walking trouble spots still need the promised visual locations.
+Per the latest review, this rollout focuses on Earth. Later-world characters/equipment, fishing and cooking remain deferred. Full tree chopping and disk saving remain separate backlog items; Earth’s quarry and launch gates are part of the implemented story. The existing walking trouble spots still need the promised visual locations.

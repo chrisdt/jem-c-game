@@ -1,5 +1,7 @@
 extends SceneTree
 
+const TRAVEL = preload("res://tests/support/area_travel.gd")
+
 var failures := 0
 
 func _initialize() -> void:
@@ -148,7 +150,7 @@ func run() -> void:
 	check(not prompt.visible and not paused and current_scene == game,"Touch No failed while a second thumb was held")
 	await touch(0,walk_point,false)
 	# Confirming from a paused flight creates one fresh playable session.
-	game.travel_to_other_planet(1)
+	TRAVEL.depart(game,1)
 	var stage: int = game.flight
 	await key(KEY_R)
 	await key(KEY_R,false)

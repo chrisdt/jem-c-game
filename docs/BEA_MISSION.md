@@ -1,10 +1,10 @@
 # Bea: Woodland Supplies
 
-Bea's character and placement in the requested clearing have been approved.
-**B04 is ready in the main game:** her fitted actor, fog discovery, greeting and
-keyboard/touch Talk interaction. This step gives ranger/equipment advice; the
-supply-box encounter and mission acceptance come in B05 after this interaction
-is reviewed. Rowan's mission-log task (R07) remains pending.
+Bea's reviewed character and placement now have the complete Woodland Supplies mission. B05/B06's encounter, unique supply box and one-time return are implemented. Rowan's reopenable journal is also available.
+
+## Current rollout
+
+B05/B06 are implemented in the complete [Earth story](EARTH_STORY.md). Bea now offers Woodland Supplies, checks the stable snake ID, remembers the unique supply box and completes its one-time return. Otis and the remaining neighbours are also present, with the quarry gate and rocket repair chain. The older B04 review route below remains useful for her approved placement.
 
 ## Test B04 in the main game
 
@@ -15,7 +15,7 @@ Bea** appears, then press **E** or tap the action. E / Enter / Next advances;
 Escape / × closes. Her introduction stays until completed, she remembers the
 conversation during the current session, and return visits give a short reminder
 based on your sword/drill equipment. Her greeting appears once without blocking
-walking. The supply-box mission is not offered in this step.
+walking. After crafting a sword, Bea offers the supply-box mission.
 
 ## Character and placement
 
@@ -69,12 +69,9 @@ by a persistent world pickup and a return conversation.
 - **Reward and lead:** Bea explains the existing **5-copper hand drill** recipe
   and Otis's quarry problem. If a drill is already owned, she recognizes it.
   Preserve the workbench's current recipe availability and all equipment.
-  No extra copper, wood or crystals are charged or created. Until Otis is
-  implemented, the quarry lead is conversational and creates no missing-NPC
-  objective or blocked route.
+  No extra copper, wood or crystals are charged or created. Otis now waits on the Pinewood side of the quarry rockfall and offers Clear the Way.
 
-The planned quarry obstruction belongs to Otis's later task. Bea's mission will
-not close the quarry, change launch access or introduce later upgrade costs.
+The quarry obstruction belongs to Otis's linked mission. The full Earth story implements later upgrades, suit preparation and Nova's final repair/launch requirements.
 
 ## Dialogue draft
 
@@ -118,8 +115,8 @@ another interaction with the same key or touch.
 | B02 | Landmark screenshot and measured same-height comparison | Reviewed; requested clearing approved |
 | B03 | Mission and dialogue draft, early-action rules and resource budget | Draft above |
 | B04 | Bea in the main game: fitted actor, greeting, discovery and Talk | Implemented; main-game review |
-| B05 | Designated encounter, persistent supply box, mission state and one-time return | After B04 review |
-| B06 | Main-game keyboard/touch playtest and completion screenshots | After B05 |
+| B05 | Designated encounter, persistent supply box, mission state and one-time return | Implemented |
+| B06 | Main-game keyboard/touch playtest and completion screenshots | Native full-chain checks and browser review |
 
 B04 routes the shared conversation's close/complete event to its actual speaker.
 Talking to Bea cannot accept, complete or acknowledge Rowan's mission. The same

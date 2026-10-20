@@ -159,9 +159,9 @@ func run() -> void:
 	await TRAVEL.enter(game,1,true)
 	check(rowan.mission == rowan.Mission.COMPLETE and not rowan.visible,"A mine trip or equipping the drill undid quest completion")
 	await TRAVEL.enter(game,0,false)
-	game.travel_to_other_planet(1)
+	TRAVEL.depart(game,1)
 	game.advance_flight(10)
-	game.travel_to_other_planet(0)
+	TRAVEL.depart(game,0)
 	game.advance_flight(10)
 	check(rowan.mission == rowan.Mission.COMPLETE and rowan.completion_seen,"Planet travel lost mission completion or the ending")
 	# Crafting before meeting Rowan uses the same real materials and remains

@@ -12,16 +12,18 @@ func _ready() -> void:
 	sync_area()
 
 func greeting_text() -> String:
-	return "Hello, explorer! Welcome to Pinewood Trail."
+	return "Could you lend a hand with some lost supplies?"
 
 func pages() -> Array[String]:
-	var result: Array[String] = []
-	if not introduced:
-		result.append("I'm Bea, the woodland ranger. I help keep Pinewood Trail safe.")
-	if not game.trial.sword_owned:
-		result.append("Rowan at camp can help you prepare a copper sword. You'll need 3 copper and 2 fallen wood.")
-	elif game.upgraded:
-		result.append("Your hand drill is ready for tough minerals. Keep your sword handy for the woodland trail.")
-	else:
-		result.append("Keep your sword ready out here. Watch for a snake's warning before it strikes.")
-	return result
+	if not game.trial.sword_owned: return ["There's a snake near my supply box. Rowan at camp can help you prepare a copper sword: 3 copper and 2 fallen wood."]
+	return game.story.pages("bea")
+
+func final_action() -> String:
+	return game.story.action("bea")
+
+func conversation_started() -> void:
+	game.story.begin("bea")
+
+func conversation_finished(completed: bool) -> void:
+	if completed: introduced = true
+	game.story.finish("bea",completed)

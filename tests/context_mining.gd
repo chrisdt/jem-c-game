@@ -75,7 +75,7 @@ func run() -> void:
 	game.hud.help.hide()
 	await TRAVEL.enter(game,0,false)
 	for world in [1,2]:
-		game.travel_to_other_planet(world)
+		TRAVEL.depart(game,world)
 		game.advance_flight(10)
 		game.player = game.rocks[0].pos
 		game.update_exploration()

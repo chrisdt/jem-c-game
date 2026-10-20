@@ -8,7 +8,7 @@ const HOMES := {
 	0:[Vector2(875,610),Vector2(1510,750),Vector2(650,1080)],
 	1:[Vector2(880,573),Vector2(1347,880)],
 	2:[Vector2(867,440),Vector2(1587,960)],
-	3:[Vector2(693,680),Vector2(1333,867)],
+	3:[Vector2(693,680),Vector2(1550,535)],
 	4:[Vector2(800,693),Vector2(1373,827)],
 }
 const SWORD_COPPER := 3
@@ -57,7 +57,7 @@ func sync_area() -> void:
 	if active_area >= 0:
 		records[active_area] = []
 		for snake in snakes:
-			records[active_area].append({"home":snake.home,"position":snake.position,"health":snake.health,"seen":snake.seen,"fade":snake.fade,"phase":snake.phase})
+			records[active_area].append({"spawn_id":snake.spawn_id,"home":snake.home,"position":snake.position,"health":snake.health,"seen":snake.seen,"fade":snake.fade,"phase":snake.phase})
 	for snake in snakes:
 		remove_child(snake)
 		snake.free()
@@ -69,6 +69,7 @@ func sync_area() -> void:
 		for record in records[area]:
 			var snake := SNAKE.new()
 			snake.trial = self
+			snake.spawn_id = record.get("spawn_id","")
 			snake.position = record.position
 			add_child(snake)
 			snake.home = record.home
@@ -81,9 +82,11 @@ func sync_area() -> void:
 			snake.update_pose()
 			snakes.append(snake)
 		return
-	for preferred in HOMES[game.earth_region]:
+	for slot in HOMES[game.earth_region].size():
+		var preferred: Vector2 = HOMES[game.earth_region][slot]
 		var snake := SNAKE.new()
 		snake.trial = self
+		snake.spawn_id = "%d/%d" % [game.earth_region,slot]
 		snake.home = preferred
 		var point := find_floor(preferred,snake)
 		if not point.is_finite():
@@ -110,6 +113,8 @@ func safe_at(point: Vector2) -> bool:
 	if game.underground:
 		return point.distance_to(game.exit_position()) < 140 or point.distance_to(game.mine_spawn_position()) < 95
 	if game.earth_region == 0 and point.distance_to(game.CAMP) < 230: return true
+	for npc in game.npcs:
+		if is_instance_valid(npc) and npc.home_region == game.earth_region and point.distance_to(npc.position) < 85: return true
 	for link in game.EARTH.LINKS[game.earth_region]:
 		if point.distance_to(game.EARTH.portal(game.earth_region,link.side)) < 130: return true
 	return false
@@ -185,6 +190,7 @@ func equip(index: int) -> void:
 		game.refresh_ui()
 		return
 	if game.mining_target >= 0: game.cancel_mining()
+	if is_instance_valid(game.story): game.story.cancel_work()
 	selected_tool = index
 	game.walking = false
 	game.restore_walk_visual()
@@ -194,6 +200,7 @@ func start_jab() -> bool:
 	if not is_active() or blocked() or jab_time >= 0 or jab_cooldown > 0: return false
 	if selected_tool == 1 and not sword_owned: return false
 	if game.mining_target >= 0: game.cancel_mining()
+	if is_instance_valid(game.story): game.story.cancel_work()
 	jab_direction = Vector2.UP if game.facing == &"up" else (Vector2.DOWN if game.facing == &"down" else (Vector2.LEFT if game.facing_left else Vector2.RIGHT))
 	jab_origin = game.player
 	jab_time = 0
@@ -230,7 +237,7 @@ func check_jab_hits() -> void:
 		if enemy.health <= 0: continue
 		var closest := Geometry2D.get_closest_point_to_segment(enemy.position,start,finish)
 		if enemy.position.distance_to(closest) < 25 and (enemy.position-jab_origin).dot(jab_direction) > 8 and clear_line(jab_origin,enemy.position):
-			enemy.take_hit(jab_id,jab_origin,SWORD_DAMAGE if selected_tool == 1 else PICK_DAMAGE)
+			enemy.take_hit(jab_id,jab_origin,(5 if is_instance_valid(game.story) and game.story.sword_improved else SWORD_DAMAGE) if selected_tool == 1 else PICK_DAMAGE)
 
 func targets() -> Array:
 	if not is_active(): return []
@@ -271,6 +278,7 @@ func hurt_player(amount: int) -> bool:
 	if safe_at(game.player): return false
 	health = maxi(0,health-amount)
 	if game.mining_target >= 0: game.cancel_mining()
+	if is_instance_valid(game.story): game.story.cancel_work()
 	invulnerable = 1.3
 	game.message = "A small bite! Berries heal one heart; apples heal two."
 	if health == 0:

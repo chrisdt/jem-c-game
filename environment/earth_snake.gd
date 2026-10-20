@@ -8,6 +8,7 @@ const POSE_SCALES := [0.20,0.15,0.15]
 const SPEED := 57.0
 const REACH := 88.0
 var trial: Node
+var spawn_id := ""
 var home := Vector2.ZERO
 var target := Vector2.ZERO
 var facing := Vector2.RIGHT

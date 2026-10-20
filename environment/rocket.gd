@@ -9,6 +9,8 @@ var frost := false
 var clock := 0.0
 var dust_clock := 0.0
 var dust: Array[Dictionary] = []
+var damaged := false
+var service_hatch: Node2D
 
 func _ready() -> void:
 	name = "ScoutRocket"
@@ -21,6 +23,12 @@ func _ready() -> void:
 	body.centered = false
 	body.scale = Vector2.ONE * ART_SCALE
 	add_child(body)
+	service_hatch = Node2D.new()
+	service_hatch.draw.connect(func():
+		service_hatch.draw_rect(Rect2(-20,-105,38,26),Color("233232"))
+		service_hatch.draw_rect(Rect2(-20,-105,38,26),Color("987343"),false,2)
+		service_hatch.draw_polyline(PackedVector2Array([Vector2(-9,-90),Vector2(8,-84),Vector2(24,-96),Vector2(32,-73)]),Color("c9854a"),3,true))
+	add_child(service_hatch)
 	set_flight(0, 0)
 
 func reset_pad(point: Vector2, icy: bool) -> void:
@@ -38,6 +46,7 @@ func set_flight(height: float, power: float) -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	service_hatch.visible = damaged and altitude == 0
 	if not is_visible_in_tree():
 		return
 	clock += delta

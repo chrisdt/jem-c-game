@@ -1,3 +1,5 @@
+**Current Earth story rollout:** all seven neighbours and their linked missions are implemented; see [Earth story](EARTH_STORY.md). This supersedes the earlier independent-crafting/travel checkpoint below. The quarry opens with Otis’s drilling task, Mara upgrades both tools, Iris/Finn prepare the spacesuit, and Nova repairs the rocket before travel. Later-world characters, fishing and cooking remain deferred by the latest request.
+
 **Sunny Scout — next steps from Chris and Jeremy’s discussion, 19 October 2026**
 
 The subsequent [Earth NPC and mission task plan](EARTH_STORY.md) breaks the new story into character mockups, mission scripts and one-character implementations. Rowan's **R06 Ready for the Trail** has been reviewed. Bea's look and position are approved, and [B04 adds her greeting and Talk interaction to the main game](BEA_MISSION.md). Test in Pinewood's lower-right fallen-tree clearing before B05 adds the encounter, supply box and mission. Rowan's reopenable log (R07) remains pending. Test gameplay with F5 → Start exploring; use screenshots for placement reviews. The quarry rockfall, later upgrades, spacesuit and final rocket repair follow in their own tasks.
@@ -63,9 +65,9 @@ The current game remembers progress only while the session remains open. This pr
 | L03 | Fishing in the ponds | Fishing rod acquisition, simple catch interaction and fish inventory. Requested at 03:34–03:46 and explicitly deferred in favour of fruit first. |
 | L04 | Cooking at camp | Cooking station, recipes and how cooked food improves recovery. Requested at 03:46–03:59 and deferred. Introduce after food and fishing have a purpose in play. |
 | L05 | Full tree chopping | If E07 starts with fallen wood, add a chopping tool, reusable tree poses, fall/stump states and a regrowth policy later. This avoids requiring an entire forestry system for the first sword prototype. |
-| L06 | World unlock rules | The discussion tentatively links the sword to later-world access at 01:20–01:33. Decide whether travel requires equipment, mission completion or remains freely available; travel is currently open for testing. |
+| L06 | World unlock rules | Implemented by the Earth story: Otis opens the quarry and Nova repairs the rocket after both tool upgrades and a ready spacesuit. |
 | L07 | Browser save and continue | Additional recommendation: decide what survives closing the browser, then add versioned save data for inventory, equipment, missions, mining progress, discoveries and companion friendship. |
 
 **Current review checkpoint**
 
-Play the complete [Earth adventure](EARTH_ADVENTURE.md): open the mission journal with J / Open, craft both tools, respond to a warned mining encounter, resume that deposit, fight a surface snake and clear a mine rat/bat, use fruit, find Buddy, and explore all five districts and three mines. Tune spacing, warning times and damage with Jeremy. Other planets, fishing and cooking stay deferred at the user’s request; full tree chopping, travel gates and browser saving still need their own decisions.
+Play the complete [Earth adventure](EARTH_ADVENTURE.md): open the mission journal with J / Open, craft both tools, respond to a warned mining encounter, resume that deposit, fight a surface snake and clear a mine rat/bat, use fruit, find Buddy, and explore all five districts and three mines. Tune spacing, warning times and damage with Jeremy. Other planets, fishing and cooking stay deferred at the user’s request; full tree chopping and browser saving still need their own decisions.
