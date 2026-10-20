@@ -1,6 +1,6 @@
 # Sunny Scout — Earth story browser build
 
-The complete browser game, exported with Godot 4.6.3 from source commit `d6974b19a453b6983592274ab9e70871f9677ec6`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `1ca65137e2eac8edf219bce475344ab6fc20c3d7`. The editable Godot project is on `main`.
 
 ## Upload
 
@@ -8,9 +8,21 @@ Download this branch with **Code → Download ZIP** and unzip it. Upload **every
 
 The intended site is https://playsunnyscout.com/play/. Publishing this build branch does not upload it to WP Engine. Manual deployment instructions are in `docs/DEPLOY_WPENGINE.md` on `main`.
 
+## This Earth update
+
+- Compact **Quests** button, replacing the large mission overlay. Open with J or tap; select any title for instructions and live progress. Each quest shows **Incomplete** or a completion tick and **Complete**. Touch supports swiping and Up/Down buttons.
+- Approved damaged rocket illustration with animated engine smoke. Repair switches to the clean rocket and stops the smoke.
+- Larger Earth neighbours, fitted by head size to match Scout rather than matching total height.
+- Nova appears beside the rocket once Finn's spacesuit quest is complete, keeping her out of the opening view.
+- Otis's enlarged rockfall covers and blocks the whole quarry path; drilling is reachable from the clear side.
+- Bea's supply box moved onto open grass above Pinewood's fallen log.
+- Expedition chest centered inside Sunstone Ridge's circular ruins, hidden until both tools are upgraded.
+- Finn moved onto the requested grassy bank below Willow Marsh's bridge. His seal kit is now inside Moss Mine, the first mine near camp; quest instructions reflect the move.
+- Buddy barks at snakes, which slither to another safe spot in the current district. They stay alive and retain their identity; frightening them does not complete defeat quests.
+
 ## Play Earth's story
 
-Start exploring, then talk to **Rowan** beside camp with **E** or the touch action. **J / Open missions** recalls the seven character missions:
+Start exploring, then talk to **Rowan** beside camp with **E** or the touch action. **J / Quests** recalls the seven character missions:
 
 1. Rowan — craft the copper sword (3 copper + 2 fallen wood).
 2. Bea — deal with her designated snake, recover the woodland supply box and return it.
@@ -24,7 +36,7 @@ Earth has enough materials for every recipe, with supplies left over. Early kill
 
 **WASD / arrows** walks. **1** selects the mining tool; **2** selects the owned sword. **Space** mines nearby ore with the mining tool or attacks; **E** gathers, talks and uses objects. The reinforced sword deals 5 damage instead of 3, and the upgraded drill completes Earth mining 25% sooner. On Earth, movement, damage, changing tools or pausing keeps each deposit's work. Returning resumes the remaining time. Rockfall/locker/engine drilling also pauses and resumes. **R** asks before a new game.
 
-Use landscape on iPad: a thumb pad handles movement; separate action, equipment and attack buttons work with other fingers. The mission journal has Up/Down buttons as well as scrolling. Berries heal one heart, apples two. Buddy can be found outside Landing Meadow and follows you into mines, where he scares rats and bats away. Snakes and food plants remain Earth-only. The game stays silent. Progress lasts while the session is open; reloading starts fresh.
+Use landscape on iPad: a thumb pad handles movement; separate action, equipment and attack buttons work with other fingers. The mission journal has Up/Down buttons as well as scrolling. Berries heal one heart, apples two. Buddy can be found outside Landing Meadow and follows you into mines, where he scares rats and bats away. He also makes living snakes retreat elsewhere in the same district without disappearing or counting as defeated. Snakes and food plants remain Earth-only. The game stays silent. Progress lasts while the session is open; reloading starts fresh.
 
 The illustrated loading screen, wooden signs, exploration mist, sparse randomized minerals, water/wildlife animation and bounded scenery streaming are retained. Story actors and quest objects use fitted art and small session records; opening the journal never downloads distant maps. Review scenes/screenshots and test code are excluded from the playable export.
 
