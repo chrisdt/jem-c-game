@@ -107,6 +107,9 @@ func craft(game, recipe: String) -> void:
 	game.camp_menu.dismiss()
 
 func run() -> void:
+	var repair_required := not "--early-rocket" in OS.get_cmdline_user_args()
+	ProjectSettings.set_setting("gameplay/rocket_repair_required",repair_required)
+	var quest_count := 7 if repair_required else 6
 	change_scene_to_file("res://main.tscn")
 	await scene_changed
 	await process_frame
@@ -116,9 +119,10 @@ func run() -> void:
 	game.companion.set_process(false)
 	game.gardens.set_process(false)
 	game.trial.invulnerable = 10000
-	check(game.npcs.size() == 7 and not game.story.launch_ready(),"Earth does not begin with seven neighbours and a broken rocket")
-	game.travel_to_other_planet(1)
-	check(game.flight == 0 and game.world == 0,"The broken rocket can launch before the story")
+	check(game.npcs.size() == 7 and game.story.launch_ready() == not repair_required,"Initial rocket access does not match the selected repair mode")
+	if repair_required:
+		game.travel_to_other_planet(1)
+		check(game.flight == 0 and game.world == 0,"The broken rocket can launch before the story")
 	for npc in game.npcs:
 		check(absf(npc.height-game.rowan.height) < 0.01,"A character exceeds Scout's visible height: "+str(npc.name))
 	# Rowan's accepted craft still owns its original recipe and reward.
@@ -198,8 +202,9 @@ func run() -> void:
 	game.advance_mining(0.02)
 	check(game.rocks[common].hp == 0,"Mara's drill did not speed real copper mining up to 1.5 seconds")
 	gather(game)
-	use_prop(game,"engine")
-	check(game.story.engine_part,"Early engine recovery did not persist")
+	if repair_required:
+		use_prop(game,"engine")
+		check(game.story.engine_part,"Early engine recovery did not persist")
 	await TRAVEL.enter(game,3,false)
 	talk(game,"iris")
 	finish_dialogue(game)
@@ -229,18 +234,19 @@ func run() -> void:
 	var wood: int = game.trial.wood
 	talk(game,"finn")
 	finish_dialogue(game)
-	check(game.story.done("finn") and game.story.suit_ready and game.story.regulator and not game.story.damaged_suit and not game.story.seal_kit and game.trial.wood == wood-2,"Finn repaired the suit with the wrong supplies or lost its distinct ready state")
+	check(game.story.done("finn") and game.story.suit_ready and game.story.regulator == repair_required and not game.story.damaged_suit and not game.story.seal_kit and game.trial.wood == wood-2,"Finn repaired the suit with the wrong supplies or lost its distinct ready state")
 	await TRAVEL.enter(game,0,false)
-	talk(game,"nova")
-	check(game.character_bubble.final_action == "Repair and check rocket","Final mission did not recognize all early recovered components")
-	game.character_bubble.dismiss()
-	check(game.story.engine_part and game.story.navigation_part and game.story.regulator and not game.story.rocket_repaired,"Cancelled rocket repair consumed parts")
-	talk(game,"nova")
-	finish_dialogue(game)
-	check(game.story.done("nova") and game.story.launch_ready() and not game.story.engine_part and not game.story.navigation_part and not game.story.regulator,"Nova did not fit each unique part once")
-	check(game.missions.completed() == 7,"Earth journal did not complete all seven story missions")
+	if repair_required:
+		talk(game,"nova")
+		check(game.character_bubble.final_action == "Repair and check rocket","Final mission did not recognize all early recovered components")
+		game.character_bubble.dismiss()
+		check(game.story.engine_part and game.story.navigation_part and game.story.regulator and not game.story.rocket_repaired,"Cancelled rocket repair consumed parts")
+		talk(game,"nova")
+		finish_dialogue(game)
+		check(game.story.done("nova") and game.story.launch_ready() and not game.story.engine_part and not game.story.navigation_part and not game.story.regulator,"Nova did not fit each unique part once")
+	check(game.missions.completed() == quest_count,"Earth journal did not complete the active story missions")
 	game.mission_journal.open()
-	check(game.mission_journal.summary.text.begins_with("7 / 7") and game.mission_journal.progress.slice(0,7).all(func(l): return l.text == "Complete"),"Completed character missions are missing from the journal")
+	check(game.mission_journal.summary.text.begins_with("%d / %d" % [quest_count,quest_count]) and game.mission_journal.progress.slice(0,quest_count).all(func(l): return l.text == "Complete"),"Completed character missions are missing from the journal")
 	game.mission_journal.dismiss()
 	game.travel_to_other_planet(1)
 	game.advance_flight(10)
@@ -248,11 +254,11 @@ func run() -> void:
 	game.travel_to_other_planet(0)
 	game.advance_flight(10)
 	await TRAVEL.enter(game,4,false)
-	check(game.story.quarry_open and game.missions.completed() == 7 and game.story.suit_ready,"Travel reset the open quarry or completed story")
+	check(game.story.quarry_open and game.missions.completed() == quest_count and game.story.suit_ready,"Travel reset the open quarry or completed story")
 	game.reset_confirmation.open()
 	game.reset_confirmation.accept_reset()
 	await scene_changed
 	await process_frame
-	check(current_scene.missions.completed() == 0 and not current_scene.story.quarry_open and not current_scene.story.launch_ready() and not current_scene.story.engine_part,"Confirmed reset inherited the story")
-	if failures == 0: print("PASS: seven fitted Earth neighbours, actual gathering and exact affordable recipes, identity-specific early snake/cache recovery, cancel/retry and one-time handoffs, quarry collision/transition/drilling gate, reinforced tools, locker/suit/unique parts, final launch gates, journal completion, off-world exclusion, travel memory and confirmed reset")
+	check(current_scene.missions.completed() == 0 and not current_scene.story.quarry_open and current_scene.story.launch_ready() == not repair_required and not current_scene.story.engine_part,"Confirmed reset inherited the story")
+	if failures == 0: print("PASS (rocket repair %s): seven fitted Earth neighbours, actual gathering and exact affordable recipes, identity-specific early snake/cache recovery, cancel/retry and one-time handoffs, quarry collision/transition/drilling gate, reinforced tools, locker/suit/unique parts, final launch gates, journal completion, off-world exclusion, travel memory and confirmed reset" % repair_required)
 	quit(1 if failures else 0)

@@ -93,7 +93,7 @@ func open() -> void:
 	game.refresh_ui()
 
 func present() -> void:
-	summary.text = "%d / 7 story quests complete · Select a title for details · Progress lasts while this game is open" % game.missions.completed()
+	summary.text = "%d / %d story quests complete · Select a title for details · Progress lasts while this game is open" % [game.missions.completed(),game.story.entries().size()]
 	var entries: Array = game.missions.entries()
 	for i in entries.size():
 		marks[i].set_meta("done",entries[i].done)

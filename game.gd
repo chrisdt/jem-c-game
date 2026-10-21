@@ -1063,7 +1063,7 @@ func refresh_ui() -> void:
 		for npc in npcs:
 			if is_instance_valid(npc): npc.sync_area()
 		story.sync_area()
-		rocket.damaged = world == 0 and not story.rocket_repaired
+		rocket.damaged = world == 0 and story.rocket_repair_required and not story.rocket_repaired
 	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(rowan):
 		rowan.sync_area()

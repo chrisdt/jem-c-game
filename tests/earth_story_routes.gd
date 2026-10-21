@@ -37,6 +37,7 @@ func near_route(points: Array[Vector2], target: Vector2) -> bool:
 	return false
 
 func run() -> void:
+	ProjectSettings.set_setting("gameplay/rocket_repair_required",true)
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame

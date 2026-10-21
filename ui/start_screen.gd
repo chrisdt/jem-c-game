@@ -50,7 +50,10 @@ func _ready() -> void:
 	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Find your way","")
 	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Collect and upgrade","")
 	combat_text = guide_row(panel,316,CATALOG.tool_icon(true),"3. Craft your Earth sword","")
-	guide_row(panel,408,CATALOG.planet_icon(1),"4. Get ready for space","Help Earth's neighbours prepare your tools,\nrepair your spacesuit and fix the rocket.")
+	if ProjectSettings.get_setting("gameplay/rocket_repair_required",false):
+		guide_row(panel,408,CATALOG.planet_icon(1),"4. Get ready for space","Help Earth's neighbours prepare your tools,\nrepair your spacesuit and fix the rocket.")
+	else:
+		guide_row(panel,408,CATALOG.planet_icon(1),"4. Explore other worlds","The camp rocket is ready! Choose a world\nto explore whenever you like.")
 	start_button = STYLE.button(panel,"Start exploring",Vector2(32,514),Vector2(480,60),22)
 	start_button.pressed.connect(start_exploring)
 	footer = STYLE.label(panel,"",Vector2(32,586),Vector2(480,48),13)

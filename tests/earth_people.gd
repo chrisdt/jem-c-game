@@ -95,6 +95,7 @@ func check_departure(game, npc) -> void:
 	check(inventory(game) == after and not npc.visible,"A departed character repeated rewards or reappeared")
 
 func run() -> void:
+	ProjectSettings.set_setting("gameplay/rocket_repair_required",true)
 	var game = await new_game()
 	check(game.npcs.size() == 7,"Earth does not contain all seven quest characters")
 	var atlas_image: Image = HUMAN.PORTRAITS.get_image()

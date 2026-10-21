@@ -20,6 +20,9 @@ const PROPS := {
 	"engine":{"region":4,"cave":true,"foot":Vector2(1230,440),"cell":4,"width":44.0,"ground_depth":0.80},
 }
 const ROCKFALL_BARRIER := Rect2(1720,545,280,285)
+# Keep the full repair chain available for a later update. Travel availability
+# does not grant any quest rewards, equipment or completion flags.
+var rocket_repair_required: bool = ProjectSettings.get_setting("gameplay/rocket_repair_required",false)
 var game: Node
 var accepted: Dictionary = {}
 var complete: Dictionary = {}
@@ -62,12 +65,13 @@ func done(role: String) -> bool:
 	return complete.get(role,false)
 
 func available(role: String) -> bool:
+	if role == "nova" and not rocket_repair_required: return false
 	if role == "bea": return game.trial.sword_owned
 	var index := ORDER.find(role)
 	return index <= 0 or done(ORDER[index-1])
 
 func launch_ready() -> bool:
-	return rocket_repaired and drill_improved and sword_improved and suit_ready
+	return not rocket_repair_required or (rocket_repaired and drill_improved and sword_improved and suit_ready)
 
 func snake_cleared(region: int, slot: int) -> bool:
 	var id := "%d/%d" % [region,slot]
@@ -119,7 +123,7 @@ func pages(role: String) -> Array[String]:
 			if damaged_suit and navigation_part: return ["An old spacesuit and a navigation unit! Finn can repair the suit beside Willow Marsh's bridge."]
 			return ["There's an expedition locker at the circular ruins. A snake has made its home nearby.","With Mara's upgraded tools, deal with the ruins snake and drill open the locker. Bring me news of what you find."]
 		"finn":
-			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit beside the campsite tent on Pinewood Trail. Bring it, the damaged suit and 2 fallen wood for the repair frame.","You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." % mini(game.trial.wood,2)]
+			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit beside the campsite tent on Pinewood Trail. Bring it, the damaged suit and 2 fallen wood for the repair frame.",("You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." if rocket_repair_required else "You have %d/2 wood. I'll seal the suit for your next adventure.") % mini(game.trial.wood,2)]
 		"nova":
 			return ["We've nearly got a space explorer! The last engine component is in Crystal Depths.","Recover it with the upgraded drill. Bring the navigation unit from Iris and fuel regulator from Finn.","Then we'll fit the parts, check both upgraded tools and your sealed spacesuit, and repair the rocket together."]
 	return []
@@ -129,8 +133,8 @@ func closing(role: String) -> String:
 		"bea": return "Thank you! Otis needs help with a rockfall on the east quarry trail. Build a hand drill at camp for 5 copper if you haven't already."
 		"otis": return "The way is clear. Find Mara by the quarry rails and mine cart for better tools."
 		"mara": return "Your crystal drill is faster and your reinforced sword hits harder! Iris is researching the circular ruins at Sunstone Ridge."
-		"iris": return "Finn at Willow Marsh's stream and bridge can seal that spacesuit. Keep the navigation unit safe for Nova."
-		"finn": return "Your spacesuit is sealed and ready! Take this fuel regulator to Nova beside the rocket at camp."
+		"iris": return "Finn at Willow Marsh's stream and bridge can seal that spacesuit."+(" Keep the navigation unit safe for Nova." if rocket_repair_required else "")
+		"finn": return "Your spacesuit is sealed and ready!"+(" Take this fuel regulator to Nova beside the rocket at camp." if rocket_repair_required else " Thanks for helping our Earth neighbours. The camp rocket is ready whenever you want to explore another world.")
 		"nova": return "Launch checks complete! The rocket, both upgraded tools and your spacesuit are ready. Choose a world at the rocket when you're ready."
 	return "Thanks for your help!"
 
@@ -162,7 +166,7 @@ func finish(role: String, completed: bool) -> void:
 			seal_kit = false
 			damaged_suit = false
 			suit_ready = true
-			regulator = true
+			regulator = rocket_repair_required
 		"nova":
 			navigation_part = false
 			regulator = false
@@ -198,6 +202,7 @@ func entries() -> Array[Dictionary]:
 		"nova":"Camp rocket: recover the engine part in Crystal Depths. Bring it, the navigation unit and Finn's regulator for launch checks.",
 	}
 	for role in ORDER:
+		if role == "nova" and not rocket_repair_required: continue
 		var detail: String = closing(role) if done(role) else details[role]
 		var progress: String = ("Sword ready · talk to Rowan" if game.trial.sword_owned and not done(role) else game.rowan.progress_text()) if role == "rowan" else progress_text(role)
 		result.append({"id":role,"title":role.capitalize()+" · "+TITLES[role],"detail":detail,"progress":progress,"done":done(role)})
@@ -209,7 +214,7 @@ func prop_exists(id: String) -> bool:
 		"rockfall": return not quarry_open
 		"locker": return drill_improved and sword_improved and not damaged_suit and not done("iris") and not suit_ready
 		"seals": return not seal_kit and not suit_ready
-		"engine": return not engine_part and not rocket_repaired
+		"engine": return rocket_repair_required and not engine_part and not rocket_repaired
 	return false
 
 func floor_at(point: Vector2, region: int, cave: bool) -> bool:

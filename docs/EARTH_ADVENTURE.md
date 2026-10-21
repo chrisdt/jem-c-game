@@ -4,7 +4,7 @@ Earth now has a complete resource-and-equipment loop across its five surface dis
 
 ## Earth story
 
-Follow the seven-character [Earth story](EARTH_STORY.md): Rowan → Bea → Otis → Mara → Iris → Finn → Nova. Their missions connect the existing gathering and combat systems to a visible quarry rockfall, upgraded tools, expedition supplies, spacesuit repairs and final rocket readiness. The journal tracks these seven story missions and optional exploration. Travel unlocks after Nova’s repair chain, with an affordable resource budget.
+Follow the six active [Earth story](EARTH_STORY.md) quests: Rowan → Bea → Otis → Mara → Iris → Finn. These cover gathering, combat, the quarry rockfall, upgraded tools, expedition supplies and spacesuit repairs. The journal tracks six story quests and optional exploration. The rocket works from the start; Nova’s repair quest and engine-part pickup are temporarily paused. Saving remains deferred.
 
 ## Try it
 
@@ -12,7 +12,7 @@ Follow the seven-character [Earth story](EARTH_STORY.md): Rowan → Bea → Otis
 - Return to the camp workbench and choose **Copper sword: 3 copper + 2 wood** or **Hand drill: 5 copper**. Either order works. Earth has thirteen copper deposits and six wood piles, enough to craft both with resources left over.
 - The sword starts locked. Crafting it unlocks the second equipment slot and selects it. **1** selects the pick/fitted drill and **2** selects the owned sword. **E / Space** collects nearby revealed wood and quest items with either weapon. A snake guarding a box keeps Space available for combat until defeated. With no ready pickup, **Space** jabs with the sword or mines nearby revealed ore with the pick/drill; away from ore it attacks. Select the mining tool to drill quest objects. **E** and **Space** can pause jobs started by either key. On touch, tap a tool and then **Attack / Jab**, or the contextual action. **E** also talks and opens the workbench/rocket.
 - Both crafted items keep their mission ticks after their ingredients are spent. Drill and sword ownership are separate; changing tools never removes an upgrade. The compact Earth header shows copper, blue crystal and wood.
-- Press **J** or tap **Open** beside Missions for the Earth expedition journal. Its seven story missions can be recalled after dialogue closes. District/mine exploration, finding Buddy and trying healing fruit are optional objectives.
+- Press **J** or tap **Open** beside Missions for the Earth expedition journal. Its six active story missions can be recalled after dialogue closes. District/mine exploration, finding Buddy and trying healing fruit are optional objectives.
 - On Earth, moving, pressing **E / Space / Pause**, changing tools, taking damage or opening the journal pauses mining. Each deposit retains its own seconds of completed work through district unloading, mine exits and rocket trips. The prompt shows **Resume** and the remaining time. Finishing pays once. A new game resets every deposit.
 - Snakes roam every outdoor Earth district: three in Landing Meadow and two in each later district. A sword defeats a snake in three hits; the pick or fitted drill takes nine. Sword artwork appears only during the jab.
 - Every Earth mine has two rats and three bats. They warn before a short attack. A rat takes two sword hits and a bat takes one; weaker pick/drill attacks also work. Defeated foes poof away silently.

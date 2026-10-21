@@ -11,6 +11,7 @@ func check(ok: bool, detail: String) -> void:
 		push_error(detail)
 
 func run() -> void:
+	ProjectSettings.set_setting("gameplay/rocket_repair_required",true)
 	change_scene_to_file("res://main.tscn")
 	await scene_changed
 	await process_frame
