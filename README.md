@@ -1,6 +1,6 @@
-# Sunny Scout — Earth exploration fixes
+# Sunny Scout — Earth character greetings
 
-The complete browser game, exported with Godot 4.6.3 from source commit `eb5bcb3f049241f34d73482933460123a9f794e4`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `2b52f76f5ceffa96f68053c86e0a362d7a759ec1`. The editable Godot project is on `main`.
 
 ## Upload
 
@@ -9,6 +9,13 @@ Download this branch with **Code → Download ZIP** and unzip it. Upload **every
 The intended site is https://playsunnyscout.com/play/. Publishing this build branch does not upload it to WP Engine. Manual deployment instructions are in `docs/DEPLOY_WPENGINE.md` on `main`. Reload the page after replacing the whole build; start a fresh session to see the new quest placements.
 
 ## This Earth update
+
+- All seven Earth characters fade in with their soft shadows over 0.75 seconds, matching explored mineral reveals.
+- Each gives a short friendly wave on the first close approach, using dedicated painted greeting artwork and gentle hand/forearm motion. The head, body and boots stay planted within the pose; the character returns to idle afterward.
+- Character artwork is centred over the boots, with layered soft contact shadows directly underneath. Outstretched hands no longer shift the feet away from their shadow.
+- Greeting and reveal state persist through revisits, pause during menus/help/travel, and reset with a fresh game. Quest-completion smoke puffs cancel any active wave cleanly.
+
+Retains the preceding Earth exploration fixes:
 
 - All seven Earth neighbours use new compact artwork fitted to Sunny's visible height. Rowan and Otis no longer tower over him.
 - Completed quest characters disappear in a small smoke puff after their final interaction closes, and stay gone through area changes. Starting a new game restores them.
@@ -42,5 +49,8 @@ Use landscape on iPad: a thumb pad handles movement; separate action, equipment 
 The illustrated loading screen, wooden signs, exploration mist, sparse randomized minerals, water/wildlife animation and bounded scenery streaming are retained. Review scenes/screenshots and test code are excluded from the playable export.
 
 ## Checked
+
+`tests/npc_presentation.gd` verifies all seven unique greeting poses, gradual reveal timing, one-time nearby waves, menu/help/pause guards, revisits, matching character height and interruption by quest completion. Existing character, conversation, touch and complete Earth-story checks also pass. Browser review captures reveal, both wave directions and idle for every NPC; the normal production startup and dialogue paths are checked in desktop/tablet emulation. Physical iPad Safari was not used for this check.
+
 
 The Earth walking audit passes 30 artwork routes in both directions, 10,704 real player movement steps, 18,739 connected floor samples and 48 doorway/trail approaches. Water, walls, pillars and the locked quarry remain blocked. Native checks cover the complete seven-character campaign, exact recipes, cancelled handoffs, all character departures, pickups, combat, touch controls, randomized mining alerts, exploration and rocket travel. Browser review checks the production welcome/start flow, quest journal and Earth rendering in desktop and tablet emulation, plus close views of all changed art and props. Physical iPad Safari testing is still useful for device-specific performance.
