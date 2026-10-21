@@ -1,38 +1,69 @@
-# Sunny Scout — Sunstone Folk & Sunforge equipment
+# Sunny Scout — Three-world speedruns
 
-Complete browser game exported with Godot 4.6.3 from source commit `2b7ee3117838964be77cad67a197914d044d0215`. Editable project: `main`. Build release: `c5fd5a184439436b44f6`.
+Full browser game exported with Godot 4.6.3 from source commit `dd8a292b3c4fa47771369cb8d272b0ec020582ec`.
+Editable project: `main`. Build release: `2950aceed712ea3445d3`.
 
-## Upload
+## Upload to WP Engine
 
-Upload **everything inside `build/web/`** to `/play/` on your website. Replace the full set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs each) and both hashed loading-art files. Serve over HTTPS. Opening `index.html` as a local file does not run the game.
+Upload **everything inside `build/web/`** to your website's **`/play/`** folder.
+Replace all **31 files**, including **`api/leaderboard.php`**, both hashed loading
+art files and the six JPGs in each of `earth_chunks/`, `frost_chunks/` and
+`ember_chunks/`. Serve over HTTPS at https://playsunnyscout.com/play/.
+Opening `index.html` as a local file does not run the browser game.
 
-Intended site: https://playsunnyscout.com/play/. Publishing this branch does not upload to WP Engine.
+**Shared scores need PHP 8.1+ and a writable `/play/api/data/` directory.** The PHP
+endpoint creates that directory and the protected JSON text file `scores.php`.
+No database, WordPress plugin, player login or saved adventure is required.
+Preserve the data folder when updating; never replace it with an empty folder.
+Exclude `/play/api/leaderboard.php` from hosting/page caching if necessary.
+An alternative private writable directory can be set with `SUNNY_SCOUT_DATA_DIR`.
+Static-only hosting still runs the adventure but cannot share scores.
 
-## Start the desert adventure
+Publishing this branch does not upload to WP Engine.
 
-Use the camp rocket to fly to **Ember Dunes**, then meet **Sol beside Mesa Camp**. The four Sunstone Folk quests are:
+## Play and compete
 
-1. **Sol — A Cool Welcome:** find three cooling parts in Dune Sea, Sunken Oasis and Redrock Arches. Return to repair the station; it heals and refills antidote.
-2. **Luma — A Cure from the Oasis:** collect glowleaf in Sunken Oasis and Redrock Arches, plus the flask in Lava Mine beneath Mesa Camp. Earn a three-dose antidote canteen.
-3. **Brasa — Fire up the Sunforge:** find the core in Sunfire Cavern beneath Dune Sea. Bring an owned Earth sword, **3 gold + 1 fire ruby** for the **Sunfang Sword**, then a hand drill, **4 gold + 1 fire ruby** for the **Magma Drill**. Talk once for each upgrade. Completed recipes disappear.
-4. **Orin — The Buried Observatory:** use the Magma Drill to open cooled lava in Obsidian Rise, defeat the guardian scorpion and return the ancient star map to Orin in Redrock Arches.
+- **Start speedrun:** the clock starts after Earth has loaded and painted.
+  Complete **14 story quests**: six on Earth, four in Frost Canyon and four in
+  Ember Dunes. Optional Earth challenges are not needed to finish. The rocket
+  remains unlocked from the start; Nova's repair quest is paused.
+- Menus, travel, background tabs and later loading count. The final story
+  handoff stops the clock and opens **Adventure complete!**
+- Post a nickname (2–16 letters, numbers, spaces, hyphens or underscores).
+  The server freezes the official finish before nickname entry. The board keeps
+  one fastest time per nickname and displays the top 10. Enemy defeats and
+  recoveries are bonus statistics, without time penalties or ranking points.
+- **Best times** opens the shared board from the welcome screen; the HUD timer
+  also opens it during a run. Combat pauses while the clock keeps running.
+- **Explore for fun** keeps relaxed play and a completion screen without posting
+  a ranked time. Keep exploring after finishing or choose **New adventure**.
+- Reloading or confirming reset starts fresh. No mid-run progress saving or
+  sound is added. Shared best times persist independently of game resets.
 
-There are enough real deposits for both upgrades: 13 gold and 3 fire rubies across the five surfaces and three mines. Unique quest objects can be collected early. Frost equipment helps but is optional. The rocket remains usable from the start and no quest blocks planet travel.
+## Controls and worlds
 
-Alien scorpions have front/back/side movement, raised-tail/claw warnings and sandy defeat puffs. Dodge during the warning, then jab during recovery. A sting deals **1.5 hearts**, with venom taking another **half heart after 3 seconds**. Claws deal one heart without venom. Venom does not stack; menus, help and travel pause its countdown. Camp shade clears it. After earning the canteen, press **3** or tap its new icon to cure venom; Sol's repaired cooler refills all three doses. Healthy players cannot waste antidote.
+**WASD / arrows** walks. **E** talks or opens the rocket. **E / Space** gathers
+ready objects; Space mines with the mining tool selected. Away from ready
+interactions, **Space** attacks. **1** selects the tool, **2** the owned sword,
+**3** uses earned antidote. **J / Quests** opens the current world's quest list.
+**R** asks before resetting. On touch, use the movement pad, action/attack buttons
+and equipment icons. Landscape is best on iPad.
 
-Sunfang deals 10 damage (Frostfang 7, reinforced sword 5, copper sword 3). The Magma Drill reduces base mining time by 55%: Earth copper 0.9s / blue crystal 4.05s; off-world common 1.35s / rare 4.5s. Both upgrades work in the Earth miner outfit and spacesuit on every planet. Lower tier rewards cannot downgrade them. The sword stays hidden between jabs.
+Start with Earth's neighbours and workbench. Snow Sprites in Frost Canyon offer
+the Frostfang Sword and Crystal Drill. Sunstone Folk in Ember Dunes offer the
+Sunfang Sword and Magma Drill. Materials, equipment and upgrades work across all
+three worlds; finished crafting cards disappear. The existing wildlife,
+companions, yetis and venomous scorpions remain part of the adventure.
 
-## Existing adventures and controls
+## Verification
 
-Earth and Frost Canyon keep separate quests, wildlife and exploration. Starter sword (3 copper + 2 wood) and hand drill (5 copper) are only crafted at Earth's workbench; built cards disappear. Frost Canyon's four Snow Sprites still offer beacon, Frostfang, Crystal Drill and expedition quests. Nova's rocket repair quest remains paused.
+Gameplay regression checks cover quests, exact crafting costs, combat, touch,
+travel, pickups and reset. Server and HTTP tests cover tokens, server timing,
+nickname validation, concurrent file writes, idempotent posting and persistent
+scores. Deployment tests preserve runtime data through updates and rollback.
+Browser checks cover the production welcome board, first-draw registration and
+in-game board, plus completion, nickname posting and refreshed ranked results.
+All 31 packaged files are hash-checked against the export. Review helpers and
+sample scores are excluded from this build.
 
-**WASD / arrows** walks. **E** talks or opens the rocket. **E / Space** gathers ready objects; Space mines with the mining tool selected. Away from ready interactions, **Space** attacks. **1** selects the tool, **2** the owned sword, **3** uses earned antidote. **J / Quests** opens the current world's expandable quest list. **R** asks before resetting. Materials and equipment stay visible across planets. On touch, use the movement pad, action/attack buttons and equipment icons.
-
-No saving or sound is added. Progress lasts while this game remains open. Reload or confirmed reset starts fresh.
-
-## Validation
-
-Fourteen native integration checks cover the complete affordable Sunstone and Snow Sprite quest chains, both Earth story configurations, exact one-time recipes/cancellation, both outfits/all attack directions, imported Earth damage/mining, venom timing/pause/cure/recovery, touch controls, flight, pickups and resets. Route audits cover all desert and frozen quest locations across each world's five surfaces and three mines, retaining the bounded three-map scenery cache.
-
-The production browser build was checked through welcome/startup, Earth and its quest popup. Chromium artwork review covers directional scorpions, venom HUD, Sunforge equipment in both outfits, touch layout and Sunstone Folk. Browser review helpers are excluded from production. The complete 30-file build and archive hashes are verified.
+Source setup and detailed score rules: `docs/SPEEDRUN_LEADERBOARD.md` on `main`.

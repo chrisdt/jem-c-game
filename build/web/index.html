@@ -58,7 +58,7 @@
 					<progress id="status-progress" aria-label="Game download progress"></progress>
 					<span id="progress-label" aria-hidden="true">…</span>
 				</div>
-				<p id="first-mission"><strong>Your first mission</strong><br>Find five copper on Earth, then build your hand drill at camp.</p>
+				<p id="first-mission"><strong>Your adventure challenge</strong><br>Finish all 14 story quests across three worlds. Try a speedrun, or explore for fun.</p>
 				<button id="retry" type="button" hidden>Try again</button>
 			</section>
 		</div>
@@ -132,7 +132,7 @@
 	(function () {
 		if (typeof Engine === 'undefined') return;
 		try {
-			const config = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":104254396,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+			const config = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":104270428,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 			const missing = Engine.getMissingFeatures({ threads: false });
 			if (missing.length) {
 				window.scoutLoading.fail(new Error('Missing browser features: ' + missing.join(', ')), true);
