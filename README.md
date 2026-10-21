@@ -1,27 +1,38 @@
-# Sunny Scout — Rocket ready from the start
+# Sunny Scout — Snow Sprites & Frost Crystal equipment
 
-The complete browser game, exported with Godot 4.6.3 from source commit `69eca113534f5af001c3f4c6ef869caf3e229086`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `7f0f9822cdb328da9d736b4c84bb7b2107fbc9e2`. The editable project is on `main`.
 
 ## Upload
 
-Unzip the download and upload **everything inside `build/web/`** to your website's game folder, such as `/play/`. Replace the complete set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs each), plus the two hashed loading illustration/logo files. Serve over HTTPS. Opening `index.html` directly as a local file will not run the game.
+Unzip the download and upload **everything inside `build/web/`** to `/play/` on your website. Replace the complete set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs each), plus both hashed loading-art files. Serve over HTTPS. Opening `index.html` directly as a local file will not run the game.
 
-The intended site is https://playsunnyscout.com/play/. Publishing this branch does not upload it to WP Engine.
+The intended site is https://playsunnyscout.com/play/. Publishing this branch does not upload to WP Engine.
 
-## Ready to explore
+## Frozen adventure
 
-The working camp rocket is available immediately. Approach it and press **E**, or tap the contextual action button on touch, to choose Earth, Frost Canyon or Ember Dunes. Takeoff, landing and return trips work without crafting or completing quests first.
+Fly to **Frost Canyon** using the working camp rocket and meet **Pip beside Canyon Camp's shelter**. Four Snow Sprites offer quests:
 
-Nova's rocket-repair quest, her appearance and the engine-part pickup are temporarily paused. Their code remains in the source: set `gameplay/rocket_repair_required=true` in `project.godot` and export again to restore the original repair chain and travel restrictions. Immediate travel grants no resources, equipment upgrades or quest completion.
+1. Pip: find beacon fragments in Frozen Basin, Prism Pass and Aurora Shelf; return to restore the trail lights.
+2. Nix in Frozen Basin: bring the Earth sword, 4 frost ore, 1 amethyst and Blue Echo Mine's heart-crystal to forge **Frostfang**.
+3. Tavi in Prism Pass: bring the hand drill, 5 frost ore, 2 amethysts and Deep Prism Mine's power coupling to fit the **Crystal Drill**.
+4. Eira on Aurora Shelf: open Glacier Crown's frozen expedition cache, defeat its guardian yeti and return the keepsake.
 
-The six other Earth story quests remain available: Rowan, Bea, Otis, Mara, Iris and Finn. The Quests popup counts the six active quests and retains optional exploration. The welcome guide explains immediate rocket travel. Saving is deferred: progress lasts only while the current game is open; reload or confirmed reset starts fresh.
+Frostfang deals stronger directional jabs and briefly slows enemies. The Crystal Drill mines approximately 40% faster than the basic drill and opens the frozen cache. Both work with Sunny's spacesuit and Earth miner outfit, and remain upgraded when brought to other planets. The sword stays hidden while idle/walking. Equipment icons update in the existing slots.
 
-## Play
+The starter sword (3 copper + 2 wood) and hand drill (5 copper) can only be built at **Earth's workbench**. Built recipe cards disappear. Nix and Tavi provide the frozen upgrades through their own conversations; the frozen shelter does not show Earth's recipes.
 
-**WASD / arrows** walks. **E / Space** collects nearby revealed wood and ready quest objects. Space attacks while a snake guards an object; otherwise it attacks with the sword or mines nearby ore with the mining tool. Select the mining tool to drill quest objects; **E** talks and uses the camp workbench/rocket. **1** selects the mining tool; **2** selects the owned sword. **J / Quests** opens the expandable quest list. **R** asks before resetting.
+Yeti encounters in the outer frozen districts warn before striking for **one and a half hearts**. Dodge the warning, then jab during recovery. Defeated yetis vanish in snowy puffs. Warm up beside the Canyon Camp shelter to recover hearts. Snow Sprites fade in with shadows, wave on approach and puff away after completing their quests.
 
-On touch, use the movement pad and contextual action button; the separate Attack/Jab button remains available. The game is silent. Craft the sword for **3 copper + 2 wood** and the hand drill for **5 copper**. Earth characters fade in with contact shadows, wave on approach and puff away when their quests finish. Painted mine closures, wildlife, sparse minerals and exploration mist remain included.
+The rocket remains available from the start. Nova's repair quest remains paused. Earth keeps its own quests, wildlife and exploration; Ember Dunes remains peaceful. No saving is added: progress lasts for the current open session, and reload or confirmed reset starts fresh. Playback stays silent.
+
+## Controls
+
+**WASD / arrows** walks. **E** talks, uses objects or opens the rocket. **E / Space** collects nearby ready items; with the mining tool selected, Space mines ore. Away from a ready interaction, **Space** attacks. **1** selects the mining tool; **2** selects the owned sword. **J / Quests** shows the current planet's expandable quest list. **R** asks before resetting. All six minerals and wood remain visible in the compact header on every planet.
+
+On touch, use the movement pad, contextual action button and separate Attack/Jab button. The equipment bar remains available across planets. Tap Fly here to choose a rocket destination.
 
 ## Checked
 
-Fresh-game keyboard and touch rocket access, both destination planets and return trips, resets, the absence of unearned rewards, six-quest journal counts and hidden repair content pass integration checks. The active six-quest story and retained seven-quest repair story both pass complete gathering/crafting playthroughs. Flight animation, touch controls, character presentation, object routes and mission/mining persistence also pass.
+Twelve integration checks cover the complete affordable frozen quest chain, both Earth story configurations, fresh rocket access, mission/mining persistence, combat, exact upgrade costs and cancellation, real upgraded Earth damage/mining, both outfits and all attack directions, dodging the warned 1.5-heart yeti strike, frozen cache progress, touch, flight, pickups and resets. The frozen route audit verifies all four Snow Sprites, quest objects and yeti approaches across five surfaces and three mines (23,640 connected floor samples), with bounded scenery loading.
+
+Fourteen browser review views cover Snow Sprite dialogue/quests, equipment in both outfits, yeti presentation and the completed workbench, alongside a normal production startup/Earth browser check. No browser script or asset errors were reported. Review helpers are excluded from production. Complete build files and ZIP hashes are verified before publication.
