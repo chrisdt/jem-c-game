@@ -31,8 +31,8 @@ The playable actor uses this approved position. `earth_regions.gd` reserves
 plants and fallen wood. She has no blocking collision, so both approaches
 around the log remain usable.
 
-Fit the character by her measured face width to Scout's **30 world-unit** head
-width, excluding transparent padding. Adult body height can differ. Keep Scout
+Use the compact shared Earth portrait atlas and fit the complete visible figure
+to Scout's **87.45 world-unit** height, excluding transparent padding. Keep Scout
 visible at the same camera zoom for the scale check. Her compact head/body
 proportions follow Scout's miner artwork. Store the character source and review
 captures in [the concept folder](concepts/bea-v1/README.md).

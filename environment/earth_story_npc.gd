@@ -16,11 +16,7 @@ func _ready() -> void:
 					found = true
 					break
 			if found: break
-	if role == "otis":
-		fit_sprite(load("res://assets/npcs/earth_people_concept.png"),Rect2i(768,0,768,1024),220.0)
-	else:
-		var index: int = ["mara","iris","finn","nova"].find(role)
-		fit_sprite(load("res://assets/npcs/earth_neighbours.png"),Rect2i((index%2)*768,(index/2)*512,768,512),140.0)
+	fit_person(role)
 	sync_area()
 
 func sync_area() -> void:
@@ -42,3 +38,6 @@ func conversation_started() -> void:
 func conversation_finished(completed: bool) -> void:
 	if completed: introduced = true
 	game.story.finish(role,completed)
+
+func quest_finished() -> bool:
+	return is_instance_valid(game.story) and game.story.done(role)

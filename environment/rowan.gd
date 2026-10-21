@@ -2,7 +2,6 @@ extends "res://environment/human_npc.gd"
 
 # Feet share the same world plane as Scout's boots. Crop transparent atlas
 # margins before fitting, so the source image size never sets character size.
-const PEOPLE: Texture2D = preload("res://assets/npcs/earth_people_concept.png")
 const FOOT := Vector2(590,454)
 const MISSION_TITLE := "Ready for the Trail"
 enum Mission { NOT_STARTED, ACTIVE, COMPLETE }
@@ -18,7 +17,7 @@ var acknowledging_completion := false
 func _ready() -> void:
 	name = "Rowan"
 	position = FOOT
-	fit_sprite(PEOPLE,Rect2i(0,0,768,1024))
+	fit_person("rowan")
 	sync_area()
 
 func greeting_text() -> String:
@@ -65,7 +64,10 @@ func sync_mission() -> void:
 	# travelling. The quest never consumes materials or grants a second sword.
 	if mission == Mission.ACTIVE and game.trial.sword_owned:
 		mission = Mission.COMPLETE
-		game.message = "Ready for the Trail complete! Your copper sword is ready."
+		game.message = "Ready for the Trail complete! Your copper sword is ready. Find Bea on Pinewood Trail for your next quest."
+
+func quest_finished() -> bool:
+	return mission == Mission.COMPLETE
 
 func progress_text() -> String:
 	if mission == Mission.COMPLETE: return "Copper sword crafted"

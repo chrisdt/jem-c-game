@@ -14,11 +14,14 @@ static var FLOOR := PackedVector2Array([
 	Vector2(320, 220), Vector2(365, 200), Vector2(430, 195),
 	Vector2(465, 210), Vector2(470, 245), Vector2(470, 275),
 	Vector2(495, 305), Vector2(520, 335), Vector2(540, 380), Vector2(550, 425),
-	Vector2(580, 420), Vector2(660, 425), Vector2(730, 365),
+	# The apron below the central timber doorway is painted open floor.
+	# The old straight edge from (580,420) to (660,425) cut that path off.
+	Vector2(580, 390), Vector2(620, 380), Vector2(675, 380),
+	Vector2(710, 385), Vector2(730, 365),
 	Vector2(760, 300), Vector2(720, 250), Vector2(735, 200),
 	Vector2(800, 160), Vector2(870, 180), Vector2(875, 245),
 	Vector2(830, 290), Vector2(870, 360), Vector2(920, 380),
-	Vector2(970, 350), Vector2(1010, 365), Vector2(1080, 410),
+	Vector2(970, 350), Vector2(1010, 365), Vector2(1080, 380),
 	Vector2(1160, 370), Vector2(1220, 300), Vector2(1290, 240),
 	Vector2(1330, 205), Vector2(1390, 220), Vector2(1380, 270),
 	Vector2(1320, 300), Vector2(1260, 370), Vector2(1210, 430),

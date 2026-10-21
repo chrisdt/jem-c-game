@@ -3,6 +3,7 @@ extends SceneTree
 const TRAVEL = preload("res://tests/support/area_travel.gd")
 const CREATURE = preload("res://environment/ambient_creature.gd")
 var failures := 0
+var layout_seed := 1701
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -18,6 +19,37 @@ func next_alert(trial) -> void:
 		if trial.encounter_rng.randf() < 0.35:
 			trial.encounter_rng.seed = seed_value
 			return
+
+func surface_alert_fixture(game, index: int) -> Dictionary:
+	# Use a real generated deposit, but select an explicitly eligible approach.
+	# An arbitrary left offset can lie inside an NPC/camp safe area or leave no
+	# snake-sized route beside a pond, deposit or tree. Those refusals are correct
+	# production behaviour; this fixture must not depend on getting lucky.
+	var snake = game.trial.snakes[0]
+	var old_home: Vector2 = snake.home
+	var old_position: Vector2 = snake.position
+	for radius in [85.0,90.0]:
+		for ray in 32:
+			var approach: Vector2 = game.rocks[index].pos+Vector2.from_angle(ray*TAU/32)*radius
+			if not game.trial.floor_at(approach) or game.trial.safe_at(approach): continue
+			var usable := true
+			for npc in game.npcs:
+				if npc.home_region == game.earth_region and approach.distance_to(npc.position) < 110: usable = false
+			for pile in game.wood_supplies.piles:
+				if not pile.collected and approach.distance_to(pile.position) < 95: usable = false
+			if not usable: continue
+			for enemy_radius in [145.0,160.0,175.0]:
+				for enemy_ray in 24:
+					var enemy: Vector2 = approach+Vector2.from_angle(enemy_ray*TAU/24)*enemy_radius
+					snake.home = enemy
+					snake.position = enemy
+					if not snake.can_stand(enemy) or not snake.clear_route(approach) or not game.trial.clear_line(enemy,approach): continue
+					snake.home = old_home
+					snake.position = old_position
+					return {"player":approach,"enemy":enemy}
+	snake.home = old_home
+	snake.position = old_position
+	return {}
 
 func press(code: Key) -> void:
 	for down in [true,false]:
@@ -72,6 +104,10 @@ func run() -> void:
 	game.set_process(false)
 	game.companion.set_process(false)
 	game.gardens.set_process(false)
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--layout-seed="): layout_seed = argument.trim_prefix("--layout-seed=").to_int()
+	game.ore_rng.seed = layout_seed
+	game.reset_rocks()
 	check(game.missions.completed() == 0 and game.missions.entries().size() == 11,"Fresh expedition inherited completed missions")
 	check(game.hud.mission_panel.size.y <= 52,"Mission HUD became a large overlay")
 	# Follow the normal journal shortcut. Opening pauses mining and all combat.
@@ -134,7 +170,14 @@ func run() -> void:
 	game.advance_mining(10)
 	check(game.ore == 1 and game.rocks[index].hp == 0,"Resumed deposit rewarded more than once")
 	# A nonfatal hit and changing equipment both pause the remaining deposit.
-	game.player = game.rocks[second].pos+Vector2(-60,0)
+	var fixture := surface_alert_fixture(game,second)
+	check(not fixture.is_empty(),"No unsafe real-ore approach with a clear snake route for layout seed %d" % layout_seed)
+	if fixture.is_empty():
+		game.queue_free()
+		await process_frame
+		quit(1)
+		return
+	game.player = fixture.player
 	game.update_exploration()
 	game.start_mining(second)
 	game.advance_mining(0.2)
@@ -154,20 +197,22 @@ func run() -> void:
 		snake.state = "gone"
 		snake.hide()
 	nearby_snake.health = 9
-	for ray in 24:
-		var point: Vector2 = game.player+Vector2.from_angle(ray*TAU/24)*145
-		nearby_snake.home = point
-		if nearby_snake.can_stand(point) and game.trial.clear_line(point,game.player):
-			nearby_snake.position = point
-			nearby_snake.state = "roam"
-			nearby_snake.show()
-			game.fog.observe(game.area_id(),point)
-			break
-	game.trial.encounter_rng.seed = 123
+	nearby_snake.home = fixture.enemy
+	nearby_snake.position = fixture.enemy
+	nearby_snake.state = "roam"
+	nearby_snake.show()
+	game.fog.observe(game.area_id(),fixture.enemy)
+	check(not game.trial.safe_at(game.player) and game.player.distance_to(game.rocks[second].pos) < 100,"Alert approach is safe or out of mining range")
+	check(nearby_snake.can_stand(nearby_snake.position) and nearby_snake.clear_route(game.player) and game.trial.clear_line(nearby_snake.position,game.player),"Alert fixture has no valid enemy floor/route")
 	game.rocks[second].erase("encounter_checked")
 	next_alert(game.trial)
-	game.start_mining(second)
-	game.advance_mining(0.2)
+	game.cooldown = 0
+	game.get_viewport().gui_release_focus()
+	await press(KEY_SPACE)
+	check(game.mining_target == second and is_equal_approx(game.mining_elapsed,0.5),"Space did not resume the real partially mined deposit")
+	game.advance_mining(0.09)
+	check(game.trial.encounter_count == 0 and not game.rocks[second].has("encounter_checked"),"Mining alerted before the 0.6-second warning threshold")
+	game.advance_mining(0.11)
 	check(game.trial.encounter_count == 1 and game.trial.snakes.size() <= 4,"Mining did not create a bounded surface alert")
 	var alerted: Array = game.trial.snakes.filter(func(s): return s.state == "stir")
 	check(alerted.size() == 1,"Mining alert has no visible warned snake")
@@ -177,8 +222,11 @@ func run() -> void:
 		snake.advance(0.8)
 		check(snake.state == "stir" and game.trial.health == health,"Mining creature attacked before its warning finished")
 		check(snake.can_stand(snake.position),"Mining snake spawned on a rock, doorway or water")
-	game.cancel_mining()
-	game.start_mining(second)
+	await press(KEY_E)
+	check(game.mining_target == -1 and is_equal_approx(game.rocks[second].work,0.7),"E did not pause and retain the alerted deposit's work")
+	game.cooldown = 0
+	await press(KEY_E)
+	check(game.mining_target == second and is_equal_approx(game.mining_elapsed,0.7),"E did not resume the same alerted deposit")
 	game.advance_mining(0.1)
 	check(game.trial.encounter_count == 1,"Resuming a deposit summoned another creature")
 	game.cancel_mining()
@@ -241,5 +289,5 @@ func run() -> void:
 	check(game.missions.completed() == 0 and game.missions.mines.is_empty() and game.trial.encounter_count == 0 and game.rocks.all(func(r): return not r.has("work")),"Fresh game inherited mission, encounter or mining state")
 	game.queue_free()
 	await process_frame
-	if failures == 0: print("PASS: journal shortcuts/modal pause, per-deposit retained work across movement/hit/equipment/mines/rocket travel, exact remaining duration and one reward, warned/capped/no-repeat mining encounters and camp protection, Earth-only missions, real defeat/scare objectives, all district/mine discovery and fresh reset")
+	if failures == 0: print("PASS (layout seed %d): journal shortcuts/modal pause, per-deposit retained work across movement/hit/equipment/mines/rocket travel, exact remaining duration and one reward, warned/capped/no-repeat mining encounters and camp protection, Earth-only missions, real defeat/scare objectives, all district/mine discovery and fresh reset" % layout_seed)
 	quit(1 if failures else 0)

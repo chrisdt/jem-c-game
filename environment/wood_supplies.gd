@@ -2,6 +2,8 @@ extends Node2D
 
 const ART = preload("res://environment/trial_art.gd")
 const GRASS = preload("res://environment/flower_placement.gd")
+const PICKUP_WIDTH := 38.0
+const GROUND_DEPTH := 0.64
 const HOMES := {
 	0:[Vector2(1120,600)],1:[Vector2(650,650),Vector2(1050,410)],
 	2:[Vector2(720,350)],3:[Vector2(1000,520)],4:[Vector2(580,430)],
@@ -52,7 +54,7 @@ func sync_area() -> void:
 						point = candidate
 						placement.placed.append(point)
 						break
-			if point.is_finite(): piles.append({"position":point,"pose":(game.earth_region+piles.size())%3,"collected":false,"seen":false,"fade":0.0})
+			if point.is_finite(): piles.append({"position":point,"collected":false,"seen":false,"fade":0.0})
 	queue_redraw()
 
 func clear_floor(point: Vector2) -> bool:
@@ -96,11 +98,19 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	for pile in piles:
 		if pile.collected or not pile.seen: continue
-		var texture: Texture2D = ART.wood(pile.pose)
-		var size := texture.get_size()*64.0/texture.get_width()
+		var texture: Texture2D = ART.wood()
 		var alpha := smoothstep(0,1,float(pile.fade))
-		draw_set_transform(pile.position+Vector2(0,18),0,Vector2(1,0.3))
-		draw_circle(Vector2.ZERO,27,Color(0.1,0.1,0.03,0.14*alpha))
-		draw_set_transform(pile.position)
-		draw_texture_rect(texture,Rect2(Vector2(-size.x*0.5,20-size.y),size),false,Color(1,1,1,alpha))
+		# The contact point shares Scout's ground offset. Flattening the art's
+		# depth and tucking its base into a tight shadow prevents levitation.
+		var contact: Vector2 = pile.position+Vector2(0,20)
+		draw_set_transform(contact,0,Vector2(1,0.18))
+		draw_circle(Vector2.ZERO,15,Color(0.1,0.1,0.03,0.16*alpha))
+		draw_set_transform(contact)
+		draw_texture_rect(texture,pickup_rect(),false,Color(1,1,1,alpha))
 	draw_set_transform(Vector2.ZERO)
+
+func pickup_rect() -> Rect2:
+	var texture: Texture2D = ART.wood()
+	var size := texture.get_size()*PICKUP_WIDTH/texture.get_width()
+	size.y *= GROUND_DEPTH
+	return Rect2(Vector2(-size.x*0.5,-size.y*0.78),size)

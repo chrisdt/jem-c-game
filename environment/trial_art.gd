@@ -37,9 +37,10 @@ static func plant(apple: bool, picked: bool) -> Texture2D:
 static func plant_anchor(apple: bool, picked: bool) -> Vector2:
 	return Vector2(365 if not picked else 345,642) if apple else Vector2(265 if not picked else 260,337)
 
-static func wood(index := 3) -> Texture2D:
-	var bounds: Rect2 = [Rect2(76,180,535,350),Rect2(736,166,456,382),Rect2(87,748,502,370),Rect2(720,752,470,378)][index]
-	return region("wood%d" % index,WOOD,bounds)
+static func wood() -> Texture2D:
+	# One recognizable fallen log for pickups and the inventory header alike.
+	# Tight alpha bounds remove the sheet's transparent border.
+	return region("wood",WOOD,Rect2(740,170,447,374))
 
 static func snake_pose(row: int, frame: int) -> Dictionary:
 	var bounds := Rect2(SNAKE_COLS[frame],SNAKE_ROWS[row].x,SNAKE_COLS[frame+1]-SNAKE_COLS[frame],SNAKE_ROWS[row].y)

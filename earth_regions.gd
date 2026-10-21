@@ -41,10 +41,11 @@ const MINE_SPAWNS := [Vector2(420,620),Vector2(750,745) / ART_SIZE * SIZE,Vector
 const MOTION = preload("res://floor_motion.gd")
 const DENSITY = preload("res://ore_density.gd")
 const FOOT_OFFSET := Vector2(0,20)
+const MINE_TRIGGER_EXTENTS := Vector2(110,100)
 const BEA_FOOT := Vector2(1632,1138)
 const NPC_CLEARANCE := {
 	0:[Vector2(590,454),Vector2(195,470)],
-	1:[BEA_FOOT,Vector2(1660,790),Vector2(1480,847)],
+	1:[BEA_FOOT,Vector2(1660,790),Vector2(1480,847),Vector2(410,278)],
 	2:[Vector2(1187,853)],
 	3:[Vector2(1370,600),Vector2(1600,345)],
 	4:[Vector2(1040,550)],
@@ -60,13 +61,13 @@ static func clear_of_people(region: int, point: Vector2, radius := 120.0) -> boo
 const SURFACE_BLOCKERS := {
 	1:[Vector4(1085,150,215,80),Vector4(510,330,32,23),Vector4(170,835,75,55),Vector4(630,920,45,30),Vector4(1050,980,55,35)],
 	2:[Vector4(490,645,270,140),Vector4(1060,245,205,85),Vector4(435,370,45,30),Vector4(945,555,58,52),Vector4(975,660,60,35)],
-	3:[Vector4(265,310,105,65),Vector4(430,225,110,48),Vector4(690,590,65,45),Vector4(460,700,65,35),Vector4(1025,785,80,45),Vector4(1185,220,105,40),Vector4(1090,315,55,40),Vector4(1275,315,50,35),Vector4(1350,690,50,30)],
+	3:[Vector4(265,310,105,65),Vector4(430,225,110,48),Vector4(690,590,65,45),Vector4(460,700,65,35),Vector4(1025,785,80,45),Vector4(1185,215,85,25),Vector4(1090,315,55,40),Vector4(1275,315,50,35),Vector4(1350,690,50,30)],
 	4:[Vector4(440,750,240,120),Vector4(1180,470,110,70),Vector4(1080,765,100,55),Vector4(580,660,85,40),Vector4(380,610,90,50),Vector4(1325,355,85,70)],
 }
 # Extra outlines for cliffs and the marsh's winding water. The bridge deck is
 # explicitly exempt, so the visible crossing remains usable across its width.
 static var SURFACE_WALLS := {
-	1:[PackedVector2Array([Vector2(845,180),Vector2(980,150),Vector2(1020,220),Vector2(960,300),Vector2(850,300)]),PackedVector2Array([Vector2(1200,190),Vector2(1370,140),Vector2(1400,300),Vector2(1310,350),Vector2(1210,300)])],
+	1:[PackedVector2Array([Vector2(845,180),Vector2(980,150),Vector2(1020,220),Vector2(960,300),Vector2(850,300)]),PackedVector2Array([Vector2(1200,190),Vector2(1370,140),Vector2(1400,300),Vector2(1310,350),Vector2(1210,300)]),PackedVector2Array([Vector2(1260,135),Vector2(1500,135),Vector2(1500,300),Vector2(1390,300)])],
 	2:[PackedVector2Array([Vector2(1100,325),Vector2(1150,350),Vector2(1125,400),Vector2(1080,430),Vector2(1045,465),Vector2(990,455),Vector2(1030,405),Vector2(1090,375)]),PackedVector2Array([Vector2(970,510),Vector2(1045,520),Vector2(1030,580),Vector2(1000,615),Vector2(1030,665),Vector2(950,705),Vector2(820,710),Vector2(815,675),Vector2(930,655),Vector2(965,625),Vector2(925,595)])],
 	3:[],
 	4:[PackedVector2Array([Vector2(80,145),Vector2(550,80),Vector2(825,140),Vector2(990,100),Vector2(1000,235),Vector2(890,310),Vector2(820,360),Vector2(710,300),Vector2(640,280),Vector2(600,210),Vector2(400,230),Vector2(330,300),Vector2(200,330),Vector2(145,260)])],
@@ -107,6 +108,18 @@ static func from_art(point: Vector2) -> Vector2:
 
 static func portal(region: int, side: String) -> Vector2:
 	return from_art(GATES[region][side])
+
+static func trail_trigger_extents(side: String) -> Vector2:
+	# Broad across the painted path, shallow along it: arrival points remain
+	# safely outside the trigger even before the return cooldown expires.
+	return Vector2(85,135) if side in ["west","east"] else Vector2(135,85)
+
+static func crosses_opening(start: Vector2, finish: Vector2, centre: Vector2, extents: Vector2) -> bool:
+	# Sweep in normalized ellipse space, so diagonal/slow frames cannot skip
+	# a doorway and the whole visible opening responds to either input method.
+	var first := (start-centre)/extents
+	var last := (finish-centre)/extents
+	return Geometry2D.get_closest_point_to_segment(Vector2.ZERO,first,last).length_squared() < 1.0
 
 static func arrival(region: int, side: String) -> Vector2:
 	var inward: Vector2 = {"west":Vector2.RIGHT,"east":Vector2.LEFT,"north":Vector2.DOWN,"south":Vector2.UP}[side]

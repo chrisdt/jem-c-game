@@ -14,12 +14,12 @@ const PEOPLE := {
 }
 const PROPS := {
 	"supplies":{"region":1,"cave":false,"foot":Vector2(1480,847),"cell":0,"width":58.0},
-	"rockfall":{"region":1,"cave":false,"foot":Vector2(1815,760),"cell":1,"width":340.0},
+	"rockfall":{"region":1,"cave":false,"foot":Vector2(1975,740),"cell":1,"width":540.0},
 	"locker":{"region":3,"cave":false,"foot":Vector2(1600,345),"cell":2,"width":68.0},
-	"seals":{"region":0,"cave":true,"foot":Vector2(910,530),"cell":3,"width":48.0},
-	"engine":{"region":4,"cave":true,"foot":Vector2(1230,440),"cell":4,"width":54.0},
+	"seals":{"region":1,"cave":false,"foot":Vector2(410,278),"cell":3,"width":36.0,"ground_depth":0.68},
+	"engine":{"region":4,"cave":true,"foot":Vector2(1230,440),"cell":4,"width":44.0,"ground_depth":0.80},
 }
-const ROCKFALL_BARRIER := Rect2(1735,555,200,255)
+const ROCKFALL_BARRIER := Rect2(1720,545,280,285)
 var game: Node
 var accepted: Dictionary = {}
 var complete: Dictionary = {}
@@ -119,7 +119,7 @@ func pages(role: String) -> Array[String]:
 			if damaged_suit and navigation_part: return ["An old spacesuit and a navigation unit! Finn can repair the suit beside Willow Marsh's bridge."]
 			return ["There's an expedition locker at the circular ruins. A snake has made its home nearby.","With Mara's upgraded tools, deal with the ruins snake and drill open the locker. Bring me news of what you find."]
 		"finn":
-			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit in Moss Mine, the first mine near camp. Bring it, the damaged suit and 2 fallen wood for the repair frame.","You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." % mini(game.trial.wood,2)]
+			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit beside the campsite tent on Pinewood Trail. Bring it, the damaged suit and 2 fallen wood for the repair frame.","You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." % mini(game.trial.wood,2)]
 		"nova":
 			return ["We've nearly got a space explorer! The last engine component is in Crystal Depths.","Recover it with the upgraded drill. Bring the navigation unit from Iris and fuel regulator from Finn.","Then we'll fit the parts, check both upgraded tools and your sealed spacesuit, and repair the rocket together."]
 	return []
@@ -194,7 +194,7 @@ func entries() -> Array[Dictionary]:
 		"otis":"Pinewood's quarry trail: craft the 5-copper hand drill, drill away the rockfall, then report to Otis.",
 		"mara":"Old Quarry, beside the rails: bring 4 copper and 2 blue crystals to upgrade both your drill and sword.",
 		"iris":"Sunstone Ridge: use the upgraded tools, defeat the ruins snake and open the expedition locker. Report to Iris.",
-		"finn":"Find Finn on the grassy bank below Willow Marsh's bridge. Bring the damaged spacesuit, seal kit from Moss Mine and 2 fallen wood.",
+		"finn":"Find Finn on the grassy bank below Willow Marsh's bridge. Bring the damaged spacesuit, seal kit from Pinewood Trail's campsite tent and 2 fallen wood.",
 		"nova":"Camp rocket: recover the engine part in Crystal Depths. Bring it, the navigation unit and Finn's regulator for launch checks.",
 	}
 	for role in ORDER:
@@ -266,6 +266,9 @@ func sync_area() -> void:
 		prop.centered = false
 		prop.scale = Vector2.ONE*(spec.width/prop.texture.get_width())
 		prop.offset = Vector2(-prop.texture.get_width()*0.5,-prop.texture.get_height())
+		if spec.has("ground_depth"):
+			prop.scale.y *= spec.ground_depth
+			prop.offset.y = -prop.texture.get_height()*0.82
 		prop.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		prop.modulate.a = prop_fades.get(id,0.0)
 		add_child(prop)
@@ -277,7 +280,7 @@ func _process(delta: float) -> void:
 	advance_actions(delta)
 	for id in props:
 		if not prop_exists(id): continue
-		if game.fog.is_revealed(game.area_id(),props[id].position): prop_seen[id] = true
+		if game.fog.is_revealed(game.area_id(),interaction_position(id)): prop_seen[id] = true
 		if prop_seen.get(id,false): prop_fades[id] = minf(1,prop_fades.get(id,0.0)+delta/0.75)
 		props[id].modulate.a = smoothstep(0,1,prop_fades.get(id,0.0))
 	for particle in dust:
@@ -291,14 +294,20 @@ func nearest_prop() -> String:
 	var distance := 1.0
 	for id in props:
 		if not prop_exists(id) or not prop_seen.get(id,false): continue
-		var d: float = game.player.distance_to(props[id].position)/prop_reach(id)
+		var d: float = game.player.distance_to(interaction_position(id))/prop_reach(id)
 		if d < distance:
 			best = id
 			distance = d
 	return best
 
-func prop_reach(id: String) -> float:
-	return 165.0 if id == "rockfall" else 105.0
+func prop_reach(_id: String) -> float:
+	return 105.0
+
+func interaction_position(id: String) -> Vector2:
+	# The rockfall's illustrated center extends beyond the map. Work on its
+	# visible west/front face, so Sunny never has to stand behind the boulders.
+	if id == "rockfall": return Vector2(ROCKFALL_BARRIER.position.x+20,PROPS.rockfall.foot.y-20)
+	return props[id].position
 
 func prop_prompt(id: String) -> String:
 	return {"supplies":"Recover Bea's supplies","rockfall":"Drill the rockfall","locker":"Open expedition locker","seals":"Recover seal kit","engine":"Recover engine component"}.get(id,"")
@@ -314,7 +323,7 @@ func cancel_work() -> void:
 
 func advance_actions(delta: float) -> void:
 	if not working() or game.menu_open() or game.get_tree().paused or game.flight != 0 or game.earth_transition: return
-	if not props.has(job) or game.player.distance_to(props[job].position) >= prop_reach(job)+5:
+	if not props.has(job) or game.player.distance_to(interaction_position(job)) >= prop_reach(job)+5:
 		cancel_work()
 		return
 	job_progress[job] = minf(2,job_progress.get(job,0.0)+delta)
@@ -348,7 +357,7 @@ func use_prop(id: String) -> bool:
 			game.message = "Select your mining tool first: press 1 or tap the drill."
 			return true
 		job = id
-		game.face_direction(props[id].position-game.player)
+		game.face_direction(interaction_position(id)-game.player)
 		game.walking = false
 		game.set_mining_pose(0)
 		game.message = "Drilling · move or tap Pause to stop. Your work is kept."
@@ -363,14 +372,22 @@ func finish_prop(id: String) -> void:
 			damaged_suit = true
 			navigation_part = true
 		"engine": engine_part = true
-	dust.append({"pos":props[id].position,"time":0.0})
+	dust.append({"pos":interaction_position(id),"time":0.0})
 	props[id].hide()
 	game.message = "The quarry trail is open! Tell Otis." if id == "rockfall" else "Recovered: %s. Keep it safe for the expedition." % prop_prompt(id).trim_prefix("Recover ").trim_prefix("Open ")
 	game.refresh_ui()
 
 func _draw() -> void:
+	for id in props:
+		if id == "rockfall" or not prop_exists(id) or not props[id].visible: continue
+		var alpha: float = props[id].modulate.a
+		draw_set_transform(props[id].position+Vector2(0,-1),0,Vector2(1,0.20))
+		draw_circle(Vector2.ZERO,PROPS[id].width*0.34,Color(0.08,0.11,0.05,alpha*0.18))
+	draw_set_transform(Vector2.ZERO)
 	if working() and props.has(job):
-		var at: Vector2 = props[job].position+Vector2(-36,-55)
+		# Keep the quarry bar left of the tall boulder art and above Sunny's
+		# head; parent drawing behind the pile must not hide the work feedback.
+		var at: Vector2 = interaction_position(job)+(Vector2(-96,-130) if job == "rockfall" else Vector2(-36,-55))
 		draw_rect(Rect2(at,Vector2(72,7)),Color("143638"))
 		draw_rect(Rect2(at+Vector2.ONE,Vector2(70*job_progress.get(job,0.0)/2,5)),Color("8de5e5"))
 	for particle in dust:

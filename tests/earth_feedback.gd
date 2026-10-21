@@ -42,7 +42,7 @@ func run() -> void:
 	game.gardens.set_process(false)
 	var scout_height: float = game.HUMAN_NPC.visible_bounds(game.MINER_FRAMES.get_frame_texture(&"idle_down",0).get_image()).size.y*0.15
 	for npc in game.npcs:
-		check(is_equal_approx(npc.head_width,30.0) and npc.height > scout_height,"Earth neighbour still looks miniature: "+str(npc.name))
+		check(is_equal_approx(npc.height,scout_height),"Earth character exceeds Scout's visible height: "+str(npc.name))
 	var nova = game.npcs.filter(func(n): return n.name == "Nova")[0]
 	game.fog.observe(0,nova.position)
 	game.refresh_ui()
@@ -86,11 +86,11 @@ func run() -> void:
 	check(game.story.props.supplies.position.distance_to(Vector2(1480,847)) < 1,"Supplies moved away from their reviewed grass clearing")
 	# The complete painted path is blocked, including the previously open side.
 	for y in [600,640,680,720,760,790]:
-		place(game,Vector2(1715,y))
+		place(game,Vector2(game.story.ROCKFALL_BARRIER.position.x-15,y))
 		game.move_player(Vector2.RIGHT,0.3)
 		check(game.player.x < game.story.ROCKFALL_BARRIER.position.x,"Player bypassed the rockfall at path height "+str(y))
 	game.upgraded = true
-	place(game,Vector2(1710,650))
+	place(game,game.story.interaction_position("rockfall")+Vector2(-60,-30))
 	check(game.story.nearest_prop() == "rockfall" and game.nearest_npc() == null,"Rockfall cannot be reached from the unblocked side without Otis stealing the prompt")
 	game.interact()
 	game.story.advance_actions(2.1)
@@ -131,8 +131,10 @@ func run() -> void:
 	game.story.sword_improved = true
 	game.story.sync_area()
 	check(game.story.props.locker.position.distance_to(Vector2(1600,345)) < 1,"Upgraded-tools chest is not centered inside the ruins")
+	await TRAVEL.enter(game,1,false)
+	check(game.story.props.has("seals") and game.story.props.seals.position.distance_to(Vector2(410,278)) < 1,"Seal kit is missing from Pinewood's campsite")
 	await TRAVEL.enter(game,0,true)
-	check(game.story.props.has("seals") and game.story.floor_at(game.story.props.seals.position,0,true),"Seal kit is missing from the first mine's floor")
+	check(not game.story.props.has("seals"),"Seal kit still appears inside Moss Mine")
 	await TRAVEL.enter(game,2,false)
 	var finn = game.npcs.filter(func(n): return n.name == "Finn")[0]
 	check(finn.position.distance_to(Vector2(1187,853)) < 1 and not game.story.props.has("seals"),"Finn or the seal kit remains on the old bridge bank")
@@ -142,5 +144,5 @@ func run() -> void:
 	check(nova.visible and nova.can_talk(),"Nova never appears for the rocket quest")
 	game.queue_free()
 	await process_frame
-	if failures == 0: print("PASS: shared character head scale, hidden-until-ready Nova, broken/working rocket and smoke, compact expandable/touch-scrollable Quests, full path rockfall and reachable drilling, grass supplies, gated centered ruins chest, Willow bank Finn, first-mine seal kit and persistent living snake retreat without quest credit")
+	if failures == 0: print("PASS: shared character head scale, hidden-until-ready Nova, broken/working rocket and smoke, compact expandable/touch-scrollable Quests, full path rockfall and reachable drilling, grass supplies, gated centered ruins chest, Willow bank Finn, Pinewood campsite seal kit and persistent living snake retreat without quest credit")
 	quit(1 if failures else 0)

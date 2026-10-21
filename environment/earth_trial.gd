@@ -117,7 +117,7 @@ func safe_at(point: Vector2) -> bool:
 		return point.distance_to(game.exit_position()) < 140 or point.distance_to(game.mine_spawn_position()) < 95
 	if game.earth_region == 0 and point.distance_to(game.CAMP) < 230: return true
 	for npc in game.npcs:
-		if is_instance_valid(npc) and npc.home_region == game.earth_region and point.distance_to(npc.position) < 85: return true
+		if is_instance_valid(npc) and not npc.departed and npc.home_region == game.earth_region and point.distance_to(npc.position) < 85: return true
 	for link in game.EARTH.LINKS[game.earth_region]:
 		if point.distance_to(game.EARTH.portal(game.earth_region,link.side)) < 130: return true
 	return false

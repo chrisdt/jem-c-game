@@ -54,7 +54,7 @@ func run() -> void:
 	var rowan = game.rowan
 	var bubble = game.character_bubble
 	check(not bea.visible and not bea.greeted,"Bea appeared or greeted in Landing Meadow")
-	check(bea.position == Vector2(1632,1138) and absf(bea.head_width-rowan.head_width) < 0.01,"Bea lost the approved position or matching head size")
+	check(bea.position == Vector2(1632,1138) and absf(bea.height-rowan.height) < 0.01,"Bea lost the approved position or matching visible height")
 	check(absf(bea.illustration.texture.region.size.y*bea.illustration.scale.y-bea.height) < 0.01,"Bea's fitted sprite does not match her measured height")
 	await TRAVEL.enter(game,1,false)
 	check(not bea.visible and not bea.can_talk() and not bea.greeted,"An undiscovered Bea appeared through fog or offered Talk")

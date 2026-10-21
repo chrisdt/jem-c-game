@@ -73,8 +73,8 @@ func use_prop(game, id: String) -> void:
 	check(game.story.props.has(id),"Missing reachable quest prop: "+id)
 	if not game.story.props.has(id): return
 	var prop = game.story.props[id]
-	var approach := Vector2(-105,-110) if id == "rockfall" else Vector2(-65,0)
-	position_player(game,prop.position+approach)
+	var approach: Vector2 = game.story.interaction_position(id)+Vector2(-60,-30) if id == "rockfall" else prop.position+Vector2(-65,0)
+	position_player(game,approach)
 	game.trial.selected_tool = 0
 	game.interact()
 	check(not game.dialogue_open(),"An NPC stole the quest prop interaction: "+id)
@@ -82,7 +82,7 @@ func use_prop(game, id: String) -> void:
 		game.story.advance_actions(0.7)
 		game.move_player(Vector2.LEFT,0.01)
 		check(not game.story.working() and is_equal_approx(game.story.job_progress[id],0.7),"Moving did not pause a world drilling job")
-		position_player(game,prop.position+approach)
+		position_player(game,approach)
 		game.interact()
 		game.story.advance_actions(1.31)
 		check(not game.story.working(),"World drilling did not resume and finish")
@@ -120,7 +120,7 @@ func run() -> void:
 	game.travel_to_other_planet(1)
 	check(game.flight == 0 and game.world == 0,"The broken rocket can launch before the story")
 	for npc in game.npcs:
-		check(absf(npc.head_width-game.rowan.head_width) < 0.01,"A new character has a different head size: "+str(npc.name))
+		check(absf(npc.height-game.rowan.height) < 0.01,"A character exceeds Scout's visible height: "+str(npc.name))
 	# Rowan's accepted craft still owns its original recipe and reward.
 	talk(game,"rowan")
 	finish_dialogue(game)
@@ -149,9 +149,9 @@ func run() -> void:
 	# The actual quarry transition and rock collider remain blocked until drilled.
 	game.begin_earth_transition(4,false,game.EARTH.arrival(4,"west"),game.player)
 	check(not game.earth_transition and game.earth_region == 1,"Locked quarry accepted a trail transition")
-	position_player(game,Vector2(1730,674))
+	position_player(game,Vector2(game.story.ROCKFALL_BARRIER.position.x-35,game.story.ROCKFALL_BARRIER.get_center().y))
 	game.move_player(Vector2.RIGHT,0.3)
-	check(game.player.x < 1755,"Walking passed through the rockfall")
+	check(game.player.x < game.story.ROCKFALL_BARRIER.position.x,"Walking passed through the rockfall")
 	talk(game,"otis")
 	finish_dialogue(game)
 	check(game.story.accepted.get("otis",false),"Otis's mission could not be accepted")
@@ -185,9 +185,8 @@ func run() -> void:
 	game.character_bubble.set_touch_mode(true)
 	await finish_touch_dialogue(game)
 	check(game.story.done("mara") and game.story.drill_improved and game.story.sword_improved and game.ore == 0 and game.blue_crystals == 0,"Mara did not spend exactly 4 copper + 2 crystals for both upgrades")
-	talk(game,"mara")
-	finish_dialogue(game)
-	check(game.ore == 0 and game.blue_crystals == 0,"Repeated Mara conversation charged again")
+	position_player(game,person(game,"mara").position+Vector2(0,30))
+	check(not person(game,"mara").can_talk() and game.ore == 0 and game.blue_crystals == 0,"Completed Mara quest remains repeatable or charged again")
 	await TRAVEL.enter(game,4,true)
 	# The upgrade changes real mining speed, rather than just a mission flag.
 	var common: int = game.rocks.find_custom(func(r): return r.cave and not r.hard)
@@ -223,9 +222,9 @@ func run() -> void:
 	talk(game,"iris")
 	finish_dialogue(game)
 	check(game.story.done("iris"),"Discovery report did not complete Iris")
-	await TRAVEL.enter(game,0,true)
+	await TRAVEL.enter(game,1,false)
 	use_prop(game,"seals")
-	check(game.story.seal_kit,"Moss Mine seal kit could not be recovered")
+	check(game.story.seal_kit,"Pinewood campsite seal kit could not be recovered")
 	await TRAVEL.enter(game,2,false)
 	var wood: int = game.trial.wood
 	talk(game,"finn")

@@ -137,7 +137,7 @@ func run() -> void:
 	var preview = load("res://previews/rowan_dialogue.tscn").instantiate()
 	root.add_child(preview)
 	await process_frame
-	check(preview.rowan_height > preview.scout_height and is_equal_approx(preview.rowan.head_width,30.0),"Preview lost the shared head size")
+	check(is_equal_approx(preview.rowan_height,preview.scout_height),"Preview character is larger than Scout")
 	check(preview.bubble.is_dialogue_open() and preview.game.process_mode == Node.PROCESS_MODE_DISABLED,"Preview is not isolated from gameplay")
 	check(not preview.game.trial.sword_owned and preview.game.ore == 0,"Bubble preview granted mission progress or equipment")
 	preview.queue_free()

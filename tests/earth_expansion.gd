@@ -91,6 +91,9 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	# This geometry/streaming fixture explores the complete map. Campaign
+	# locking and earned rockfall clearance are tested in earth_story.gd.
+	game.story.quarry_open = true
 	check(EARTH.NAMES.size() == 5 and EARTH.NAMES.size()*EARTH.SIZE.x*EARTH.SIZE.y == 14000000,"Earth is not five original-sized districts")
 	check(game.earth_stream.texture_loads == 0 and game.earth_rocks.size() == 1 and game.fog.maps.size() == 1,"Unvisited districts loaded/generated/revealed at startup")
 	for link in EARTH.LINKS[0]:

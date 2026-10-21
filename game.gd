@@ -15,6 +15,7 @@ const PLANET_MENU = preload("res://planet_menu.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const UI_STYLE = preload("res://ui/expedition_style.gd")
 const WORLD_SIGNS = preload("res://environment/world_signs.gd")
+const BOARDED_PASSAGES = preload("res://environment/boarded_passages.gd")
 const GAME_HUD = preload("res://ui/game_hud.gd")
 const RESET_CONFIRMATION = preload("res://ui/reset_confirmation.gd")
 var reset_confirmation: RESET_CONFIRMATION
@@ -713,9 +714,11 @@ func check_mine_transition(previous: Vector2) -> void:
 	if not regions().has_mine(current_region()):
 		return
 	var doorway := exit_position() if underground else cave_position()
-	var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
-	if closest.distance_to(doorway) >= MINE_TRIGGER_RADIUS:
-		return
+	if world == 0:
+		if not EARTH.crosses_opening(previous,player,doorway,EARTH.MINE_TRIGGER_EXTENTS): return
+	else:
+		var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
+		if closest.distance_to(doorway) >= MINE_TRIGGER_RADIUS: return
 	if current_region() > 0:
 		var entering := not underground
 		begin_earth_transition(current_region(),entering,mine_spawn_position() if entering else surface_exit_position(),surface_exit_position() if entering else mine_spawn_position())
@@ -743,8 +746,13 @@ func check_earth_trail(previous: Vector2) -> void:
 		return
 	for link in regions().LINKS[current_region()]:
 		var point: Vector2 = regions().portal(current_region(),link.side)
-		var closest := Geometry2D.get_closest_point_to_segment(point,previous,player)
-		if closest.distance_to(point) < 55:
+		var crossed: bool
+		if world == 0:
+			crossed = EARTH.crosses_opening(previous,player,point,EARTH.trail_trigger_extents(link.side))
+		else:
+			var closest := Geometry2D.get_closest_point_to_segment(point,previous,player)
+			crossed = closest.distance_to(point) < 55
+		if crossed:
 			begin_earth_transition(link.target,false,regions().arrival(link.target,link.arrival),regions().arrival(current_region(),link.side))
 			return
 
@@ -1153,6 +1161,7 @@ func _draw() -> void:
 		elif world == 2 and current_region() == 0:
 			draw_texture_rect(DESERT_ART, Rect2(0, 0, 2000, 1400), false)
 	WORLD_SIGNS.draw_map(self, world, current_region(), underground, regions())
+	BOARDED_PASSAGES.draw_map(self,world,current_region(),underground)
 
 	for rock_index in rocks.size():
 		var rock: Dictionary = rocks[rock_index]
