@@ -1,6 +1,6 @@
-# Sunny Scout — Earth character greetings
+# Sunny Scout — Space gathering controls
 
-The complete browser game, exported with Godot 4.6.3 from source commit `2b52f76f5ceffa96f68053c86e0a362d7a759ec1`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `99749aec20fdbaa100c63600fd44e7d037a581ea`. The editable Godot project is on `main`.
 
 ## Upload
 
@@ -9,6 +9,13 @@ Download this branch with **Code → Download ZIP** and unzip it. Upload **every
 The intended site is https://playsunnyscout.com/play/. Publishing this build branch does not upload it to WP Engine. Manual deployment instructions are in `docs/DEPLOY_WPENGINE.md` on `main`. Reload the page after replacing the whole build; start a fresh session to see the new quest placements.
 
 ## This Earth update
+
+- **Space / E** picks up nearby revealed wood and ready quest objects, with either the mining tool or sword equipped.
+- Space remains available for combat while a snake guards a supply box or locker. Hidden/out-of-range pickups and menus cannot bypass collection requirements.
+- With the mining tool selected, Space can also drill quest objects and pause/resume their retained work. E still talks and uses the camp workbench/rocket.
+- Context prompts, controls help and the welcome guide explain the additional key. Mouse/touch Attack remains a separate action.
+
+Retains character greetings and the Earth exploration fixes below:
 
 - All seven Earth characters fade in with their soft shadows over 0.75 seconds, matching explored mineral reveals.
 - Each gives a short friendly wave on the first close approach, using dedicated painted greeting artwork and gentle hand/forearm motion. The head, body and boots stay planted within the pose; the character returns to idle afterward.
@@ -42,13 +49,16 @@ Start exploring, then talk to **Rowan** beside camp with **E** or the touch acti
 
 Earth has enough materials for every recipe, with supplies left over. Early kills, pickups and crafts count. Closing a conversation preserves items; returns, upgrades and repairs happen only on their explicit final actions. The quarry stays open and the repaired rocket unlocks travel.
 
-**WASD / arrows** walks. **1** selects the mining tool; **2** selects the owned sword. **Space** mines nearby ore with the mining tool or attacks; **E** gathers, talks and uses objects. On Earth, movement, damage, changing tools or pausing keeps each deposit's work. Returning resumes the remaining time. Rockfall/locker/engine drilling also pauses and resumes. **R** asks before a new game.
+**WASD / arrows** walks. **1** selects the mining tool; **2** selects the owned sword. **E / Space** picks up nearby wood and ready quest objects. With no pickup, **Space** mines with the mining tool or attacks with the sword. Select the mining tool to drill quest objects; **E** talks and uses the workbench/rocket. On Earth, movement, damage, changing tools or pausing keeps each deposit's work. Returning resumes the remaining time. Rockfall/locker/engine drilling also pauses and resumes. **R** asks before a new game.
 
 Use landscape on iPad: a thumb pad handles movement; separate action, equipment and attack buttons work with other fingers. The quest journal has Up/Down buttons as well as scrolling. Berries heal one heart, apples two. Buddy can be found outside Landing Meadow and follows you into mines, where he scares rats and bats away. He also makes living snakes retreat elsewhere in the same district without disappearing or counting as defeated. Snakes and food plants remain Earth-only. The game stays silent. Progress lasts while the session is open; reloading starts fresh.
 
 The illustrated loading screen, wooden signs, exploration mist, sparse randomized minerals, water/wildlife animation and bounded scenery streaming are retained. Review scenes/screenshots and test code are excluded from the playable export.
 
 ## Checked
+
+The real-keyboard context test covers Space/E wood and quest pickups, both weapons, discovery/range/menu/help/held-key guards, protected-box combat, quest drilling requirements and retained work, mining and off-world behavior. The complete Earth campaign, combat, mission and touch-control checks also pass.
+
 
 `tests/npc_presentation.gd` verifies all seven unique greeting poses, gradual reveal timing, one-time nearby waves, menu/help/pause guards, revisits, matching character height and interruption by quest completion. Existing character, conversation, touch and complete Earth-story checks also pass. Browser review captures reveal, both wave directions and idle for every NPC; the normal production startup and dialogue paths are checked in desktop/tablet emulation. Physical iPad Safari was not used for this check.
 
