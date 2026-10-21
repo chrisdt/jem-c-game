@@ -1,7 +1,7 @@
-# Sunny Scout — Three-world speedruns
+# Sunny Scout — Independent quests and Frost Canyon fixes
 
-Full browser game exported with Godot 4.6.3 from source commit `dd8a292b3c4fa47771369cb8d272b0ec020582ec`.
-Editable project: `main`. Build release: `2950aceed712ea3445d3`.
+Full browser game exported with Godot 4.6.3 from source commit `8508ef52a9562f504fac170fee888a4ebf3daaf3`.
+Editable project: `main`. Build release: `2097db982708621af18c`.
 
 ## Upload to WP Engine
 
@@ -20,6 +20,28 @@ An alternative private writable directory can be set with `SUNNY_SCOUT_DATA_DIR`
 Static-only hosting still runs the adventure but cannot share scores.
 
 Publishing this branch does not upload to WP Engine.
+
+## This update
+
+- Accept and hand in story quests independently on all three worlds, once their
+  actual equipment and ingredients are ready. Nix no longer waits for Pip;
+  Tavi no longer waits for Nix, and Luma no longer waits for Sol.
+- **Nix / Frostfang:** bring your owned Earth sword, **4 frost ore + 1 amethyst**
+  and the **heart-crystal from the centre of Prism Pass's ruined stone circle**.
+  Return to **Nix in Frozen Basin** and confirm **Forge Frostfang Sword**.
+  Earth's camp workbench builds the starter sword and hand drill.
+- The heart-crystal stays on the central pedestal and can be picked up with
+  E, Space or the touch action from the walkable ground in front. Nix/Tavi
+  dialogue and journal progress show missing unique items and starter tools.
+- Pip's three fragments are larger and have dark snow contrast, contact shadows
+  and subtle gold glints after exploration reveals them. Returning them replaces
+  them with permanent trail lanterns. E / touch action inspects a restored
+  beacon and explains it; Space remains usable for combat nearby.
+- Reporting the expedition discovery to Iris still works after Finn consumes
+  the damaged suit for repairs. Stronger imported tools can open the Earth
+  expedition locker; a Magma Drill also opens the frozen cache.
+- Mineral collection no longer claims an entire world mission is complete.
+  Actual story completions still determine the 14-quest speedrun finish.
 
 ## Play and compete
 
@@ -57,7 +79,15 @@ companions, yetis and venomous scorpions remain part of the adventure.
 
 ## Verification
 
-Gameplay regression checks cover quests, exact crafting costs, combat, touch,
+This update passed story/combat/travel/touch checks on all three worlds, both
+Earth repair modes, a flood-fill route audit across all eight frozen areas,
+Nix-before-Pip with actual landmark pickup/cancel/return/crafting, every one of
+the 24 Frost handoff orders, shared quest-item consumption and recipe-race checks.
+Browser views verify snow fragment visibility, the central landmark heart,
+Nix's ready forge action before Pip and the journal's ready/missing states.
+Review helpers are not included in this production build.
+
+Existing infrastructure: Gameplay regression checks cover quests, exact crafting costs, combat, touch,
 travel, pickups and reset. Server and HTTP tests cover tokens, server timing,
 nickname validation, concurrent file writes, idempotent posting and persistent
 scores. Deployment tests preserve runtime data through updates and rollback.
