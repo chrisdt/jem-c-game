@@ -1,6 +1,6 @@
 # Sunny Scout — Sunstone Folk & Sunforge equipment
 
-Complete browser game exported with Godot 4.6.3 from source commit `da94e8eb0e9921ffa7397bdf4bbee2ed6c46ba22`. Editable project: `main`. Build release: `33f3224eac8f4cf5de77`.
+Complete browser game exported with Godot 4.6.3 from source commit `2b7ee3117838964be77cad67a197914d044d0215`. Editable project: `main`. Build release: `c5fd5a184439436b44f6`.
 
 ## Upload
 
