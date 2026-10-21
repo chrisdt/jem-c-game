@@ -8,6 +8,8 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 All seven neighbours are playable: **Rowan, Bea, Otis, Mara, Iris, Finn and Nova**. Talk to them along Earth’s trails to craft equipment, recover woodland supplies, drill open Old Quarry, upgrade both tools, investigate the ruins, repair a spacesuit and restore the rocket. Press **J / Quests** for the seven story missions and optional exploration. Earth travel unlocks after Nova’s launch checks. [The Earth story guide](docs/EARTH_STORY.md) includes the exact resource budget and playtest route. Later-world characters, fishing and cooking remain deferred.
 
+Earth neighbours and their soft boot-contact shadows fade in together over 0.75 seconds when explored, matching mineral reveals. Each gives a short hand-and-forearm wave on the first close approach, then returns to idle. Their heads, bodies and boots stay planted while waving; menus and travel pause the animation. Revisiting retains the reveal and greeting state. Completed quests still trigger the smoke-puff departure. `tests/npc_presentation.gd` checks all seven greetings, reveal timing, pauses and departure interruption.
+
 ## Play
 
 To publish a checked build at **playsunnyscout.com/play/**, say **“deploy Sunny Scout”**. The [WP Engine deployment workflow](docs/DEPLOY_WPENGINE.md) provides an explicit upload command, verified versioned releases and rollback. Commits and ZIP builds alone do not deploy.

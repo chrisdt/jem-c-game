@@ -8,6 +8,14 @@ var height := 0.0
 var home_region := 0
 var greeted := false
 var introduced := false
+const GREETING = preload("res://environment/npc_greeting.gd")
+const REVEAL_SECONDS := 0.75
+const WAVE_SECONDS := 2.4
+var greeting_wave: MeshInstance2D
+var reveal_time := 0.0
+var has_waved := false
+var wave_time := -1.0
+var wave_blend := 0.0
 const PORTRAITS: Texture2D = preload("res://assets/npcs/earth_compact_people.png")
 const PORTRAIT_CELLS := {
 	"rowan":Rect2i(70,5,340,545),"otis":Rect2i(410,5,360,545),
@@ -22,6 +30,7 @@ const DEPARTURE_SECONDS := 0.8
 
 func fit_person(role: String) -> void:
 	fit_sprite(PORTRAITS,PORTRAIT_CELLS[role])
+	greeting_wave = GREETING.make(self,role)
 
 func fit_sprite(source: Texture2D, source_region := Rect2i()) -> void:
 	# The compact portraits share Scout's body proportions. Cap the complete
@@ -43,9 +52,17 @@ func fit_sprite(source: Texture2D, source_region := Rect2i()) -> void:
 	illustration.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	illustration.texture = atlas
 	illustration.centered = false
-	illustration.offset = Vector2(-bounds.size.x*0.5,-bounds.size.y)
+	illustration.offset = Vector2(-(ground_centre(source_image,bounds)-bounds.position.x),-bounds.size.y)
 	illustration.scale = Vector2.ONE*art_scale
 	add_child(illustration)
+	modulate.a = 0
+
+static func ground_centre(image: Image, bounds: Rect2i) -> float:
+	# Anchor the middle of the boots, rather than the whole silhouette: an
+	# outstretched hand must not shift the feet away from their contact shadow.
+	var boots := Rect2i(bounds.position+Vector2i(0,int(bounds.size.y*0.84)),Vector2i(bounds.size.x,bounds.size.y-int(bounds.size.y*0.84)))
+	var feet := visible_bounds(image.get_region(boots))
+	return boots.position.x+feet.position.x+feet.size.x*0.5
 
 static func visible_bounds(image: Image) -> Rect2i:
 	image.convert(Image.FORMAT_RGBA8)
@@ -92,11 +109,42 @@ func begin_departure() -> void:
 	departing = true
 	departure_time = 0
 	greeted = true
+	wave_time = -1
+	wave_blend = 0
+	if is_instance_valid(greeting_wave): greeting_wave.hide()
+	queue_redraw()
+
+func presentation_paused() -> bool:
+	return game.get_tree().paused or game.menu_open() or game.hud.help.visible or game.flight != 0 or game.earth_transition
+
+func advance_presentation(delta: float) -> void:
+	if departed or not is_visible_in_tree() or presentation_paused(): return
+	reveal_time = minf(REVEAL_SECONDS,reveal_time+maxf(0,delta))
+	modulate.a = smoothstep(0,REVEAL_SECONDS,reveal_time)
+	if departing or quest_finished():
+		queue_redraw()
+		return
+	# Greet once when an explorer actually approaches; revealing a distant
+	# neighbour should not consume their wave before the player reaches them.
+	if not has_waved and modulate.a >= 0.7 and game.player.distance_to(position) < 200:
+		has_waved = true
+		wave_time = 0
+	if wave_time >= 0:
+		wave_time = minf(WAVE_SECONDS,wave_time+maxf(0,delta))
+		wave_blend = smoothstep(0,0.2,wave_time)*(1-smoothstep(WAVE_SECONDS-0.2,WAVE_SECONDS,wave_time))
+		greeting_wave.show()
+		greeting_wave.modulate.a = wave_blend
+		greeting_wave.material.set_shader_parameter("wave_angle",0.16*sin(wave_time*TAU*1.7)*sin(PI*wave_time/WAVE_SECONDS))
+		illustration.modulate.a = 1-wave_blend
+		if wave_time >= WAVE_SECONDS:
+			wave_time = -1
+			greeting_wave.hide()
+			illustration.modulate.a = 1
 	queue_redraw()
 
 func advance_departure(delta: float) -> void:
 	if departed: return
-	if game.get_tree().paused or game.menu_open() or game.hud.help.visible or game.flight != 0 or game.earth_transition: return
+	if presentation_paused(): return
 	if not departing and quest_finished():
 		if not is_visible_in_tree():
 			departed = true
@@ -113,9 +161,17 @@ func advance_departure(delta: float) -> void:
 	queue_redraw()
 
 func _process(delta: float) -> void:
+	advance_presentation(delta)
 	advance_departure(delta)
 
 func _draw() -> void:
+	# Layer soft ellipses at the boot anchor. Keep the contact narrow and let
+	# it fade with the person instead of drawing an opaque floating platform.
+	var shadow_alpha := 1-smoothstep(0,0.35,departure_time) if departing else 1.0
+	draw_set_transform(Vector2(0,1.8),0,Vector2(1,0.32))
+	for layer in 4:
+		draw_circle(Vector2.ZERO,23-layer*3,Color(0.06,0.10,0.035,(0.035+layer*0.014)*shadow_alpha))
+	draw_set_transform(Vector2.ZERO)
 	if departing:
 		var t := departure_time/DEPARTURE_SECONDS
 		var centre := Vector2(0,-height*0.45-14*t)
@@ -127,5 +183,3 @@ func _draw() -> void:
 			var at := centre+Vector2.from_angle(angle)*(7+19*t)*(0.72+0.12*(i%3))
 			draw_circle(at,9+2*(i%3)+8*t,Color(0.88,0.88,0.80,sin(t*PI)*0.42))
 		return
-	draw_set_transform(Vector2(0,-1),0,Vector2(1,0.32))
-	draw_circle(Vector2.ZERO,19,Color(0.08,0.14,0.06,0.18))
