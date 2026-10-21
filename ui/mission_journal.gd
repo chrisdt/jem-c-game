@@ -96,10 +96,11 @@ func rebuild() -> void:
 		progress.append(objective)
 
 func open() -> void:
-	if game.world not in [0,1] or game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible or game.trial.jab_time >= 0: return
+	if game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible or game.trial.jab_time >= 0: return
 	if game.mining_target >= 0: game.cancel_mining()
 	game.story.cancel_work()
 	game.frost_story.cancel_work()
+	game.ember_story.cancel_work()
 	game.clear_touch_gestures()
 	game.walking = false
 	game.restore_walk_visual()

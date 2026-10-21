@@ -35,6 +35,7 @@ var equip_icons: Array[TextureRect] = []
 var equip_marks: Array[Panel] = []
 var equip_labels: Array[Label] = []
 var equipped_label: Label
+var poison_label: Label
 var attack_button: Button
 var missions_button: Button
 
@@ -90,7 +91,9 @@ func make_trial_hud() -> void:
 	missions_button = STYLE.button(mission_panel,"Quests · J",Vector2.ZERO,Vector2(144,44),17)
 	missions_button.focus_mode = Control.FOCUS_NONE
 	missions_button.pressed.connect(func(): missions_requested.emit())
-	for i in 2:
+	poison_label = STYLE.label(self,"",Vector2(240,89),Vector2(190,24),14,true)
+	poison_label.add_theme_color_override("font_color",Color("91ecc5"))
+	for i in 3:
 		var button := STYLE.button(self,"",Vector2(560+i*80,708),Vector2(72,72),12)
 		button.focus_mode = Control.FOCUS_NONE
 		button.pressed.connect(func(): equipment_requested.emit(i))
@@ -199,7 +202,7 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nE / Space · gather / mine\nJ · Quests   E · talk / use"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nE / Space · gather / mine\nJ · Quests   E · talk / use\n3 · antidote (when earned)"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
@@ -211,7 +214,7 @@ func present_trial(state: Dictionary) -> void:
 	equip_icons[0].texture = preload("res://environment/frost_art.gd").item(1) if state.get("crystal_drill",false) else CATALOG.tool_icon(state.upgraded)
 	equip_icons[1].texture = preload("res://environment/frost_art.gd").item(0) if state.get("frostfang",false) else TRIAL_ART.icon(0)
 	var selected: int = state.get("selected_tool",0)
-	for i in 2:
+	for i in 3:
 		equip_marks[i].visible = i == selected
 		equip_slots[i].disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 		equip_labels[i].text = str(i+1)
@@ -229,6 +232,27 @@ func present_trial(state: Dictionary) -> void:
 		equip_slots[0].tooltip_text = "Crystal Drill · faster mining on every world"
 	if state.get("frostfang",false) and selected == 1: equipped_label.text = "Frostfang Sword"
 	if state.get("crystal_drill",false) and selected == 0: equipped_label.text = "Crystal Drill"
+	if state.get("sunfang",false):
+		equip_icons[1].texture = preload("res://environment/ember_art.gd").item(0)
+		equip_icons[1].modulate = Color.WHITE
+		equip_slots[1].tooltip_text = "Sunfang Sword · powerful Sunforge jabs on every world"
+		if selected == 1: equipped_label.text = "Sunfang Sword"
+	if state.get("magma_drill",false):
+		equip_icons[0].texture = preload("res://environment/ember_art.gd").item(1)
+		equip_icons[0].modulate = Color.WHITE
+		equip_slots[0].tooltip_text = "Magma Drill · Sunforge mining on every world"
+		if selected == 0: equipped_label.text = "Magma Drill"
+	var canteen: bool = state.get("antidote_owned",false)
+	equip_slots[2].visible = canteen and not state.menu and not state.flying
+	equip_icons[2].texture = preload("res://environment/ember_art.gd").item(4)
+	equip_slots[2].tooltip_text = "Antidote · %d / 3 doses · refill at Mesa Camp cooler" % state.get("antidote_doses",0)
+	equip_slots[2].disabled = equip_slots[2].disabled or state.get("antidote_doses",0) <= 0 or state.get("poison",0.0) <= 0
+	equip_icons[2].modulate.a = 1.0 if state.get("antidote_doses",0) > 0 else 0.35
+	for i in 3: equip_slots[i].position.x = (520 if canteen else 560)+i*80
+	equipped_label.position.x = 545
+	poison_label.visible = state.get("poison",0.0) > 0 and not state.menu and not state.flying
+	poison_label.text = "Venom · %.1fs · antidote: 3" % state.get("poison",0.0) if canteen else "Venom · %.1fs · find shade" % state.get("poison",0.0)
+	for heart in health_hearts: heart.modulate = Color("a3edb6") if state.get("poison",0.0) > 0 else Color.WHITE
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
 	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"

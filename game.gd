@@ -47,6 +47,9 @@ var story: EARTH_STORY
 const FROST_STORY = preload("res://environment/frost_story.gd")
 const FROST_ART = preload("res://environment/frost_art.gd")
 var frost_story: FROST_STORY
+const EMBER_STORY = preload("res://environment/ember_story.gd")
+const EMBER_ART = preload("res://environment/ember_art.gd")
+var ember_story: EMBER_STORY
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -223,7 +226,9 @@ func _ready() -> void:
 	action_button = hud.context_button
 	hud.action_requested.connect(interact)
 	hud.equipment_requested.connect(func(index: int):
-		if is_instance_valid(trial): trial.equip(index))
+		if is_instance_valid(trial):
+			if index == 2: ember_story.use_antidote()
+			else: trial.equip(index))
 	hud.attack_requested.connect(func():
 		if is_instance_valid(trial): trial.start_jab())
 	var travel_layer := CanvasLayer.new()
@@ -274,6 +279,9 @@ func _ready() -> void:
 	frost_story = FROST_STORY.new()
 	frost_story.game = self
 	add_child(frost_story)
+	ember_story = EMBER_STORY.new()
+	ember_story.game = self
+	add_child(ember_story)
 	missions = EARTH_MISSIONS.new()
 	missions.game = self
 	mission_journal = MISSION_JOURNAL.new()
@@ -336,7 +344,7 @@ func talk_to_rowan() -> void:
 func nearest_npc() -> HUMAN_NPC:
 	var closest: HUMAN_NPC
 	var distance := 100.0
-	for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else []):
+	for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else [])+(ember_story.npcs if is_instance_valid(ember_story) else []):
 		if not is_instance_valid(npc) or npc.is_queued_for_deletion() or not npc.can_talk(): continue
 		var candidate := player.distance_to(npc.position)
 		if candidate < distance:
@@ -392,7 +400,7 @@ func present_character_messages(flying: bool) -> void:
 		if character_bubble.show_hint(pending_hint,scout,Vector2(0,-70)):
 			pending_hint = ""
 	elif character_bubble.mode == CHARACTER_BUBBLE.Mode.CLOSED:
-		for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else []):
+		for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else [])+(ember_story.npcs if is_instance_valid(ember_story) else []):
 			if not is_instance_valid(npc) or npc.greeted or not npc.is_visible_in_tree() or player.distance_to(npc.position) >= 160: continue
 			if character_bubble.show_hint(npc.greeting_text(),npc,Vector2(0,-npc.height)):
 				npc.greeted = true
@@ -660,9 +668,13 @@ func restore_walk_visual() -> void:
 		scout.scale = Vector2.ONE * 0.15
 		scout.offset = Vector2(0,-145)
 
-	if is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded and not carrying_sword: FROST_ART.fit_drill(scout,facing)
+	if is_instance_valid(ember_story) and ember_story.magma_drill and upgraded and not carrying_sword: EMBER_ART.fit_drill(scout,facing)
+	elif is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded and not carrying_sword: FROST_ART.fit_drill(scout,facing)
 
 func move_player(direction: Vector2, delta: float) -> void:
+	if is_instance_valid(ember_story) and ember_story.working():
+		if direction.is_zero_approx(): return
+		ember_story.cancel_work()
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if is_instance_valid(frost_story) and frost_story.working():
@@ -855,6 +867,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif not earth_transition and not menu_open() and trial.is_active() and event.keycode in [KEY_1,KEY_2]:
 			trial.equip(0 if event.keycode == KEY_1 else 1)
+		elif event.keycode == KEY_3 and not menu_open():
+			ember_story.use_antidote()
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SPACE and trial.is_active():
 			space_action()
 			get_viewport().set_input_as_handled()
@@ -863,6 +878,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func space_action() -> void:
 	if trial.blocked() or trial.jab_time >= 0: return
+	if ember_story.working():
+		ember_story.cancel_work()
+		refresh_ui()
+		return
+	var ember_prop := ember_story.nearest_prop()
+	if not ember_prop.is_empty() and (ember_prop != "observatory" or (ember_story.guardian_cleared() and trial.selected_tool == 0)):
+		if cooldown > 0: return
+		cooldown = 0.3
+		ember_story.use_prop(ember_prop)
+		refresh_ui()
+		return
 	if frost_story.working():
 		frost_story.cancel_work()
 		refresh_ui()
@@ -912,6 +938,10 @@ func nearest_rock() -> int:
 	return best
 
 func interact() -> void:
+	if is_instance_valid(ember_story) and ember_story.working():
+		ember_story.cancel_work()
+		refresh_ui()
+		return
 	if is_instance_valid(frost_story) and frost_story.working():
 		frost_story.cancel_work()
 		refresh_ui()
@@ -937,6 +967,8 @@ func interact() -> void:
 		talk_to_npc(npc)
 	elif world == 0 and not underground and has_base() and player.distance_to(camp_position()) < 140:
 		camp_menu.open()
+	elif ember_story.use_prop(ember_story.nearest_prop()):
+		pass
 	elif frost_story.use_prop(frost_story.nearest_prop()):
 		pass
 	elif is_instance_valid(story) and story.use_prop(story.nearest_prop()):
@@ -1021,7 +1053,8 @@ func set_mining_pose(pose: int) -> void:
 		if facing_left:
 			scout.offset.x = -scout.offset.x
 
-	if is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded: FROST_ART.fit_drill(scout,facing)
+	if is_instance_valid(ember_story) and ember_story.magma_drill and upgraded: EMBER_ART.fit_drill(scout,facing)
+	elif is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded: FROST_ART.fit_drill(scout,facing)
 
 func advance_mining(delta: float) -> void:
 	if mining_target < 0:
@@ -1068,6 +1101,7 @@ func advance_mining(delta: float) -> void:
 			message = "Copper collected! %d / 5 for your upgrade." % ore if not upgraded else "More copper for your next adventure!"
 
 func mining_rate() -> float:
+	if is_instance_valid(ember_story) and ember_story.magma_drill: return 2.222222
 	if is_instance_valid(frost_story) and frost_story.crystal_drill: return 1.666667
 	return 1.333333 if world == 0 and is_instance_valid(story) and story.drill_improved else 1.0
 
@@ -1099,6 +1133,7 @@ func refresh_ui() -> void:
 		story.sync_area()
 		rocket.damaged = world == 0 and story.rocket_repair_required and not story.rocket_repaired
 	if is_instance_valid(frost_story): frost_story.sync_area()
+	if is_instance_valid(ember_story): ember_story.sync_area()
 	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(rowan):
 		rowan.sync_area()
@@ -1136,7 +1171,9 @@ func refresh_ui() -> void:
 	var context := ""
 	var actionable := true
 	var npc := nearest_npc()
-	if frost_story.working():
+	if ember_story.working():
+		context = "E / Space   Pause drilling · %.1fs" % (2-ember_story.work)
+	elif frost_story.working():
 		context = "E / Space   Pause drilling · %.1fs" % (2-frost_story.work)
 	elif story.working():
 		context = "E / Space   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
@@ -1149,6 +1186,8 @@ func refresh_ui() -> void:
 		context = "E   Talk to "+str(npc.name)
 	elif world == 0 and not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
+	elif not ember_story.nearest_prop().is_empty():
+		context = "E / Space   "+ember_story.prompt(ember_story.nearest_prop())
 	elif not frost_story.nearest_prop().is_empty():
 		context = "E / Space   "+frost_story.prompt(frost_story.nearest_prop())
 	elif is_instance_valid(story) and not story.nearest_prop().is_empty():
@@ -1166,7 +1205,7 @@ func refresh_ui() -> void:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and npc == null and story.nearest_prop().is_empty() and frost_story.nearest_prop().is_empty() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and npc == null and story.nearest_prop().is_empty() and frost_story.nearest_prop().is_empty() and ember_story.nearest_prop().is_empty() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
@@ -1177,11 +1216,13 @@ func refresh_ui() -> void:
 		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
 		"earth_next":missions.next_hint() if is_instance_valid(missions) and world == 0 else "",
 		"improved_drill":story.drill_improved,"improved_sword":story.sword_improved,
-		"frostfang":frost_story.frostfang,"crystal_drill":frost_story.crystal_drill,"quests_available":world in [0,1],
+		"frostfang":frost_story.frostfang,"crystal_drill":frost_story.crystal_drill,"quests_available":true,
+		"sunfang":ember_story.sunfang,"magma_drill":ember_story.magma_drill,
+		"antidote_owned":ember_story.antidote_owned,"antidote_doses":ember_story.antidote_doses,"poison":trial.poison_remaining,
 		"rowan_mission":rowan.mission != ROWAN.Mission.NOT_STARTED,"rowan_complete":rowan.mission == ROWAN.Mission.COMPLETE,
 		"rowan_title":ROWAN.MISSION_TITLE,"rowan_progress":rowan.progress_text(),
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
-		"space_object":wood_supplies.nearest() >= 0 or not story.space_usable_prop().is_empty() or not frost_story.nearest_prop().is_empty(),
+		"space_object":wood_supplies.nearest() >= 0 or not story.space_usable_prop().is_empty() or not frost_story.nearest_prop().is_empty() or not ember_story.nearest_prop().is_empty(),
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 	present_character_messages(flying)
@@ -1245,8 +1286,8 @@ func draw_mining_effects() -> void:
 			mining_fx.draw_circle(particle.pos, particle.size * (2.0 - tint.a), tint)
 
 func quest_entries() -> Array[Dictionary]:
-	return frost_story.entries() if world == 1 else missions.entries()
+	return ember_story.entries() if world == 2 else (frost_story.entries() if world == 1 else missions.entries())
 func quest_story_count() -> int:
-	return frost_story.entries().size() if world == 1 else story.entries().size()
+	return ember_story.entries().size() if world == 2 else (frost_story.entries().size() if world == 1 else story.entries().size())
 func quest_completed() -> int:
-	return frost_story.entries().filter(func(e): return e.done).size() if world == 1 else missions.completed()
+	return ember_story.entries().filter(func(e): return e.done).size() if world == 2 else (frost_story.entries().filter(func(e): return e.done).size() if world == 1 else missions.completed())

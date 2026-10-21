@@ -50,7 +50,7 @@ func approach(game, yeti, distance: float) -> Vector2:
 		if game.trial.floor_at(point) and not game.trial.safe_at(point) and game.trial.clear_line(point,yeti.position): return point
 	return Vector2.INF
 func check_equipment(game) -> void:
-	check(game.hud.equip_slots.all(func(b): return b.visible),"Equipment bar disappeared on another planet")
+	check(game.hud.equip_slots.slice(0,2).all(func(b): return b.visible),"Equipment bar disappeared on another planet")
 	check(game.hud.material_icons.size() == 7 and game.hud.material_icons.all(func(i): return i.visible),"Collected material types disappeared")
 	for direction in [Vector2.RIGHT,Vector2.LEFT,Vector2.DOWN,Vector2.UP]:
 		game.face_direction(direction)

@@ -34,6 +34,7 @@ var defeated := 0
 var snakes: Array[Node2D] = []
 var seconds := 0.0
 var heal_clock := 0.0
+var poison_remaining := 0.0
 var was_active := true
 var active_area := -1
 var records: Dictionary = {}
@@ -117,8 +118,8 @@ func safe_at(point: Vector2) -> bool:
 	if game.world != 0:
 		if game.underground: return point.distance_to(game.mine_spawn_position()) < 110 or point.distance_to(game.exit_position()) < 110
 		if game.has_base() and (point.distance_to(game.ship_position()) < 160 or point.distance_to(game.camp_position()) < 175): return true
-		for person in game.frost_story.npcs:
-			if game.world == 1 and person.home_region == game.current_region() and point.distance_to(person.position) < 105: return true
+		for person in (game.frost_story.npcs if game.world == 1 else game.ember_story.npcs):
+			if game.world in [1,2] and person.home_region == game.current_region() and point.distance_to(person.position) < 105: return true
 		for link in game.regions().LINKS[game.current_region()]:
 			if point.distance_to(game.regions().portal(game.current_region(),link.side)) < 130: return true
 		return false
@@ -204,6 +205,7 @@ func equip(index: int) -> void:
 	if game.mining_target >= 0: game.cancel_mining()
 	if is_instance_valid(game.story): game.story.cancel_work()
 	if is_instance_valid(game.frost_story): game.frost_story.cancel_work()
+	if is_instance_valid(game.ember_story): game.ember_story.cancel_work()
 	selected_tool = index
 	game.walking = false
 	game.restore_walk_visual()
@@ -215,6 +217,7 @@ func start_jab() -> bool:
 	if game.mining_target >= 0: game.cancel_mining()
 	if is_instance_valid(game.story): game.story.cancel_work()
 	if is_instance_valid(game.frost_story): game.frost_story.cancel_work()
+	if is_instance_valid(game.ember_story): game.ember_story.cancel_work()
 	jab_direction = Vector2.UP if game.facing == &"up" else (Vector2.DOWN if game.facing == &"down" else (Vector2.LEFT if game.facing_left else Vector2.RIGHT))
 	jab_origin = game.player
 	jab_time = 0
@@ -234,7 +237,7 @@ func update_jab_pose() -> void:
 		game.set_mining_pose(pose)
 		return
 	var frame := 1 if jab_time < 0.065 else (2 if jab_time < 0.19 else (3 if jab_time < 0.27 else 0))
-	var frozen_art: bool = game.world > 0 or game.frost_story.frostfang
+	var frozen_art: bool = game.world > 0 or game.frost_story.frostfang or game.ember_story.sunfang
 	game.scout.material = null
 	game.scout.sprite_frames = game.FROST_ART.make_jab_frames(game.world > 0) if frozen_art else ART.make_jab_frames()
 	game.scout.animation = StringName("jab_"+str(game.facing))
@@ -242,7 +245,8 @@ func update_jab_pose() -> void:
 	game.scout.flip_h = game.facing_left
 	game.scout.position = game.player
 	game.scout.rotation = 0
-	if frozen_art: game.FROST_ART.fit_jab(game.scout,game.world > 0,game.facing,frame,not game.frost_story.frostfang)
+	if game.ember_story.sunfang: game.EMBER_ART.fit_jab(game.scout,game.world > 0,game.facing,frame)
+	elif frozen_art: game.FROST_ART.fit_jab(game.scout,game.world > 0,game.facing,frame,not game.frost_story.frostfang)
 	else: ART.fit_jab(game.scout,game.facing,frame)
 
 func check_jab_hits() -> void:
@@ -254,13 +258,14 @@ func check_jab_hits() -> void:
 		if enemy.health <= 0: continue
 		var closest := Geometry2D.get_closest_point_to_segment(enemy.position,start,finish)
 		if enemy.position.distance_to(closest) < 25 and (enemy.position-jab_origin).dot(jab_direction) > 8 and clear_line(jab_origin,enemy.position):
-			var damage: int = (7 if game.frost_story.frostfang else (5 if is_instance_valid(game.story) and game.story.sword_improved else SWORD_DAMAGE)) if selected_tool == 1 else PICK_DAMAGE
-			if enemy.take_hit(jab_id,jab_origin,damage) and game.frost_story.frostfang and selected_tool == 1:
+			var damage: int = sword_damage() if selected_tool == 1 else PICK_DAMAGE
+			if enemy.take_hit(jab_id,jab_origin,damage) and weapon_is_frost() and selected_tool == 1:
 				enemy.set_meta("frost_slow",1.25)
 
 func targets() -> Array:
 	if not is_active(): return []
 	if game.world == 1: return game.frost_story.yetis
+	if game.world == 2: return game.ember_story.scorpions
 	if game.world != 0: return []
 	if not game.underground: return snakes
 	var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
@@ -282,6 +287,7 @@ func advance(delta: float) -> void:
 		var step := minf(remaining,1.0/120.0)
 		remaining -= step
 		seconds += step
+		advance_poison(step)
 		if game.world == 1 and not game.underground and game.current_region() == 0 and game.player.distance_to(game.ICE_CAMP) < 150:
 			heal_clock += step
 			if heal_clock >= 1.5:
@@ -300,16 +306,18 @@ func advance(delta: float) -> void:
 		for snake in snakes: snake.advance(step)
 	game.scout.modulate = Color(1.3,0.78,0.65,0.66+0.34*sin(seconds*35)) if invulnerable > 0 and invulnerable < 1.3 else Color.WHITE
 
-func hurt_player(amount: int) -> bool:
-	if not is_active() or blocked() or invulnerable > 0 or amount <= 0: return false
-	if safe_at(game.player): return false
+func hurt_player(amount: int, venom_tick := false) -> bool:
+	if not is_active() or blocked() or (invulnerable > 0 and not venom_tick) or amount <= 0: return false
+	if safe_at(game.player) and not venom_tick: return false
 	health = maxi(0,health-amount)
 	if game.mining_target >= 0: game.cancel_mining()
 	if is_instance_valid(game.story): game.story.cancel_work()
 	if is_instance_valid(game.frost_story): game.frost_story.cancel_work()
+	if is_instance_valid(game.ember_story): game.ember_story.cancel_work()
 	invulnerable = 1.3
-	game.message = "A yeti hit! Return to Canyon Camp to warm up and recover." if game.world == 1 else "A small bite! Berries heal one heart; apples heal two."
+	game.message = "A yeti hit! Return to Canyon Camp to warm up and recover." if game.world == 1 else ("A scorpion hit! Dodge its raised tail; camp shade clears venom." if game.world == 2 else "A small bite! Berries heal one heart; apples heal two.")
 	if health == 0:
+		clear_poison()
 		if game.mining_target >= 0: game.cancel_mining()
 		jab_time = -1
 		game.player = game.mine_spawn_position() if game.underground else ((game.EARTH_START if game.world == 0 else game.surface_arrival_position()) if game.current_region() == 0 else game.regions().arrival(game.current_region(),game.regions().LINKS[game.current_region()][0].side))
@@ -327,3 +335,24 @@ func heal(amount: int) -> int:
 	var before := health
 	health = mini(MAX_HEALTH,health+maxi(0,amount))
 	return health-before
+
+func weapon_is_frost() -> bool:
+	return game.frost_story.frostfang and not game.ember_story.sunfang
+func sword_damage() -> int:
+	return 10 if game.ember_story.sunfang else (7 if game.frost_story.frostfang else (5 if game.story.sword_improved else SWORD_DAMAGE))
+func apply_poison() -> void:
+	if poison_remaining > 0: return
+	poison_remaining = 3.0
+	game.message = "Venom! Half a heart in 3 seconds. Use antidote (3) or reach camp shade."
+	game.refresh_ui()
+func clear_poison() -> void: poison_remaining = 0
+func advance_poison(delta: float) -> void:
+	if poison_remaining <= 0: return
+	if not game.underground and game.has_base() and game.player.distance_to(game.camp_position()) < 175:
+		clear_poison()
+		return
+	poison_remaining = maxf(0,poison_remaining-delta)
+	if poison_remaining <= 0:
+		hurt_player(1,true)
+		if invulnerable < 2:
+			game.message = "The venom faded. Rest in camp shade or use antidote after a sting."

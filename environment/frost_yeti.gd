@@ -99,7 +99,7 @@ func take_hit(id: int, origin: Vector2, damage: int) -> bool:
 	last_jab = id
 	health = maxi(0,health-damage)
 	hit_flash = 0.18
-	if game.frost_story.frostfang and game.trial.selected_tool == 1: slow = 1.25
+	if game.trial.weapon_is_frost() and game.trial.selected_tool == 1: slow = 1.25
 	change("puff" if health == 0 else "hurt")
 	if health == 0: game.message = "The yeti vanished in a snowy puff!"
 	queue_redraw()
