@@ -1,38 +1,38 @@
-# Sunny Scout — Snow Sprites & Frost Crystal equipment
+# Sunny Scout — Sunstone Folk & Sunforge equipment
 
-The complete browser game, exported with Godot 4.6.3 from source commit `7f0f9822cdb328da9d736b4c84bb7b2107fbc9e2`. The editable project is on `main`.
+Complete browser game exported with Godot 4.6.3 from source commit `da94e8eb0e9921ffa7397bdf4bbee2ed6c46ba22`. Editable project: `main`. Build release: `33f3224eac8f4cf5de77`.
 
 ## Upload
 
-Unzip the download and upload **everything inside `build/web/`** to `/play/` on your website. Replace the complete set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs each), plus both hashed loading-art files. Serve over HTTPS. Opening `index.html` directly as a local file will not run the game.
+Upload **everything inside `build/web/`** to `/play/` on your website. Replace the full set of **30 files**, preserving `earth_chunks/`, `frost_chunks/` and `ember_chunks/` (six JPGs each) and both hashed loading-art files. Serve over HTTPS. Opening `index.html` as a local file does not run the game.
 
-The intended site is https://playsunnyscout.com/play/. Publishing this branch does not upload to WP Engine.
+Intended site: https://playsunnyscout.com/play/. Publishing this branch does not upload to WP Engine.
 
-## Frozen adventure
+## Start the desert adventure
 
-Fly to **Frost Canyon** using the working camp rocket and meet **Pip beside Canyon Camp's shelter**. Four Snow Sprites offer quests:
+Use the camp rocket to fly to **Ember Dunes**, then meet **Sol beside Mesa Camp**. The four Sunstone Folk quests are:
 
-1. Pip: find beacon fragments in Frozen Basin, Prism Pass and Aurora Shelf; return to restore the trail lights.
-2. Nix in Frozen Basin: bring the Earth sword, 4 frost ore, 1 amethyst and Blue Echo Mine's heart-crystal to forge **Frostfang**.
-3. Tavi in Prism Pass: bring the hand drill, 5 frost ore, 2 amethysts and Deep Prism Mine's power coupling to fit the **Crystal Drill**.
-4. Eira on Aurora Shelf: open Glacier Crown's frozen expedition cache, defeat its guardian yeti and return the keepsake.
+1. **Sol — A Cool Welcome:** find three cooling parts in Dune Sea, Sunken Oasis and Redrock Arches. Return to repair the station; it heals and refills antidote.
+2. **Luma — A Cure from the Oasis:** collect glowleaf in Sunken Oasis and Redrock Arches, plus the flask in Lava Mine beneath Mesa Camp. Earn a three-dose antidote canteen.
+3. **Brasa — Fire up the Sunforge:** find the core in Sunfire Cavern beneath Dune Sea. Bring an owned Earth sword, **3 gold + 1 fire ruby** for the **Sunfang Sword**, then a hand drill, **4 gold + 1 fire ruby** for the **Magma Drill**. Talk once for each upgrade. Completed recipes disappear.
+4. **Orin — The Buried Observatory:** use the Magma Drill to open cooled lava in Obsidian Rise, defeat the guardian scorpion and return the ancient star map to Orin in Redrock Arches.
 
-Frostfang deals stronger directional jabs and briefly slows enemies. The Crystal Drill mines approximately 40% faster than the basic drill and opens the frozen cache. Both work with Sunny's spacesuit and Earth miner outfit, and remain upgraded when brought to other planets. The sword stays hidden while idle/walking. Equipment icons update in the existing slots.
+There are enough real deposits for both upgrades: 13 gold and 3 fire rubies across the five surfaces and three mines. Unique quest objects can be collected early. Frost equipment helps but is optional. The rocket remains usable from the start and no quest blocks planet travel.
 
-The starter sword (3 copper + 2 wood) and hand drill (5 copper) can only be built at **Earth's workbench**. Built recipe cards disappear. Nix and Tavi provide the frozen upgrades through their own conversations; the frozen shelter does not show Earth's recipes.
+Alien scorpions have front/back/side movement, raised-tail/claw warnings and sandy defeat puffs. Dodge during the warning, then jab during recovery. A sting deals **1.5 hearts**, with venom taking another **half heart after 3 seconds**. Claws deal one heart without venom. Venom does not stack; menus, help and travel pause its countdown. Camp shade clears it. After earning the canteen, press **3** or tap its new icon to cure venom; Sol's repaired cooler refills all three doses. Healthy players cannot waste antidote.
 
-Yeti encounters in the outer frozen districts warn before striking for **one and a half hearts**. Dodge the warning, then jab during recovery. Defeated yetis vanish in snowy puffs. Warm up beside the Canyon Camp shelter to recover hearts. Snow Sprites fade in with shadows, wave on approach and puff away after completing their quests.
+Sunfang deals 10 damage (Frostfang 7, reinforced sword 5, copper sword 3). The Magma Drill reduces base mining time by 55%: Earth copper 0.9s / blue crystal 4.05s; off-world common 1.35s / rare 4.5s. Both upgrades work in the Earth miner outfit and spacesuit on every planet. Lower tier rewards cannot downgrade them. The sword stays hidden between jabs.
 
-The rocket remains available from the start. Nova's repair quest remains paused. Earth keeps its own quests, wildlife and exploration; Ember Dunes remains peaceful. No saving is added: progress lasts for the current open session, and reload or confirmed reset starts fresh. Playback stays silent.
+## Existing adventures and controls
 
-## Controls
+Earth and Frost Canyon keep separate quests, wildlife and exploration. Starter sword (3 copper + 2 wood) and hand drill (5 copper) are only crafted at Earth's workbench; built cards disappear. Frost Canyon's four Snow Sprites still offer beacon, Frostfang, Crystal Drill and expedition quests. Nova's rocket repair quest remains paused.
 
-**WASD / arrows** walks. **E** talks, uses objects or opens the rocket. **E / Space** collects nearby ready items; with the mining tool selected, Space mines ore. Away from a ready interaction, **Space** attacks. **1** selects the mining tool; **2** selects the owned sword. **J / Quests** shows the current planet's expandable quest list. **R** asks before resetting. All six minerals and wood remain visible in the compact header on every planet.
+**WASD / arrows** walks. **E** talks or opens the rocket. **E / Space** gathers ready objects; Space mines with the mining tool selected. Away from ready interactions, **Space** attacks. **1** selects the tool, **2** the owned sword, **3** uses earned antidote. **J / Quests** opens the current world's expandable quest list. **R** asks before resetting. Materials and equipment stay visible across planets. On touch, use the movement pad, action/attack buttons and equipment icons.
 
-On touch, use the movement pad, contextual action button and separate Attack/Jab button. The equipment bar remains available across planets. Tap Fly here to choose a rocket destination.
+No saving or sound is added. Progress lasts while this game remains open. Reload or confirmed reset starts fresh.
 
-## Checked
+## Validation
 
-Twelve integration checks cover the complete affordable frozen quest chain, both Earth story configurations, fresh rocket access, mission/mining persistence, combat, exact upgrade costs and cancellation, real upgraded Earth damage/mining, both outfits and all attack directions, dodging the warned 1.5-heart yeti strike, frozen cache progress, touch, flight, pickups and resets. The frozen route audit verifies all four Snow Sprites, quest objects and yeti approaches across five surfaces and three mines (23,640 connected floor samples), with bounded scenery loading.
+Fourteen native integration checks cover the complete affordable Sunstone and Snow Sprite quest chains, both Earth story configurations, exact one-time recipes/cancellation, both outfits/all attack directions, imported Earth damage/mining, venom timing/pause/cure/recovery, touch controls, flight, pickups and resets. Route audits cover all desert and frozen quest locations across each world's five surfaces and three mines, retaining the bounded three-map scenery cache.
 
-Fourteen browser review views cover Snow Sprite dialogue/quests, equipment in both outfits, yeti presentation and the completed workbench, alongside a normal production startup/Earth browser check. No browser script or asset errors were reported. Review helpers are excluded from production. Complete build files and ZIP hashes are verified before publication.
+The production browser build was checked through welcome/startup, Earth and its quest popup. Chromium artwork review covers directional scorpions, venom HUD, Sunforge equipment in both outfits, touch layout and Sunstone Folk. Browser review helpers are excluded from production. The complete 30-file build and archive hashes are verified.
