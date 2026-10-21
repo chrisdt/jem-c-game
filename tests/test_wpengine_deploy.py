@@ -83,6 +83,8 @@ class DeploymentTests(unittest.TestCase):
         self.build.mkdir()
         for name in deploy.TOP_FILES - {"index.html"}:
             (self.build / name).write_bytes(b"fixture")
+        (self.build / "api").mkdir()
+        (self.build / deploy.SCORE_API).write_text("<?php /* scoreboard fixture */")
         for folder, names in deploy.CHUNKS.items():
             (self.build / folder).mkdir()
             for name in names.split():
@@ -94,6 +96,18 @@ class DeploymentTests(unittest.TestCase):
             '<html><head><title>Sunny Scout</title></head><body><script src="index.js"></script>'
             '<script>window.scoutLoading = {};\nconst config = ' + json.dumps(config) + ';</script></body></html>'
         )
+
+    def test_scoreboard_data_survives_release_and_rollback(self):
+        first = self.upload()
+        state = self.remote / "play/api/data"
+        state.mkdir()
+        (state / "scores.php").write_text("existing private scores")
+        (self.build / "index.js").write_text("changed runtime")
+        second = self.upload()
+        self.assertNotEqual(first, second)
+        deploy.rollback(self.sftp, "/")
+        self.assertEqual((state / "scores.php").read_text(), "existing private scores")
+        self.assertTrue((self.remote / "play/api/leaderboard.php").is_file())
 
     def upload(self):
         with redirect_stdout(io.StringIO()):
@@ -110,7 +124,7 @@ class DeploymentTests(unittest.TestCase):
         first_entry = self.current()
         self.assertIn(f'/play/releases/{first}/'.encode(), first_entry)
         assets = deploy.collect_assets(self.build)
-        self.assertEqual(len(assets), 30)
+        self.assertEqual(len(assets), 31)
         for asset in assets:
             self.assertEqual((self.remote / "play/releases" / first / asset.name).read_bytes(), asset.source.read_bytes())
             self.assertTrue(urljoin(f"{deploy.PUBLIC_URL}releases/{first}/", asset.name).startswith(deploy.PUBLIC_URL + "releases/"))

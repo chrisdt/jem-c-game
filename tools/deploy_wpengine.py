@@ -32,6 +32,7 @@ CHUNKS = {
     "frost_chunks": "aurora_shelf blue_echo deep_prism frozen_basin glacier_crown prism_pass",
     "ember_chunks": "dune_sea magma_vault obsidian_rise redrock_arches sunfire_cavern sunken_oasis",
 }
+SCORE_API = "api/leaderboard.php"
 MARKER = 'name="sunny-scout-release"'
 
 
@@ -61,7 +62,7 @@ def collect_assets(directory):
     # A direct Godot export keeps the font notice in the source assets folder.
     if "FONT_LICENSE.txt" not in files and directory == (REPO / "build/web").resolve():
         files["FONT_LICENSE.txt"] = REPO / "assets/ui/FONT_LICENSE.txt"
-    expected = TOP_FILES | {
+    expected = TOP_FILES | {SCORE_API} | {
         f"{folder}/{name}.jpg" for folder, names in CHUNKS.items() for name in names.split()
     }
     artwork = {name for name in files if re.fullmatch(r"scout-(backdrop-[a-f0-9]+\.jpg|logo-[a-f0-9]+\.png)", name)}
@@ -195,7 +196,7 @@ def deploy(sftp, root, assets):
     staged = destination + ".upload-" + uuid.uuid4().hex
     if not exists(sftp, destination):
         require_directory(sftp, staged, create=True)
-        for folder in CHUNKS:
+        for folder in [*CHUNKS, "api"]:
             require_directory(sftp, staged + "/" + folder, create=True)
         for asset in assets:
             remote = staged + "/" + asset.name
@@ -207,6 +208,16 @@ def deploy(sftp, root, assets):
         require_directory(sftp, destination)
         for asset in assets:
             verify_asset(sftp, destination + "/" + asset.name, asset)
+    # The endpoint and its runtime data have a stable home outside releases.
+    # Updating code never deletes /play/api/data or its scores.
+    api = next(asset for asset in assets if asset.name == SCORE_API)
+    require_directory(sftp, target + "/api", create=True)
+    endpoint = api.source.read_bytes()
+    if hashlib.sha256(endpoint).hexdigest() != api.digest:
+        raise ValueError("Scoreboard endpoint changed after validation")
+    if read_optional(sftp, target + "/" + SCORE_API) != endpoint:
+        atomic_write(sftp, target + "/" + SCORE_API, endpoint)
+    verify_asset(sftp, target + "/" + SCORE_API, api)
     new_entry = entry_html(assets, release)
     if current == new_entry:
         print("This complete release is already active")

@@ -1,14 +1,20 @@
 extends Control
+var run_session: Node
 
 const STYLE = preload("res://ui/expedition_style.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const TOUCH = preload("res://ui/touch_controls.gd")
 const STARTUP_ART = preload("res://ui/startup_art.gd")
+const TRIAL_ART = preload("res://environment/trial_art.gd")
 const ART: Texture2D = preload("res://assets/ui/title_landscape.png")
 const WORLD_SCENE := "res://main.tscn"
 enum Stage { GUIDE, LOADING, ENTERING }
 var stage := Stage.GUIDE
 var touch_mode := false
+const SCORE_PANEL = preload("res://ui/scoreboard_panel.gd")
+var score_panel: SCORE_PANEL
+var board_button: Button
+var relax_button: Button
 var start_button: Button
 var walk_text: Label
 var mine_text: Label
@@ -24,6 +30,8 @@ var window: Window
 var previous_aspect := Window.CONTENT_SCALE_ASPECT_KEEP
 
 func _ready() -> void:
+	run_session = get_node("/root/RunSession")
+	run_session.menu()
 	window = get_window()
 	previous_aspect = window.content_scale_aspect
 	# Fill the window during the welcome scene. The game restores its usual
@@ -42,21 +50,27 @@ func _ready() -> void:
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(content)
 	logo = STYLE.icon(content,STARTUP_ART.logo_texture(),Vector2(76,86),Vector2(530,156))
-	var panel := STYLE.panel(content,Vector2(676,72),Vector2(544,656))
+	var panel := STYLE.panel(content,Vector2(676,62),Vector2(544,680))
 	var eyebrow := STYLE.label(panel,"YOUR EXPLORER'S GUIDE",Vector2(32,22),Vector2(480,24),14,true)
 	eyebrow.add_theme_color_override("font_color",STYLE.GOLD)
-	STYLE.label(panel,"Ready, explorer?",Vector2(32,49),Vector2(480,42),30,true)
-	STYLE.label(panel,"Start on Earth. See where your curiosity takes you.",Vector2(32,95),Vector2(480,28),15)
+	STYLE.label(panel,"Ready for an adventure?",Vector2(32,49),Vector2(480,42),30,true)
+	STYLE.label(panel,"Three worlds. Fourteen quests. How fast can you finish?",Vector2(32,95),Vector2(480,28),15)
 	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Find your way","")
 	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Collect and upgrade","")
-	combat_text = guide_row(panel,316,CATALOG.tool_icon(true),"3. Craft your Earth sword","")
+	combat_text = guide_row(panel,316,TRIAL_ART.icon(0),"3. Craft your Earth sword","")
 	if ProjectSettings.get_setting("gameplay/rocket_repair_required",false):
 		guide_row(panel,408,CATALOG.planet_icon(1),"4. Get ready for space","Help Earth's neighbours prepare your tools,\nrepair your spacesuit and fix the rocket.")
 	else:
-		guide_row(panel,408,CATALOG.planet_icon(1),"4. Explore other worlds","The camp rocket is ready! Choose a world\nto explore whenever you like.")
-	start_button = STYLE.button(panel,"Start exploring",Vector2(32,514),Vector2(480,60),22)
+		guide_row(panel,408,CATALOG.planet_icon(1),"4. Finish all three worlds","Finish 14 story quests to stop the clock.\nMenus and travel count; extras are optional.")
+	start_button = STYLE.button(panel,"Start speedrun",Vector2(32,506),Vector2(480,60),22)
 	start_button.pressed.connect(start_exploring)
-	footer = STYLE.label(panel,"",Vector2(32,586),Vector2(480,48),13)
+	board_button = STYLE.button(panel,"Best times",Vector2(32,578),Vector2(232,46),18)
+	board_button.pressed.connect(func(): score_panel.open_board())
+	relax_button = STYLE.button(panel,"Explore for fun",Vector2(280,578),Vector2(232,46),18)
+	relax_button.pressed.connect(func(): start_exploring(false))
+	score_panel = SCORE_PANEL.new()
+	add_child(score_panel)
+	footer = STYLE.label(panel,"",Vector2(32,638),Vector2(480,28),13)
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	load_status = STYLE.label(panel,"",Vector2(32,586),Vector2(480,22),14)
 	load_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -102,14 +116,17 @@ func guide_row(panel: Control, y: float, icon: Texture2D, title: String, text: S
 func set_touch_mode(value: bool) -> void:
 	touch_mode = value
 	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
-	mine_text.text = "Tap action to mine. Move away to pause.\nReturn to resume; build a drill at camp." if value else "E / Space mines nearby ore. Move to pause.\nReturn to resume; build a drill at camp."
+	mine_text.text = "Tap action to mine. Move away to pause.\nReturn to resume; drill upgrade: 5 copper." if value else "E / Space mines nearby ore. Move to pause.\nReturn to resume; drill upgrade: 5 copper."
 	combat_text.text = "Gather 3 copper + 2 wood; craft at camp.\nTap Attack / Jab. Open Quests for more." if value else "E / Space gathers. Craft: 3 copper + 2 wood.\n1 tool, 2 sword; Space attacks. J: Quests."
-	footer.text = ("Best on iPad in landscape. Tap ? in game for controls." if value else "Enter / Space to start. Open ? in game for controls.") + "\nProgress lasts while this game is open."
+	footer.text = "Clock starts on Earth · No mid-run saves · Use a nickname"
 
-func start_exploring() -> void:
-	if stage != Stage.GUIDE:
+func start_exploring(timed := true) -> void:
+	if score_panel.visible or stage != Stage.GUIDE:
 		return
+	run_session.choose(timed)
 	stage = Stage.LOADING
+	board_button.hide()
+	relax_button.hide()
 	start_button.disabled = true
 	start_button.text = "Landing on Earth…"
 	footer.hide()
@@ -147,6 +164,8 @@ func load_failed() -> void:
 	request_started = false
 	start_button.disabled = false
 	start_button.text = "Try again"
+	board_button.show()
+	relax_button.show()
 	load_status.text = "Earth couldn't open. Please try again."
 	progress.hide()
 	start_button.grab_focus()
@@ -154,6 +173,7 @@ func load_failed() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.pressed and not touch_mode:
 		set_touch_mode(true)
+	if score_panel.visible: return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE]:
 		start_exploring()
 		get_viewport().set_input_as_handled()

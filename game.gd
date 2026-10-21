@@ -1,4 +1,5 @@
 extends Node2D
+var run_session: Node
 
 const SPEED := 235.0
 const CAMP := Vector2(470, 400)
@@ -50,6 +51,8 @@ var frost_story: FROST_STORY
 const EMBER_STORY = preload("res://environment/ember_story.gd")
 const EMBER_ART = preload("res://environment/ember_art.gd")
 var ember_story: EMBER_STORY
+const SCORE_PANEL = preload("res://ui/scoreboard_panel.gd")
+var score_panel: SCORE_PANEL
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -173,6 +176,7 @@ var flight_caption_panel: Panel
 var flight_caption: Label
 
 func _ready() -> void:
+	run_session = get_node("/root/RunSession")
 	# This iteration is deliberately silent, including Buddy's existing bark.
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"),true)
 	y_sort_enabled = true
@@ -291,7 +295,16 @@ func _ready() -> void:
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
 	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
+	score_panel = SCORE_PANEL.new()
+	score_panel.game = self
+	add_child(score_panel)
+	run_session.adventure_completed.connect(score_panel.open_results)
+	hud.run_button.pressed.connect(func():
+		if run_session.finished: score_panel.open_results()
+		else: score_panel.open_board())
 	refresh_ui()
+	run_session.begin_world()
+	hud.run_button.text = "Run 0:00 · 0/14" if run_session.timed else "Best times"
 
 # The Earth-named transition fields are retained for the existing editor/test
 # API; the same bounded loader now serves all three planets.
@@ -333,7 +346,7 @@ func has_base() -> bool:
 	return current_region() == 0
 
 func menu_open() -> bool:
-	return planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or (is_instance_valid(mission_journal) and mission_journal.visible) or dialogue_open()
+	return (is_instance_valid(score_panel) and score_panel.visible) or planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or (is_instance_valid(mission_journal) and mission_journal.visible) or dialogue_open()
 
 func dialogue_open() -> bool:
 	return is_instance_valid(character_bubble) and character_bubble.is_dialogue_open()
@@ -429,7 +442,7 @@ func craft_item(recipe: String) -> bool:
 
 func clear_touch_gestures() -> void:
 	hud.touch_controls.clear()
-	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
+	var buttons: Array = hud.equip_slots + [hud.context_button,hud.attack_button,hud.help_button,hud.run_button] + planet_menu.buttons + [planet_menu.close_button,planet_menu.cancel_button]
 	if is_instance_valid(camp_menu): buttons += camp_menu.buttons + [camp_menu.close_button]
 	buttons.append(hud.missions_button)
 	if is_instance_valid(mission_journal): buttons += [mission_journal.close_button,mission_journal.up_button,mission_journal.down_button]+mission_journal.headers
@@ -1226,6 +1239,11 @@ func refresh_ui() -> void:
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 	present_character_messages(flying)
+	if is_instance_valid(score_panel):
+		run_session.observe(self)
+		hud.run_button.text = ("Run "+run_session.format_time(run_session.elapsed_ms())+" · %d/14" % run_session.completed_ids.size()) if run_session.timed else ("Adventure complete" if run_session.finished else "Best times")
+		hud.run_button.visible = not flying and not menu_open()
+		hud.run_button.disabled = hud.help.visible or trial.jab_time >= 0
 
 func ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := PackedVector2Array()

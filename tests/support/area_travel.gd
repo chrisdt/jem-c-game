@@ -9,9 +9,14 @@ static func enter(game, region: int, cave: bool) -> void:
 	var data = game.regions()
 	var arrival: Vector2 = data.MINE_SPAWNS[region] if cave else data.arrival(region,data.LINKS[region][0].side)
 	game.begin_earth_transition(region,cave,arrival,game.player)
-	var deadline := Time.get_ticks_msec()+12000
+	var previous := Time.get_ticks_msec()
+	var deadline := previous+60000
 	while game.earth_transition and Time.get_ticks_msec() < deadline:
-		game.advance_earth_transition(0.05)
+		var now := Time.get_ticks_msec()
+		# Headless frames can run much faster than real downloads/decompression.
+		# Do not turn a few milliseconds of loading into a 24-second timeout.
+		game.advance_earth_transition(clampf((now-previous)/1000.0,0.001,0.05))
+		previous = now
 		await game.get_tree().process_frame
 	assert(not game.earth_transition,"Test area did not finish loading")
 	assert(game.current_region() == region and game.underground == cave,"Test arrived in the wrong area")

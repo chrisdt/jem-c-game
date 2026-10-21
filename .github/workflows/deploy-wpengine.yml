@@ -63,7 +63,7 @@ jobs:
           import sys
           from urllib.request import Request, urlopen
           sys.path.insert(0, 'source/tools')
-          from deploy_wpengine import collect_assets, release_id, PUBLIC_URL
+          from deploy_wpengine import collect_assets, release_id, PUBLIC_URL, SCORE_API
           assets = collect_assets(Path('browser-build/build/web'))
           release = release_id(assets)
           request = Request(PUBLIC_URL + '?release=' + release, headers={'Cache-Control': 'no-cache'})
@@ -71,9 +71,15 @@ jobs:
               html = response.read(2 * 1024 * 1024).decode()
           assert f'name="sunny-scout-release" content="{release}"' in html, 'Public entry does not serve the new release; inspect WP Engine caching/domain setup'
           for asset in assets:
+              if asset.name == SCORE_API:
+                  continue
               url = PUBLIC_URL + 'releases/' + release + '/' + asset.name
               with urlopen(Request(url, method='HEAD'), timeout=30) as response:
                   assert response.status == 200, url
                   assert 'text/html' not in response.headers.get('Content-Type', '') or asset.name == 'index.html', 'Asset is returning an HTML page: ' + asset.name
-          print('Public entry and all 30 release files respond successfully: ' + PUBLIC_URL)
+          import json, time
+          with urlopen(PUBLIC_URL + SCORE_API + '?fresh=' + str(time.time_ns()), timeout=30) as response:
+              board = json.load(response)
+              assert response.status == 200 and board['campaign'] == 'three-worlds-story-v1' and isinstance(board['scores'], list)
+          print('Public entry, 30 static release files and shared scoreboard respond successfully: ' + PUBLIC_URL)
           PY

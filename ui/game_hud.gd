@@ -38,6 +38,7 @@ var equipped_label: Label
 var poison_label: Label
 var attack_button: Button
 var missions_button: Button
+var run_button: Button
 
 func _ready() -> void:
 	location_panel = STYLE.panel(self, Vector2(18,18), Vector2(242,58))
@@ -91,6 +92,8 @@ func make_trial_hud() -> void:
 	missions_button = STYLE.button(mission_panel,"Quests · J",Vector2.ZERO,Vector2(144,44),17)
 	missions_button.focus_mode = Control.FOCUS_NONE
 	missions_button.pressed.connect(func(): missions_requested.emit())
+	run_button = STYLE.button(self,"Best times",Vector2(18,174),Vector2(214,38),14)
+	run_button.focus_mode = Control.FOCUS_NONE
 	poison_label = STYLE.label(self,"",Vector2(240,89),Vector2(190,24),14,true)
 	poison_label.add_theme_color_override("font_color",Color("91ecc5"))
 	for i in 3:

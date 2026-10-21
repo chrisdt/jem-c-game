@@ -257,6 +257,7 @@ func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
 	if health == 0:
 		remember_removed()
 		game.trial.mine_defeated += 1
+		game.run_session.record_enemy()
 		begin_puff()
 	else:
 		state = "hurt"

@@ -317,6 +317,7 @@ func hurt_player(amount: int, venom_tick := false) -> bool:
 	invulnerable = 1.3
 	game.message = "A yeti hit! Return to Canyon Camp to warm up and recover." if game.world == 1 else ("A scorpion hit! Dodge its raised tail; camp shade clears venom." if game.world == 2 else "A small bite! Berries heal one heart; apples heal two.")
 	if health == 0:
+		game.run_session.record_recovery()
 		clear_poison()
 		if game.mining_target >= 0: game.cancel_mining()
 		jab_time = -1

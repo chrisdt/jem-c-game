@@ -219,6 +219,7 @@ func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
 		state = "puff"
 		for picture in pictures: picture.hide()
 		trial.defeated += 1
+		trial.game.run_session.record_enemy()
 	else:
 		state = "hurt"
 		var away := (position-origin).normalized()

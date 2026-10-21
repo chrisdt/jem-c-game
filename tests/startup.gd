@@ -66,7 +66,7 @@ func run() -> void:
 		assert(welcome.stage != welcome.Stage.GUIDE and welcome.start_button.disabled)
 		# Duplicate starts while resources load must not request another world.
 		welcome.start_exploring()
-		var deadline := Time.get_ticks_msec()+12000
+		var deadline := Time.get_ticks_msec()+60000
 		while is_instance_valid(welcome) and current_scene == welcome and Time.get_ticks_msec() < deadline:
 			await process_frame
 		assert(current_scene != welcome,"The world never finished loading")

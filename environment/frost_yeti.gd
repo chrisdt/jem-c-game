@@ -101,6 +101,7 @@ func take_hit(id: int, origin: Vector2, damage: int) -> bool:
 	hit_flash = 0.18
 	if game.trial.weapon_is_frost() and game.trial.selected_tool == 1: slow = 1.25
 	change("puff" if health == 0 else "hurt")
+	if health == 0: game.run_session.record_enemy()
 	if health == 0: game.message = "The yeti vanished in a snowy puff!"
 	queue_redraw()
 	return true

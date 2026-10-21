@@ -82,9 +82,12 @@ SFTP passwords; use a supported runner with a real runtime secret.
 
 ## What gets uploaded
 
-The command validates all 30 browser files, including the 18 streamed scenery
+The command validates all 31 browser files, including the 18 streamed scenery
 images, matching runtime/PCK sizes, loading art and font license. Symlinked or
-unexpected files are rejected. Local Godot `.import` metadata is omitted.
+unexpected files are rejected. Local Godot `.import` metadata is omitted. The PHP
+scoreboard endpoint is installed at stable `/play/api/leaderboard.php`. Its runtime
+`/play/api/data/` folder is preserved across releases and rollback. See
+[scoreboard setup](SPEEDRUN_LEADERBOARD.md) for PHP write permissions and caching.
 
 Each complete build goes into `/play/releases/CONTENT_HASH/`. Uploads first use
 a separate staging directory and every file is read back and SHA-256 checked.
@@ -101,7 +104,8 @@ does not change the active game. Do not run the local uploader concurrently with
 Actions; Actions queues its own deployments.
 
 After deployment the workflow checks the public entry's release marker and all
-30 asset URLs. The initial browser review should cover the welcome screen,
+30 static asset URLs plus the stable PHP scoreboard endpoint. The initial browser
+review should cover the welcome screen,
 starting camp and a trail/mine transition. If WP Engine serves an older entry,
 exclude `/play/` from its HTML page cache or clear that entry's cache; release
 assets already have unique URLs. The workflow does not alter WordPress caching,

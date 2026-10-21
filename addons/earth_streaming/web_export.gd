@@ -25,6 +25,7 @@ func _export_file(path: String, _type: String, features: PackedStringArray) -> v
 func _export_end() -> void:
 	if not web: return
 	export_startup_art()
+	export_scoreboard()
 	for folder in FOLDERS:
 		var target := output.path_join(folder+"_chunks")
 		var destination := ProjectSettings.globalize_path(target if target.is_absolute_path() else "res://"+target)
@@ -81,3 +82,12 @@ func write_art(destination: String, prefix: String, bytes: PackedByteArray, exte
 		return ""
 	file.store_buffer(bytes)
 	return name
+
+func export_scoreboard() -> void:
+	var destination := ProjectSettings.globalize_path(output if output.is_absolute_path() else "res://"+output).path_join("api")
+	DirAccess.make_dir_recursive_absolute(destination)
+	var file := FileAccess.open(destination.path_join("leaderboard.php"),FileAccess.WRITE)
+	if file == null:
+		push_error("Unable to export the Sunny Scout scoreboard endpoint")
+		return
+	file.store_buffer(FileAccess.get_file_as_bytes("res://server/leaderboard.php"))
