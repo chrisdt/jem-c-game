@@ -851,10 +851,21 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			interact()
 
 func space_action() -> void:
-	if trial.blocked(): return
+	if trial.blocked() or trial.jab_time >= 0: return
 	if story.working():
 		story.cancel_work()
+		refresh_ui()
 		return
+	if mining_target < 0:
+		var prop := story.space_usable_prop()
+		var wood: int = wood_supplies.nearest()
+		if not prop.is_empty() or wood >= 0:
+			if cooldown > 0: return
+			cooldown = 0.3
+			if not prop.is_empty(): story.use_prop(prop)
+			else: wood_supplies.collect_nearby()
+			refresh_ui()
+			return
 	if trial.sword_equipped():
 		trial.start_jab()
 	elif mining_target >= 0:
@@ -1092,7 +1103,7 @@ func refresh_ui() -> void:
 	var actionable := true
 	var npc := nearest_npc()
 	if story.working():
-		context = "E   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
+		context = "E / Space   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
 	elif mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
 		context = "E / Space   %s %s · %.1fs" % ["Pause" if world == 0 else "Cancel","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)/mining_rate()]
@@ -1103,9 +1114,9 @@ func refresh_ui() -> void:
 	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
 	elif is_instance_valid(story) and not story.nearest_prop().is_empty():
-		context = "E   "+story.prop_prompt(story.nearest_prop())
+		context = ("E / Space   " if not story.space_usable_prop().is_empty() else "E   ")+story.prop_prompt(story.nearest_prop())
 	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
-		context = "E   Pick up wood"
+		context = "E / Space   Pick up wood"
 	elif (not underground and regions().has_mine(current_region()) and player.distance_to(cave_position()) < 130) or (underground and player.distance_to(exit_position()) < 120):
 		context = "Walk to the surface" if underground else "Walk into " + mine_name()
 		actionable = false
@@ -1117,7 +1128,7 @@ func refresh_ui() -> void:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and npc == null and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and npc == null and story.nearest_prop().is_empty() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
@@ -1130,6 +1141,7 @@ func refresh_ui() -> void:
 		"rowan_mission":rowan.mission != ROWAN.Mission.NOT_STARTED,"rowan_complete":rowan.mission == ROWAN.Mission.COMPLETE,
 		"rowan_title":ROWAN.MISSION_TITLE,"rowan_progress":rowan.progress_text(),
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
+		"space_object":wood_supplies.nearest() >= 0 or not story.space_usable_prop().is_empty(),
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 	present_character_messages(flying)

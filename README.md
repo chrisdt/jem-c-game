@@ -28,6 +28,7 @@ The loading and welcome screens share one illustrated logo: **Planet Adventures*
 
 - **WASD / arrow keys:** move
 - **E / action button:** talk, gather, start mining, use workbench or rocket. With the pick or drill selected, **Space** also starts or cancels nearby mining; away from ore it attacks. With the sword selected, **Space** jabs. Outside Earth, **Space** also uses nearby objects.
+- **Space / E:** pick up nearby revealed wood and collectible quest objects. Ready pickups take priority over attacks with either weapon. Space still attacks while a snake guards a box; select the mining tool to drill open quest objects. E continues to talk and use the workbench/rocket.
 - **Mine doorways:** walk into an entrance or exit to change areas automatically
 - **iPad / touch:** drag the pad at bottom left to walk; tap the action at bottom right to mine, cancel, upgrade or open the rocket. Tap a world card's **Fly here** button to travel.
 - On Earth, **E / Space / Pause button**, movement, equipping a weapon or taking damage pauses mining. Return to that deposit to resume its remaining work, even after a mine, district or rocket trip. Other planets retain their existing cancellation rules.

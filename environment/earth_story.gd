@@ -303,6 +303,15 @@ func nearest_prop() -> String:
 func prop_reach(_id: String) -> float:
 	return 105.0
 
+func space_usable_prop() -> String:
+	var id := nearest_prop()
+	# Space remains an attack while a creature guards the object. E can still
+	# explain the requirement; once safe, either key recovers the item.
+	if id == "supplies" and not snake_cleared(1,1): return ""
+	if id == "locker" and not snake_cleared(3,1): return ""
+	if id in ["rockfall","locker","engine"] and game.trial.sword_equipped(): return ""
+	return id
+
 func interaction_position(id: String) -> Vector2:
 	# The rockfall's illustrated center extends beyond the map. Work on its
 	# visible west/front face, so Sunny never has to stand behind the boulders.

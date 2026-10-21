@@ -197,7 +197,7 @@ func set_touch_layout_positions() -> void:
 
 func update_help_copy() -> void:
 	if trial_active:
-		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nMove to pause; return to resume\nJ · Quests   E · talk / use"
+		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nE / Space · gather / mine\nJ · Quests   E · talk / use"
 	else:
 		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
@@ -221,6 +221,7 @@ func present_trial(state: Dictionary) -> void:
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
 	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"
+	if not touch_mode and state.get("space_object",false): attack_button.text = "Jab" if selected == 1 else "Attack"
 	attack_button.position = Vector2(1140,680) if touch_mode else Vector2(1110,688)
 	attack_button.size = Vector2(122,98) if touch_mode else Vector2(112,62)
 	if touch_mode:
