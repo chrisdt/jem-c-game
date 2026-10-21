@@ -1,0 +1,652 @@
+{
+	"mines": [
+		{
+			"edits": [
+				{
+					"bounds": [
+						261,
+						127,
+						84,
+						91
+					],
+					"kind": "boards",
+					"opening": [
+						279,
+						145,
+						48,
+						55
+					],
+					"original_sha256": "10dd3f5a5a9a241e867fecc88d0a45ba0df32d02170497e4afba65f7fb52fb9e"
+				},
+				{
+					"bounds": [
+						393,
+						82,
+						80,
+						101
+					],
+					"kind": "boards",
+					"opening": [
+						411,
+						100,
+						44,
+						65
+					],
+					"original_sha256": "0a8e48d9fc84198c761dee7f98cecc8db7ca66022b1890d334b98f3ce0b03aaf"
+				},
+				{
+					"bounds": [
+						610,
+						279,
+						86,
+						101
+					],
+					"kind": "boards",
+					"opening": [
+						628,
+						297,
+						50,
+						65
+					],
+					"original_sha256": "97f35119375e66bd8245921fc4a2712565c48c3ec52dea8d8c0022ed103033e1"
+				},
+				{
+					"bounds": [
+						755,
+						80,
+						85,
+						88
+					],
+					"kind": "boards",
+					"opening": [
+						773,
+						98,
+						49,
+						52
+					],
+					"original_sha256": "08eb5d54419f98ab463fb36e828bc83f2352a1f24fcfa11a3ee2f2e982d1ddab"
+				},
+				{
+					"bounds": [
+						950,
+						228,
+						76,
+						93
+					],
+					"kind": "boards",
+					"opening": [
+						968,
+						246,
+						40,
+						57
+					],
+					"original_sha256": "c3f46243288f7e375f348663ee502355c8bb951845e0e5b7e9b3ebfbb11f13e9"
+				},
+				{
+					"bounds": [
+						1302,
+						128,
+						94,
+						104
+					],
+					"kind": "boards",
+					"opening": [
+						1320,
+						146,
+						58,
+						68
+					],
+					"original_sha256": "3892a31592a42aca93de9ea4f0fffd8cb2e1678c9e3e728c83a9f31aa9e3ff7c"
+				},
+				{
+					"bounds": [
+						1374,
+						360,
+						91,
+						103
+					],
+					"kind": "boards",
+					"opening": [
+						1392,
+						378,
+						55,
+						67
+					],
+					"original_sha256": "d40f39aa9776a3a938726e318144c0d65a45d43e6790a5cd8586b4e064465b4b"
+				},
+				{
+					"bounds": [
+						1243,
+						733,
+						113,
+						100
+					],
+					"kind": "boards",
+					"opening": [
+						1261,
+						751,
+						77,
+						64
+					],
+					"original_sha256": "f1c6511231e173443b8f65b81357d5c696dbcaad42f6c950dbacfb8ebefdf717"
+				},
+				{
+					"bounds": [
+						593,
+						826,
+						97,
+						97
+					],
+					"kind": "boards",
+					"opening": [
+						611,
+						844,
+						61,
+						61
+					],
+					"original_sha256": "b4b50f05a09421105e681b435d87a26af2c6164f7a1e5e4f3185ed8012c02516"
+				},
+				{
+					"bounds": [
+						265,
+						650,
+						103,
+						98
+					],
+					"kind": "boards",
+					"opening": [
+						283,
+						668,
+						67,
+						62
+					],
+					"original_sha256": "6f967963dfea8ab05b2fd888baf9c95518118637084a6c370a927bb6ba62455a"
+				},
+				{
+					"bounds": [
+						307,
+						110,
+						103,
+						104
+					],
+					"kind": "rubble",
+					"opening": [
+						326,
+						118,
+						65,
+						86
+					],
+					"original_sha256": "e3cf0e4ec9020eb6d2ee7a7988a3304a07c696b6f1675c99fa728ac27d11341d"
+				},
+				{
+					"bounds": [
+						872,
+						50,
+						114,
+						112
+					],
+					"kind": "rubble",
+					"opening": [
+						893,
+						58,
+						72,
+						94
+					],
+					"original_sha256": "0058643c074dce00c7ec2def0a25dc2816aef0d1fd85d8ea709edeb640355c19"
+				},
+				{
+					"bounds": [
+						1164,
+						236,
+						115,
+						102
+					],
+					"kind": "rubble",
+					"opening": [
+						1186,
+						244,
+						72,
+						84
+					],
+					"original_sha256": "949c288b7f404567db2a616aaf3f806bc51da94dce247387a8533e12a0408fee"
+				},
+				{
+					"bounds": [
+						111,
+						656,
+						115,
+						104
+					],
+					"kind": "rubble",
+					"opening": [
+						132,
+						664,
+						72,
+						86
+					],
+					"original_sha256": "8a7687cd389376465bc512a2e1e3eff4af41efdd7785885b2e9530d5519fbe9f"
+				},
+				{
+					"bounds": [
+						1101,
+						666,
+						122,
+						111
+					],
+					"kind": "rubble",
+					"opening": [
+						1124,
+						674,
+						77,
+						93
+					],
+					"original_sha256": "e7f012a329b4c458e63b4df21a4b3c9fbcd1db662125072852e0b2c48d77d56f"
+				}
+			],
+			"exit": [
+				14,
+				334,
+				171,
+				151
+			],
+			"exit_sha256": "fdcc388710c45ac0b74b179f3bb846777c29f12736cfd62b82ec0ef862abf736",
+			"path": "res://assets/moss_mine.png",
+			"preserved_sha256": "8502205841cb0811c572b99ae97ad1b1165f8500e5b88379c76d427c2afaad45",
+			"region": 0,
+			"size": [
+				1499,
+				1049
+			]
+		},
+		{
+			"edits": [
+				{
+					"bounds": [
+						116,
+						114,
+						99,
+						102
+					],
+					"kind": "boards",
+					"opening": [
+						134,
+						132,
+						63,
+						66
+					],
+					"original_sha256": "5ecec53bf34faf575954110c8b7b44456fce6afa368aeb4d8741e57b73b2209d"
+				},
+				{
+					"bounds": [
+						328,
+						159,
+						84,
+						92
+					],
+					"kind": "boards",
+					"opening": [
+						346,
+						177,
+						48,
+						56
+					],
+					"original_sha256": "b14e1c0e3223ee327ec17f89b6f392bd1acaf84cf019415f841bf53b9902a517"
+				},
+				{
+					"bounds": [
+						692,
+						15,
+						117,
+						95
+					],
+					"kind": "boards",
+					"opening": [
+						710,
+						33,
+						81,
+						59
+					],
+					"original_sha256": "29539a201b3fe5f9496f3042c6f72aee833591c1bd7f9c59a23355e216321918"
+				},
+				{
+					"bounds": [
+						1124,
+						113,
+						97,
+						96
+					],
+					"kind": "boards",
+					"opening": [
+						1142,
+						131,
+						61,
+						60
+					],
+					"original_sha256": "75af018eba90f7c17d8584ff1e8bb5f949a9ad971606574544d52aefb945d19d"
+				},
+				{
+					"bounds": [
+						1258,
+						113,
+						104,
+						102
+					],
+					"kind": "boards",
+					"opening": [
+						1276,
+						131,
+						68,
+						66
+					],
+					"original_sha256": "205185d6e99ba09dc79d95b5cb0fafc0db190f16a3e84615eb170fc02ce02df6"
+				},
+				{
+					"bounds": [
+						589,
+						227,
+						71,
+						91
+					],
+					"kind": "boards",
+					"opening": [
+						607,
+						245,
+						35,
+						55
+					],
+					"original_sha256": "41e095fb5714d1c4d3b9b3bcb8375c289dad199de0df5283fb8b479e58bcf811"
+				},
+				{
+					"bounds": [
+						841,
+						227,
+						68,
+						91
+					],
+					"kind": "boards",
+					"opening": [
+						859,
+						245,
+						32,
+						55
+					],
+					"original_sha256": "15543ec2cd8c4735a721d35046ac22ee1a1f230fc12a5714f4c36af89b59a4aa"
+				},
+				{
+					"bounds": [
+						121,
+						491,
+						116,
+						96
+					],
+					"kind": "boards",
+					"opening": [
+						139,
+						509,
+						80,
+						60
+					],
+					"original_sha256": "45a4cc6a89dcbe9658f37033fb4dbc848da916b13ea3f3f58bae3b9247614054"
+				},
+				{
+					"bounds": [
+						408,
+						514,
+						81,
+						91
+					],
+					"kind": "boards",
+					"opening": [
+						426,
+						532,
+						45,
+						55
+					],
+					"original_sha256": "c21fb1b10869cab7c198c59f186914ef34ca31c3aa8f83dfe70260a9b94c6ecc"
+				},
+				{
+					"bounds": [
+						626,
+						529,
+						66,
+						82
+					],
+					"kind": "boards",
+					"opening": [
+						644,
+						547,
+						30,
+						46
+					],
+					"original_sha256": "8d2dfbc2faea8831045b8e075bd69c6d7dbfab220808b7a5452530018aca198a"
+				},
+				{
+					"bounds": [
+						812,
+						528,
+						66,
+						82
+					],
+					"kind": "boards",
+					"opening": [
+						830,
+						546,
+						30,
+						46
+					],
+					"original_sha256": "c3c78e8210ee3f60c86412bde60763f12d809bf26ab2cdc1460529066d0b2985"
+				},
+				{
+					"bounds": [
+						1076,
+						508,
+						112,
+						96
+					],
+					"kind": "boards",
+					"opening": [
+						1094,
+						526,
+						76,
+						60
+					],
+					"original_sha256": "86515ab71ad8b47495049f7b297915f7cd92a08ba6687c163b8a645e6534712d"
+				},
+				{
+					"bounds": [
+						1368,
+						522,
+						85,
+						92
+					],
+					"kind": "boards",
+					"opening": [
+						1386,
+						540,
+						49,
+						56
+					],
+					"original_sha256": "d3e75ebb6f92686b4b1207a8597c682475a146849283be06c59ef2a1e43168bb"
+				}
+			],
+			"exit": [
+				659,
+				809,
+				181,
+				146
+			],
+			"exit_sha256": "346c2c1dd77b9fbb88d4b686b52bdfa85e1c7c3ea2a33275f64c075fbfbda5b9",
+			"path": "res://assets/earth/copper_hollow.png",
+			"preserved_sha256": "d1c486f8385551d91e0565d700a71ec1dd9aca5ee44066315ff7ff85398c7af0",
+			"region": 1,
+			"size": [
+				1499,
+				1049
+			]
+		},
+		{
+			"edits": [
+				{
+					"bounds": [
+						312,
+						97,
+						98,
+						101
+					],
+					"kind": "boards",
+					"opening": [
+						330,
+						115,
+						62,
+						65
+					],
+					"original_sha256": "d35ec4e6f416a23a3dfbff259a670df6d67822bf6931a8e57ccbfe36682817b8"
+				},
+				{
+					"bounds": [
+						735,
+						28,
+						94,
+						98
+					],
+					"kind": "boards",
+					"opening": [
+						753,
+						46,
+						58,
+						62
+					],
+					"original_sha256": "2e9972c97f45e8c5fcf84320fc3267fa85657b6fd6801b0ee5f758cc11390ed8"
+				},
+				{
+					"bounds": [
+						1069,
+						104,
+						69,
+						86
+					],
+					"kind": "boards",
+					"opening": [
+						1087,
+						122,
+						33,
+						50
+					],
+					"original_sha256": "2318b64d87713a5dc6b563abd0521bafce367340a0f00d4e52519a527b28d9a7"
+				},
+				{
+					"bounds": [
+						1303,
+						79,
+						94,
+						97
+					],
+					"kind": "boards",
+					"opening": [
+						1321,
+						97,
+						58,
+						61
+					],
+					"original_sha256": "931e94dfb47dc7b3848c4f3c41d776bd5ab9a8756cb77759647f2df53183e65a"
+				},
+				{
+					"bounds": [
+						81,
+						306,
+						122,
+						98
+					],
+					"kind": "boards",
+					"opening": [
+						99,
+						324,
+						86,
+						62
+					],
+					"original_sha256": "9b4a7dc5c9e207fc5a2bd1d706bd627d8b96c516ff11b06fb368bd322233beec"
+				},
+				{
+					"bounds": [
+						590,
+						289,
+						98,
+						93
+					],
+					"kind": "boards",
+					"opening": [
+						608,
+						307,
+						62,
+						57
+					],
+					"original_sha256": "ea7be5c801cc7934d7bd4e677637dbaba4d27824e08f1bb2a04906afcb1a5e63"
+				},
+				{
+					"bounds": [
+						1362,
+						431,
+						86,
+						99
+					],
+					"kind": "boards",
+					"opening": [
+						1380,
+						449,
+						50,
+						63
+					],
+					"original_sha256": "23dba95a795ae2f316ad8201b60305dd76b235f130362caeb62e38d23838ab08"
+				},
+				{
+					"bounds": [
+						1312,
+						652,
+						89,
+						99
+					],
+					"kind": "boards",
+					"opening": [
+						1330,
+						670,
+						53,
+						63
+					],
+					"original_sha256": "5400308fe991d351ebc59a63d4f8a1480719526c66df64ec66178e6911c3706e"
+				},
+				{
+					"bounds": [
+						588,
+						581,
+						82,
+						86
+					],
+					"kind": "boards",
+					"opening": [
+						606,
+						599,
+						46,
+						50
+					],
+					"original_sha256": "bf6543ca16c5c1a92fd2fd7ef0a4ad4e58fdc504f5023cf39ef5c543b62e60e0"
+				}
+			],
+			"exit": [
+				64,
+				749,
+				171,
+				176
+			],
+			"exit_sha256": "8f5a1ca4afce1d5075ed6c9a4d7f65badec30db2546e159d5769a6c65072b8e9",
+			"path": "res://assets/earth/crystal_depths.png",
+			"preserved_sha256": "419b60afb1fe2fb2a76b8712f7f84e6039be160f4555ed5f19b17f064fc853f2",
+			"region": 4,
+			"size": [
+				1499,
+				1049
+			]
+		}
+	],
+	"reference_commit": "cae2c71fa4a03e22ccec62b43941d780b7022b81",
+	"version": 1
+}

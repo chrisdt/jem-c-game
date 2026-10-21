@@ -10,6 +10,8 @@ All seven neighbours are playable: **Rowan, Bea, Otis, Mara, Iris, Finn and Nova
 
 Earth neighbours and their soft boot-contact shadows fade in together over 0.75 seconds when explored, matching mineral reveals. Each gives a short hand-and-forearm wave on the first close approach, then returns to idle. Their heads, bodies and boots stay planted while waving; menus and travel pause the animation. Revisiting retains the reveal and greeting state. Completed quests still trigger the smoke-puff departure. `tests/npc_presentation.gd` checks all seven greetings, reveal timing, pauses and departure interruption.
 
+Permanently closed mine doorways and rail workings are painted into the three Earth mine backgrounds, with fitted timber boards or rubble and matching light and perspective. They use no separate runtime overlay. Usable surface exits stay open, and the original pixels outside the local doorway edits are preserved.
+
 ## Play
 
 To publish a checked build at **playsunnyscout.com/play/**, say **“deploy Sunny Scout”**. The [WP Engine deployment workflow](docs/DEPLOY_WPENGINE.md) provides an explicit upload command, verified versioned releases and rollback. Commits and ZIP builds alone do not deploy.
