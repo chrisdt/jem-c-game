@@ -27,7 +27,7 @@ Earth supplies **13 copper, 3 blue crystals and 6 fallen wood**. The complete st
 
 Bea, Otis, Iris and Nova do not charge additional common materials. Blocking Old Quarry leaves ten copper available on the other side of the gate, enough for both starter crafts. Neither starter recipe needs a quarry ingredient. There are spare resources after finishing, and early gathering or crafting cannot make the story unaffordable.
 
-Mara's reinforced sword deals **5 damage** per directional jab instead of 3; the pick/drill still deals 1. Her crystal drill completes Earth mining **25% sooner**: copper takes 1.5 seconds and blue crystal 6.75 seconds from untouched rock. The HUD names and highlights the upgrades. Existing fitted drill and grounded attack poses remain in use. Other planets retain their existing mineral timing and friendly wildlife.
+Mara's reinforced sword deals **5 damage** per directional jab instead of 3; the pick/drill still deals 1. Her reinforced drill completes Earth mining **25% sooner**: copper takes 1.5 seconds and blue crystal 6.75 seconds from untouched rock. The HUD names and highlights the upgrades. Existing fitted drill and grounded attack poses remain in use. Frost Canyon now has its own Snow Sprite quests, stronger equipment and yetis; the new Crystal Drill improves mining on all planets.
 
 ## World interactions and early actions
 

@@ -8,6 +8,8 @@ var material_label: Label
 var buttons: Array[Button] = []
 var close_button: Button
 var notes: Array[Label] = []
+var cards: Array[Panel] = []
+var finished_label: Label
 
 func _ready() -> void:
 	layer = 4
@@ -22,6 +24,7 @@ func _ready() -> void:
 	material_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for i in 2:
 		var card := STYLE.panel(panel,Vector2(22+i*364,105),Vector2(344,242))
+		cards.append(card)
 		var heading := STYLE.label(card,"Hand drill" if i == 0 else "Copper sword",Vector2(16,12),Vector2(312,30),21,true)
 		heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		STYLE.icon(card,CATALOG.tool_icon(true) if i == 0 else ART.icon(0),Vector2(137,45),Vector2(70,70))
@@ -33,12 +36,14 @@ func _ready() -> void:
 		var button := STYLE.button(card,"",Vector2(22,178),Vector2(300,56),18)
 		button.pressed.connect(craft.bind("drill" if i == 0 else "sword"))
 		buttons.append(button)
+	finished_label = STYLE.label(panel,"All starter equipment is built!",Vector2(70,188),Vector2(612,48),23,true)
+	finished_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	close_button = STYLE.button(panel,"Back to exploring",Vector2(250,366),Vector2(252,56),17)
 	close_button.pressed.connect(dismiss)
 	hide()
 
 func open() -> void:
-	if not game.at_workbench(): return
+	if game.world != 0 or not game.at_workbench(): return
 	game.clear_touch_gestures()
 	game.walking = false
 	game.restore_walk_visual()
@@ -49,8 +54,12 @@ func open() -> void:
 
 func present() -> void:
 	material_label.text = "Your materials: %d copper    ·    %d wood" % [game.ore,game.trial.wood]
+	var remaining := int(not game.upgraded)+int(not game.trial.sword_owned)
+	finished_label.visible = remaining == 0
 	for i in 2:
 		var owned: bool = game.upgraded if i == 0 else game.trial.sword_owned
+		cards[i].visible = not owned and game.world == 0
+		cards[i].position.x = 204 if remaining == 1 else 22+i*364
 		var earth_only: bool = i == 1 and game.world != 0
 		var available: bool = game.ore >= (5 if i == 0 else 3) and (i == 0 or game.trial.wood >= 2)
 		buttons[i].disabled = owned or earth_only or not available

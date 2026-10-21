@@ -250,7 +250,7 @@ func run() -> void:
 	game.mission_journal.dismiss()
 	game.travel_to_other_planet(1)
 	game.advance_flight(10)
-	check(game.world == 1 and not game.hud.mission_panel.visible and game.npcs.all(func(n): return not n.visible),"Repaired rocket could not travel or Earth people leaked off-world")
+	check(game.world == 1 and game.hud.mission_panel.visible and game.hud.equip_slots[1].visible and game.npcs.all(func(n): return not n.visible),"Repaired rocket could not travel or Earth people leaked off-world")
 	game.travel_to_other_planet(0)
 	game.advance_flight(10)
 	await TRAVEL.enter(game,4,false)

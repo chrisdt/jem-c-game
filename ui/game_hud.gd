@@ -44,14 +44,14 @@ func _ready() -> void:
 	location_title = STYLE.label(location_panel, "EARTH", Vector2(66,7), Vector2(164,24), 18, true)
 	location_subtitle = STYLE.label(location_panel, "Surface", Vector2(66,31), Vector2(162,20), 14)
 	resource_panel = STYLE.panel(self, Vector2(888,18), Vector2(374,58))
-	for i in 3:
-		var x := 12 + i * 148
-		material_icons.append(STYLE.icon(resource_panel, CATALOG.ORES[0][i] if i < 2 else TRIAL_ART.wood(), Vector2(x,8), Vector2(40,42)))
-		material_labels.append(STYLE.label(resource_panel, "", Vector2(x+47,7), Vector2(94,18), 12))
-		counts.append(STYLE.label(resource_panel, "0", Vector2(x+47,24), Vector2(90,29), 22, true))
+	for i in 7:
+		var x := 12 + i * 88
+		material_icons.append(STYLE.icon(resource_panel, CATALOG.ORES[0][0], Vector2(x,23), Vector2(30,30)))
+		material_labels.append(STYLE.label(resource_panel, "", Vector2(x,5), Vector2(84,16), 10))
+		counts.append(STYLE.label(resource_panel, "0", Vector2(x+35,23), Vector2(47,28), 19, true))
 		var divider := ColorRect.new()
 		divider.color = Color("9e854d")
-		divider.position = Vector2(x+141,14)
+		divider.position = Vector2(x+83,14)
 		divider.size = Vector2(1,30)
 		divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		resource_panel.add_child(divider)
@@ -149,19 +149,20 @@ func present(state: Dictionary) -> void:
 	location_title.text = CATALOG.NAMES[world].to_upper()
 	location_subtitle.text = state.place
 	planet.texture = CATALOG.planet_icon(world)
-	for i in 3:
-		var shown := i < 2 or world == 0
-		material_icons[i].visible = shown
-		material_labels[i].visible = shown
-		counts[i].visible = shown
-		material_icons[i].texture = CATALOG.ORES[world][i] if i < 2 else TRIAL_ART.wood()
-		material_labels[i].text = CATALOG.MATERIALS[world][i] if i < 2 else "Wood"
-		counts[i].text = str(state.inventory[i]) if i < 2 else str(state.get("wood",0))
+	var ordering: Array = [[0,1,6,2,3,4,5],[2,3,6,0,1,4,5],[4,5,6,0,1,2,3]][world]
+	var full: Array = state.get("all_materials",[0,0,0,0,0,0,0])
+	var names := ["Copper","Blue crystal","Frost ore","Amethyst","Gold","Fire ruby","Wood"]
+	var icons := [CATALOG.ORES[0][0],CATALOG.ORES[0][1],CATALOG.ORES[1][0],CATALOG.ORES[1][1],CATALOG.ORES[2][0],CATALOG.ORES[2][1],TRIAL_ART.wood()]
+	for i in 7:
+		var index: int = ordering[i]
+		material_icons[i].texture = icons[index]
+		material_labels[i].text = names[index]
+		counts[i].text = str(full[index])
 	equipment.texture = CATALOG.tool_icon(state.upgraded)
 	equipment.tooltip_text = "Hand drill fitted — ready for every mineral" if state.upgraded else "Starter pick — build a hand drill at camp for 5 copper"
 	equipment.visible = not trial_active
-	resource_panel.position.x = 804 if trial_active else 888
-	resource_panel.size.x = 458 if trial_active else 374
+	resource_panel.position.x = 628
+	resource_panel.size.x = 634
 	objective.text = state.objective
 	objective.visible = not state.menu and not trial_active
 	context_button.text = state.context.trim_prefix("E / Space   ").trim_prefix("E   ") if touch_mode else state.context
@@ -182,6 +183,7 @@ func present(state: Dictionary) -> void:
 		help.visible = false
 	if trial_active:
 		present_trial(state)
+		mission_panel.visible = mission_panel.visible and state.get("quests_available",true)
 	else:
 		set_trial_visibility(false)
 		# Keep remaining health readable while searching other districts for
@@ -206,7 +208,8 @@ func present_trial(state: Dictionary) -> void:
 	var owned: bool = state.get("sword_owned",false)
 	missions_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	missions_button.tooltip_text = "Quests · expand a title for instructions and progress"
-	equip_icons[0].texture = CATALOG.tool_icon(state.upgraded)
+	equip_icons[0].texture = preload("res://environment/frost_art.gd").item(1) if state.get("crystal_drill",false) else CATALOG.tool_icon(state.upgraded)
+	equip_icons[1].texture = preload("res://environment/frost_art.gd").item(0) if state.get("frostfang",false) else TRIAL_ART.icon(0)
 	var selected: int = state.get("selected_tool",0)
 	for i in 2:
 		equip_marks[i].visible = i == selected
@@ -215,9 +218,17 @@ func present_trial(state: Dictionary) -> void:
 	equip_slots[1].disabled = equip_slots[1].disabled or not owned
 	equip_icons[1].modulate.a = 1.0 if owned else 0.35
 	equip_slots[1].tooltip_text = "Copper sword" if owned else "Craft at Earth camp: 3 copper + 2 wood"
-	equipped_label.text = ("Reinforced sword" if state.get("improved_sword",false) else "Sword") if selected == 1 else ("Crystal drill" if state.get("improved_drill",false) else ("Hand drill" if state.upgraded else "Mining pick"))
+	equipped_label.text = ("Reinforced sword" if state.get("improved_sword",false) else "Sword") if selected == 1 else ("Reinforced drill" if state.get("improved_drill",false) else ("Hand drill" if state.upgraded else "Mining pick"))
 	equip_icons[0].modulate = Color(0.75,1.2,1.25) if state.get("improved_drill",false) else Color.WHITE
 	equip_icons[1].modulate = Color(0.75,1.2,1.25,1 if owned else 0.35) if state.get("improved_sword",false) else Color(1,1,1,1 if owned else 0.35)
+	if state.get("frostfang",false):
+		equip_icons[1].modulate = Color.WHITE
+		equip_slots[1].tooltip_text = "Frostfang Sword · strong jabs briefly slow enemies"
+	if state.get("crystal_drill",false):
+		equip_icons[0].modulate = Color.WHITE
+		equip_slots[0].tooltip_text = "Crystal Drill · faster mining on every world"
+	if state.get("frostfang",false) and selected == 1: equipped_label.text = "Frostfang Sword"
+	if state.get("crystal_drill",false) and selected == 0: equipped_label.text = "Crystal Drill"
 	attack_button.disabled = state.menu or state.flying or state.get("jabbing",false) or help.visible
 	attack_button.text = ("Jab" if selected == 1 else "Attack") if touch_mode else ("Space · Jab" if selected == 1 else "Space · Hit")
 	if not touch_mode and selected == 0 and state.get("mining_reachable",false): attack_button.text = "Attack"

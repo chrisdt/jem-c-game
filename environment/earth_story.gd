@@ -132,7 +132,7 @@ func closing(role: String) -> String:
 	match role:
 		"bea": return "Thank you! Otis needs help with a rockfall on the east quarry trail. Build a hand drill at camp for 5 copper if you haven't already."
 		"otis": return "The way is clear. Find Mara by the quarry rails and mine cart for better tools."
-		"mara": return "Your crystal drill is faster and your reinforced sword hits harder! Iris is researching the circular ruins at Sunstone Ridge."
+		"mara": return "Your reinforced drill is faster and your reinforced sword hits harder! Iris is researching the circular ruins at Sunstone Ridge."
 		"iris": return "Finn at Willow Marsh's stream and bridge can seal that spacesuit."+(" Keep the navigation unit safe for Nova." if rocket_repair_required else "")
 		"finn": return "Your spacesuit is sealed and ready!"+(" Take this fuel regulator to Nova beside the rocket at camp." if rocket_repair_required else " Thanks for helping our Earth neighbours. The camp rocket is ready whenever you want to explore another world.")
 		"nova": return "Launch checks complete! The rocket, both upgraded tools and your spacesuit are ready. Choose a world at the rocket when you're ready."

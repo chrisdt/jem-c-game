@@ -15,6 +15,8 @@ var rows: Array[Panel] = []
 var headers: Array[Button] = []
 var statuses: Array[Label] = []
 var expanded: Dictionary = {}
+var column: VBoxContainer
+var listed_world := -1
 
 func _ready() -> void:
 	layer = 4
@@ -30,11 +32,31 @@ func _ready() -> void:
 	scroll.size = Vector2(840,438)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
-	var column := VBoxContainer.new()
+	column = VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation",8)
 	scroll.add_child(column)
-	for entry in game.missions.entries():
+	close_button = STYLE.button(panel,"Back to exploring",Vector2(304,563),Vector2(280,56),18)
+	close_button.pressed.connect(dismiss)
+	up_button = STYLE.button(panel,"Up",Vector2(30,563),Vector2(100,56),17)
+	down_button = STYLE.button(panel,"Down",Vector2(758,563),Vector2(100,56),17)
+	up_button.pressed.connect(func(): scroll.scroll_vertical = maxi(0,scroll.scroll_vertical-330))
+	down_button.pressed.connect(func(): scroll.scroll_vertical += 330)
+	rebuild()
+	hide()
+
+func rebuild() -> void:
+	if listed_world == game.world: return
+	for row in rows: row.free()
+	rows.clear()
+	headers.clear()
+	titles.clear()
+	descriptions.clear()
+	progress.clear()
+	marks.clear()
+	statuses.clear()
+	listed_world = game.world
+	for entry in game.quest_entries():
 		var row := Panel.new()
 		row.custom_minimum_size = Vector2(810,56)
 		var background := StyleBoxFlat.new()
@@ -72,18 +94,12 @@ func _ready() -> void:
 		objective.add_theme_color_override("font_color",STYLE.GOLD)
 		objective.hide()
 		progress.append(objective)
-	close_button = STYLE.button(panel,"Back to exploring",Vector2(304,563),Vector2(280,56),18)
-	close_button.pressed.connect(dismiss)
-	up_button = STYLE.button(panel,"Up",Vector2(30,563),Vector2(100,56),17)
-	down_button = STYLE.button(panel,"Down",Vector2(758,563),Vector2(100,56),17)
-	up_button.pressed.connect(func(): scroll.scroll_vertical = maxi(0,scroll.scroll_vertical-330))
-	down_button.pressed.connect(func(): scroll.scroll_vertical += 330)
-	hide()
 
 func open() -> void:
-	if game.world != 0 or game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible or game.trial.jab_time >= 0: return
+	if game.world not in [0,1] or game.flight != 0 or game.earth_transition or game.menu_open() or game.hud.help.visible or game.trial.jab_time >= 0: return
 	if game.mining_target >= 0: game.cancel_mining()
 	game.story.cancel_work()
+	game.frost_story.cancel_work()
 	game.clear_touch_gestures()
 	game.walking = false
 	game.restore_walk_visual()
@@ -93,8 +109,9 @@ func open() -> void:
 	game.refresh_ui()
 
 func present() -> void:
-	summary.text = "%d / %d story quests complete · Select a title for details · Progress lasts while this game is open" % [game.missions.completed(),game.story.entries().size()]
-	var entries: Array = game.missions.entries()
+	rebuild()
+	summary.text = "%d / %d story quests complete · Select a title for details · Progress lasts while this game is open" % [game.quest_completed(),game.quest_story_count()]
+	var entries: Array = game.quest_entries()
 	for i in entries.size():
 		marks[i].set_meta("done",entries[i].done)
 		marks[i].queue_redraw()
@@ -109,7 +126,7 @@ func present() -> void:
 		headers[i].tooltip_text = ("Collapse " if showing else "Expand ")+entries[i].title
 
 func toggle(index: int) -> void:
-	var entry: Dictionary = game.missions.entries()[index]
+	var entry: Dictionary = game.quest_entries()[index]
 	expanded[entry.id] = not expanded.get(entry.id,false)
 	present()
 

@@ -15,7 +15,7 @@ This backlog reviews the complete 6:22 transcript, `Sunny Scout — Planet Adven
 - Add directional sword/combat animation. Preserve a deposit’s mining progress when leaving to deal with an enemy.
 - Try enemies emerging in response to mining, and put multiple objectives, including the drill and sword, inside a brass mission panel.
 - Wood gathering/tree chopping and a material recipe for the sword were suggested; the harvesting method and costs are still open.
-- Later: chasing yetis on Frost Canyon, tougher opponents on later planets, new weapon/mining upgrades per world, fishing and camp cooking. The third planet’s enemy was not chosen.
+- Frost Canyon now has Snow Sprite quests, yetis and crystal equipment: see [the frozen adventure guide](FROZEN_ADVENTURE.md). Later: Ember Dunes enemies/characters, fishing and camp cooking. The third planet’s enemy was not chosen.
 
 **Earth task list, in suggested working order**
 

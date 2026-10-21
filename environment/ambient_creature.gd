@@ -146,6 +146,10 @@ func rest() -> void:
 	rest_seconds = rng.randf_range(0.7,1.8) if kind == Kind.BAT else rng.randf_range(1.5,4.0)
 
 func advance(delta: float) -> void:
+	var chill: float = get_meta("frost_slow",0.0)
+	if chill > 0:
+		set_meta("frost_slow",maxf(0,chill-delta))
+		delta *= 0.55
 	if state == "gone": return
 	if hostile and (not hostile_active() or game.trial.blocked()): return
 	if state in ["flee","puff"]:

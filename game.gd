@@ -44,6 +44,9 @@ var missions: EARTH_MISSIONS
 var mission_journal: MISSION_JOURNAL
 const EARTH_STORY = preload("res://environment/earth_story.gd")
 var story: EARTH_STORY
+const FROST_STORY = preload("res://environment/frost_story.gd")
+const FROST_ART = preload("res://environment/frost_art.gd")
+var frost_story: FROST_STORY
 const PLANET_NAMES := CATALOG.NAMES
 const LAVA_ENVIRONMENT: PackedScene = preload("res://environment/lava_mine.tscn")
 const DESERT_ART: Texture2D = preload("res://assets/desert_planet.png")
@@ -268,6 +271,9 @@ func _ready() -> void:
 	story = EARTH_STORY.new()
 	story.game = self
 	add_child(story)
+	frost_story = FROST_STORY.new()
+	frost_story.game = self
+	add_child(frost_story)
 	missions = EARTH_MISSIONS.new()
 	missions.game = self
 	mission_journal = MISSION_JOURNAL.new()
@@ -330,7 +336,7 @@ func talk_to_rowan() -> void:
 func nearest_npc() -> HUMAN_NPC:
 	var closest: HUMAN_NPC
 	var distance := 100.0
-	for npc in npcs:
+	for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else []):
 		if not is_instance_valid(npc) or npc.is_queued_for_deletion() or not npc.can_talk(): continue
 		var candidate := player.distance_to(npc.position)
 		if candidate < distance:
@@ -386,14 +392,14 @@ func present_character_messages(flying: bool) -> void:
 		if character_bubble.show_hint(pending_hint,scout,Vector2(0,-70)):
 			pending_hint = ""
 	elif character_bubble.mode == CHARACTER_BUBBLE.Mode.CLOSED:
-		for npc in npcs:
+		for npc in npcs+(frost_story.npcs if is_instance_valid(frost_story) else []):
 			if not is_instance_valid(npc) or npc.greeted or not npc.is_visible_in_tree() or player.distance_to(npc.position) >= 160: continue
 			if character_bubble.show_hint(npc.greeting_text(),npc,Vector2(0,-npc.height)):
 				npc.greeted = true
 				break
 
 func at_workbench() -> bool:
-	return not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
+	return world == 0 and not underground and has_base() and player.distance_to(camp_position()) < 140 and flight == Flight.IDLE and not earth_transition
 
 func craft_item(recipe: String) -> bool:
 	if not camp_menu.visible or not at_workbench(): return false
@@ -641,6 +647,7 @@ func face_direction(direction: Vector2) -> void:
 			facing_left = false
 
 func restore_walk_visual() -> void:
+	scout.material = null
 	var carrying_sword: bool = is_instance_valid(trial) and trial.sword_equipped()
 	scout.sprite_frames = DRILL_VISUAL.WALK[int(world > 0)] if upgraded and not carrying_sword else (MINER_FRAMES if world == 0 else SCOUT_FRAMES)
 	scout.animation = StringName(("walk_" if walking else "idle_") + str(facing))
@@ -653,9 +660,14 @@ func restore_walk_visual() -> void:
 		scout.scale = Vector2.ONE * 0.15
 		scout.offset = Vector2(0,-145)
 
+	if is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded and not carrying_sword: FROST_ART.fit_drill(scout,facing)
+
 func move_player(direction: Vector2, delta: float) -> void:
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
+	if is_instance_valid(frost_story) and frost_story.working():
+		if direction.is_zero_approx(): return
+		frost_story.cancel_work()
 	if is_instance_valid(story) and story.working():
 		if direction.is_zero_approx(): return
 		story.cancel_work()
@@ -851,6 +863,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func space_action() -> void:
 	if trial.blocked() or trial.jab_time >= 0: return
+	if frost_story.working():
+		frost_story.cancel_work()
+		refresh_ui()
+		return
+	var frozen_prop := frost_story.nearest_prop()
+	# Guarded rock keeps Space as combat until its guardian is defeated.
+	if not frozen_prop.is_empty() and (frozen_prop != "cache" or (frost_story.guardian_cleared() and trial.selected_tool == 0)):
+		if cooldown > 0: return
+		cooldown = 0.3
+		frost_story.use_prop(frozen_prop)
+		refresh_ui()
+		return
 	if story.working():
 		story.cancel_work()
 		refresh_ui()
@@ -888,6 +912,10 @@ func nearest_rock() -> int:
 	return best
 
 func interact() -> void:
+	if is_instance_valid(frost_story) and frost_story.working():
+		frost_story.cancel_work()
+		refresh_ui()
+		return
 	if flight != Flight.IDLE or earth_transition or menu_open():
 		return
 	if trial.is_active() and (hud.help.visible or trial.jab_time >= 0): return
@@ -907,8 +935,10 @@ func interact() -> void:
 		open_planet_menu()
 	elif npc != null:
 		talk_to_npc(npc)
-	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
+	elif world == 0 and not underground and has_base() and player.distance_to(camp_position()) < 140:
 		camp_menu.open()
+	elif frost_story.use_prop(frost_story.nearest_prop()):
+		pass
 	elif is_instance_valid(story) and story.use_prop(story.nearest_prop()):
 		pass
 	elif is_instance_valid(wood_supplies) and wood_supplies.collect_nearby():
@@ -974,6 +1004,7 @@ func update_mining_visual() -> void:
 		scout.offset.x += sin(mining_elapsed * 95) * 0.6 / scout.scale.x
 
 func set_mining_pose(pose: int) -> void:
+	scout.material = null
 	scout.sprite_frames = DRILL_VISUAL.MINING[int(world > 0)] if upgraded else (MINER_MINE_FRAMES if world == 0 else MINE_FRAMES)
 	scout.animation = StringName("mine_" + str(facing))
 	scout.frame = pose
@@ -989,6 +1020,8 @@ func set_mining_pose(pose: int) -> void:
 		scout.offset = texture_size * 0.5 - anchor + Vector2(0,20.0 / 0.22)
 		if facing_left:
 			scout.offset.x = -scout.offset.x
+
+	if is_instance_valid(frost_story) and frost_story.crystal_drill and upgraded: FROST_ART.fit_drill(scout,facing)
 
 func advance_mining(delta: float) -> void:
 	if mining_target < 0:
@@ -1035,6 +1068,7 @@ func advance_mining(delta: float) -> void:
 			message = "Copper collected! %d / 5 for your upgrade." % ore if not upgraded else "More copper for your next adventure!"
 
 func mining_rate() -> float:
+	if is_instance_valid(frost_story) and frost_story.crystal_drill: return 1.666667
 	return 1.333333 if world == 0 and is_instance_valid(story) and story.drill_improved else 1.0
 
 func emit_impact(rock: Dictionary, finished: bool) -> void:
@@ -1064,6 +1098,7 @@ func refresh_ui() -> void:
 			if is_instance_valid(npc): npc.sync_area()
 		story.sync_area()
 		rocket.damaged = world == 0 and story.rocket_repair_required and not story.rocket_repaired
+	if is_instance_valid(frost_story): frost_story.sync_area()
 	if is_instance_valid(missions): missions.observe_area()
 	if is_instance_valid(rowan):
 		rowan.sync_area()
@@ -1101,7 +1136,9 @@ func refresh_ui() -> void:
 	var context := ""
 	var actionable := true
 	var npc := nearest_npc()
-	if story.working():
+	if frost_story.working():
+		context = "E / Space   Pause drilling · %.1fs" % (2-frost_story.work)
+	elif story.working():
 		context = "E / Space   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
 	elif mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
@@ -1110,8 +1147,10 @@ func refresh_ui() -> void:
 		context = "E   Rocket needs repairs · talk to Nova" if world == 0 and not story.launch_ready() else "E   Choose a world"
 	elif npc != null:
 		context = "E   Talk to "+str(npc.name)
-	elif not underground and has_base() and player.distance_to(camp_position()) < 140:
+	elif world == 0 and not underground and has_base() and player.distance_to(camp_position()) < 140:
 		context = "E   Camp workbench"
+	elif not frost_story.nearest_prop().is_empty():
+		context = "E / Space   "+frost_story.prompt(frost_story.nearest_prop())
 	elif is_instance_valid(story) and not story.nearest_prop().is_empty():
 		context = ("E / Space   " if not story.space_usable_prop().is_empty() else "E   ")+story.prop_prompt(story.nearest_prop())
 	elif is_instance_valid(wood_supplies) and wood_supplies.nearest() >= 0:
@@ -1127,20 +1166,22 @@ func refresh_ui() -> void:
 			context = "Hand drill needed · build at camp"
 			actionable = false
 	var trial_active: bool = is_instance_valid(trial) and trial.is_active()
-	if trial_active and trial.sword_equipped() and npc == null and story.nearest_prop().is_empty() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
+	if trial_active and trial.sword_equipped() and npc == null and story.nearest_prop().is_empty() and frost_story.nearest_prop().is_empty() and nearest_rock() >= 0 and mining_target < 0 and wood_supplies.nearest() < 0 and player.distance_to(camp_position()) >= 140 and player.distance_to(ship_position()) >= 95:
 		context = "Select mining tool to mine"
 		actionable = false
 	hud.present({"world":world,"place":mine_name() if underground else regions().NAMES[current_region()], "inventory":inventory,
+		"all_materials":[ore,blue_crystals,frost_ore,amethysts,gold_ore,rubies,trial.wood],
 		"upgraded":upgraded,"objective":objective,"context":context,"actionable":actionable,
 		"flying":flying,"menu":menu_open(),"mining":mining_target >= 0,"message":message,
 		"trial_active":trial_active,"health":trial.health if is_instance_valid(trial) else 10,
 		"wood":trial.wood,"sword_owned":trial.sword_owned,"earth_explored":earth_visited.size(),
 		"earth_next":missions.next_hint() if is_instance_valid(missions) and world == 0 else "",
 		"improved_drill":story.drill_improved,"improved_sword":story.sword_improved,
+		"frostfang":frost_story.frostfang,"crystal_drill":frost_story.crystal_drill,"quests_available":world in [0,1],
 		"rowan_mission":rowan.mission != ROWAN.Mission.NOT_STARTED,"rowan_complete":rowan.mission == ROWAN.Mission.COMPLETE,
 		"rowan_title":ROWAN.MISSION_TITLE,"rowan_progress":rowan.progress_text(),
 		"mining_reachable":mining_target >= 0 or nearest_rock() >= 0,
-		"space_object":wood_supplies.nearest() >= 0 or not story.space_usable_prop().is_empty(),
+		"space_object":wood_supplies.nearest() >= 0 or not story.space_usable_prop().is_empty() or not frost_story.nearest_prop().is_empty(),
 		"selected_tool":trial.selected_tool if trial_active else 0,"defeated":trial.defeated if trial_active else 0,
 		"snake_count":trial.snakes.size() if trial_active else 0,"jabbing":trial.jab_time >= 0 if trial_active else false})
 	present_character_messages(flying)
@@ -1202,3 +1243,10 @@ func draw_mining_effects() -> void:
 			mining_fx.draw_line(particle.pos, particle.pos - particle.velocity.normalized() * 7, tint, 2)
 		else:
 			mining_fx.draw_circle(particle.pos, particle.size * (2.0 - tint.a), tint)
+
+func quest_entries() -> Array[Dictionary]:
+	return frost_story.entries() if world == 1 else missions.entries()
+func quest_story_count() -> int:
+	return frost_story.entries().size() if world == 1 else story.entries().size()
+func quest_completed() -> int:
+	return frost_story.entries().filter(func(e): return e.done).size() if world == 1 else missions.completed()

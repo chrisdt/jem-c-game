@@ -104,6 +104,10 @@ func move_towards(point: Vector2, speed: float, delta: float) -> void:
 		phase += motion.length()/78.0
 
 func advance(delta: float) -> void:
+	var chill: float = get_meta("frost_slow",0.0)
+	if chill > 0:
+		set_meta("frost_slow",maxf(0,chill-delta))
+		delta *= 0.55
 	if state == "gone": return
 	elapsed += delta
 	clock += delta
