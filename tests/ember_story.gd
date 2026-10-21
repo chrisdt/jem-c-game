@@ -10,6 +10,9 @@ func check(ok: bool, detail: String) -> void:
 func place(game, point: Vector2) -> void:
 	game.player = point
 	game.scout.position = point
+	game.camera.position = point
+	game.camera.reset_smoothing()
+	game.camera.force_update_scroll()
 	game.cooldown = 0
 	game.update_exploration()
 	game.refresh_ui()

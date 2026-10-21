@@ -5,8 +5,8 @@ const SCORPION = preload("res://environment/ember_scorpion.gd")
 const ORDER := ["sol","luma","brasa","orin"]
 const TITLES := ["A Cool Welcome","A Cure from the Oasis","Fire up the Sunforge","The Buried Observatory"]
 const PEOPLE := {
-	"sol":{"region":0,"foot":Vector2(1230,1010)},
-	"luma":{"region":2,"foot":Vector2(1050,800)},
+	"sol":{"region":0,"foot":Vector2(1230,1130)},
+	"luma":{"region":2,"foot":Vector2(1060,900)},
 	"brasa":{"region":1,"foot":Vector2(1050,810)},
 	"orin":{"region":3,"foot":Vector2(1000,720)},
 }
@@ -14,7 +14,7 @@ const PROPS := {
 	"cooler_dune":{"region":1,"cave":false,"foot":Vector2(650,750),"cell":2,"width":32.0},
 	"cooler_oasis":{"region":2,"cave":false,"foot":Vector2(850,800),"cell":2,"width":32.0},
 	"cooler_arch":{"region":3,"cave":false,"foot":Vector2(780,690),"cell":2,"width":32.0},
-	"station_camp":{"region":0,"cave":false,"foot":Vector2(1230,1010),"cell":2,"width":58.0},
+	"station_camp":{"region":0,"cave":false,"foot":Vector2(1380,1140),"cell":2,"width":58.0},
 	"plant_oasis":{"region":2,"cave":false,"foot":Vector2(1300,690),"cell":3,"width":33.0},
 	"plant_arch":{"region":3,"cave":false,"foot":Vector2(1350,730),"cell":3,"width":33.0},
 	"flask":{"region":0,"cave":true,"foot":Vector2(1100,650),"cell":4,"width":24.0},
