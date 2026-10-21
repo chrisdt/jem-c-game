@@ -1,4 +1,4 @@
-# Earth's neighbours and mission chain
+# Earth's neighbours and independent quests
 
 Six Earth characters currently offer quests in the main game. **The rocket works from a fresh start**, with no equipment or quest requirements. Nova’s final repair mission, her appearance and the engine-part pickup are temporarily disabled; no quest is marked complete to bypass travel. Saving remains deferred.
 
@@ -12,9 +12,16 @@ To restore the original seven-character repair chain for a later update, change 
 | Mara | Beside Old Quarry's rails and mine cart | **Better Tools:** spend 4 copper + 2 blue crystals to upgrade both tools together: 2 copper + 1 crystal per tool. |
 | Iris | Beside Sunstone Ridge's circular ruins | **The Old Expedition:** use the improved tools, defeat the designated ruins snake, drill open the expedition locker and report the discovery. Finds a damaged spacesuit and navigation unit. |
 | Finn | Grassy left bank below Willow Marsh's bridge | **Ready for Space:** recover the seal kit beside the Pinewood Trail campsite tent, bring the damaged suit and 2 fallen wood, and repair the suit. Receives a working suit; also receives the fuel regulator when rocket repairs are enabled. |
-| Nova (paused) | Beside the Landing Meadow rocket, appearing after Finn's suit repair | **Beyond Earth:** recover the engine component in Crystal Depths, fit all three unique rocket parts and complete launch checks. Repairs the rocket and unlocks travel. |
+| Nova (paused) | Beside the Landing Meadow rocket, visible when rocket repairs are enabled | **Beyond Earth:** recover the engine component in Crystal Depths, fit all three unique rocket parts and complete launch checks. Repairs the rocket and unlocks travel. |
 
 The compact Quests button replaces the old mission overlay. Its popup contains six active story quests (seven when rocket repairs are enabled) plus optional district/mine exploration, finding Buddy and trying a healing snack. Titles expand to show instructions and live progress; every row shows Complete or Incomplete. Touch supports expansion, swipe scrolling and Up/Down buttons. Completed missions remain complete after spending materials or handing in quest items. Completed quest characters fade into a short smoke puff and stay gone through area and planet changes. Rowan leaves after her accepted sword quest is crafted and the workbench closes; its completion message directs the player to Bea. Early crafting still counts when her quest is subsequently accepted. The journal keeps every completed quest and its next-step directions. Bea's reviewed actor and position are retained, with B05/B06's encounter, persistent supply box and return now implemented.
+
+All active quests can be accepted and handed in independently. Physical
+requirements still apply: the quarry needs a hand drill, and the expedition
+locker needs reinforced or stronger imported tools. Reporting the discovery to
+Iris remains possible after Finn repairs the recovered suit. There is no
+requirement to finish Rowan before accepting Bea or to report the rockfall to
+Otis before upgrading with Mara.
 
 ## Budget and upgrades
 

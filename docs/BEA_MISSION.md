@@ -15,7 +15,7 @@ Bea** appears, then press **E** or tap the action. E / Enter / Next advances;
 Escape / × closes. Her introduction stays until completed, she remembers the
 conversation during the current session, and return visits give a short reminder
 based on your sword/drill equipment. Her greeting appears once without blocking
-walking. After crafting a sword, Bea offers the supply-box mission.
+walking. Bea offers the supply-box mission independently of Rowan and sword ownership.
 
 ## Character and placement
 
@@ -43,10 +43,9 @@ captures in [the concept folder](concepts/bea-v1/README.md).
 the box and return it to her. This introduces a short combat objective followed
 by a persistent world pickup and a return conversation.
 
-- **Before accepting:** require ownership of the copper sword. If Scout has no
-  sword, Bea suggests Rowan and the camp workbench. Keep exploration and normal
-  crafting available. Already-crafted swords count, including those crafted
-  before meeting Rowan.
+- **Before accepting:** no prior quest or sword is required. Bea recommends
+  Rowan and the camp workbench for a stronger sword; the pick can also defeat
+  the designated snake. Genuine supply-box recovery is still required.
 - **Accept:** use the existing paged character bubble with an explicit
   **Accept mission** action. Closing the conversation does not accept.
 - **Encounter:** use Pinewood's existing second snake, with preferred spawn
@@ -78,7 +77,7 @@ The quarry obstruction belongs to Otis's linked mission. The full Earth story im
 | State | Short pages / action |
 | --- | --- |
 | Greeting | “Could you lend a hand with some lost supplies?” |
-| No sword | “There's a snake near my supply box. Rowan at camp can help you prepare a copper sword.” / **Done** |
+| No sword | Optional Rowan/camp sword advice / **Accept mission** |
 | Offer, page 1 | “A snake's guarding my supply box beside the fallen tree.” |
 | Offer, page 2 | “Deal with the snake, recover the box and bring it back to me.” / **Accept mission** |
 | Snake still alive | “The snake near the box is still there. Keep your sword ready and watch its warning before it strikes.” |

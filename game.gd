@@ -908,7 +908,7 @@ func space_action() -> void:
 		return
 	var frozen_prop := frost_story.nearest_prop()
 	# Guarded rock keeps Space as combat until its guardian is defeated.
-	if not frozen_prop.is_empty() and (frozen_prop != "cache" or (frost_story.guardian_cleared() and trial.selected_tool == 0)):
+	if not frozen_prop.is_empty() and not frozen_prop.begins_with("trail_") and (frozen_prop != "cache" or (frost_story.guardian_cleared() and trial.selected_tool == 0)):
 		if cooldown > 0: return
 		cooldown = 0.3
 		frost_story.use_prop(frozen_prop)
@@ -1098,12 +1098,12 @@ func advance_mining(delta: float) -> void:
 			if rock.hard: rubies += 1
 			else: gold_ore += 1
 			desert_won = gold_ore >= 3 and rubies >= 1
-			message = "DESERT MISSION COMPLETE! You found gold and fire ruby!" if desert_won else "Desert mission: %d / 3 gold, %d / 1 fire ruby." % [gold_ore,rubies]
+			message = material_name(rock)+" collected! Open Quests for recipe requirements."
 		elif world == 1:
 			if rock.hard: amethysts += 1
 			else: frost_ore += 1
 			ice_won = frost_ore >= 3 and amethysts >= 1
-			message = "FROST MISSION COMPLETE! You found frost ore and amethyst!" if ice_won else "Frost mission: %d / 3 frost ore, %d / 1 amethyst." % [frost_ore,amethysts]
+			message = material_name(rock)+" collected! Open Quests for recipe requirements."
 		elif rock.hard:
 			blue_crystals += 1
 			won = blue_crystals >= 1

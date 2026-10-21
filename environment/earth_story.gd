@@ -33,6 +33,7 @@ var quarry_open := false
 var drill_improved := false
 var sword_improved := false
 var damaged_suit := false
+var locker_recovered := false
 var navigation_part := false
 var seal_kit := false
 var suit_ready := false
@@ -66,9 +67,15 @@ func done(role: String) -> bool:
 
 func available(role: String) -> bool:
 	if role == "nova" and not rocket_repair_required: return false
-	if role == "bea": return game.trial.sword_owned
-	var index := ORDER.find(role)
-	return index <= 0 or done(ORDER[index-1])
+	return role in ORDER
+
+func expedition_found() -> bool:
+	# Finn repairs the suit and Nova uses the navigation unit. Reporting the
+	# discovery to Iris must remain possible after either handoff.
+	return locker_recovered or ((damaged_suit or suit_ready) and (navigation_part or rocket_repaired))
+
+func locker_tools_ready() -> bool:
+	return (drill_improved or game.frost_story.crystal_drill or game.ember_story.magma_drill) and (sword_improved or game.frost_story.frostfang or game.ember_story.sunfang)
 
 func launch_ready() -> bool:
 	return not rocket_repair_required or (rocket_repaired and drill_improved and sword_improved and suit_ready)
@@ -87,14 +94,13 @@ func action(role: String) -> String:
 	if not available(role): return "Done"
 	match role:
 		"bea":
-			if not game.trial.sword_owned: return "Done"
 			if cache_held: return "Return supplies"
 		"otis":
 			if quarry_open: return "Complete mission"
 		"mara":
 			if game.upgraded and game.trial.sword_owned and game.ore >= 4 and game.blue_crystals >= 2: return "Upgrade both tools"
 		"iris":
-			if damaged_suit and navigation_part: return "Report discovery"
+			if expedition_found(): return "Report discovery"
 		"finn":
 			if damaged_suit and seal_kit and game.trial.wood >= 2: return "Repair spacesuit"
 		"nova":
@@ -105,22 +111,19 @@ func pages(role: String) -> Array[String]:
 	if done(role):
 		return [closing(role)]
 	if not available(role):
-		var prior: String = ORDER[ORDER.find(role)-1]
-		if role == "nova": return ["I'd love to explore other planets with you. This rocket needs repairs first.","Help our Earth neighbours prepare your tools and spacesuit. I'll be here when you're ready."]
-		return ["Let's finish %s's job first: %s. Then I can help with the next step." % [prior.capitalize(),TITLES[prior]]]
+		return []
 	match role:
 		"bea":
-			if not game.trial.sword_owned: return ["There's a snake near my supply box. Rowan at camp can help you prepare a copper sword."]
 			if cache_held: return ["You found my supplies! Shall we put them back to work on the woodland trail?"]
 			if snake_cleared(1,1): return ["The snake near the fallen tree is gone. Recover my tied wooden box just northwest of here, then bring it to me."]
-			return ["A snake is guarding my supply box beside the fallen tree.","Deal with that snake, recover the tied box and bring it back. Watch its warning before you jab."]
+			return ["A snake is guarding my supply box beside the fallen tree.","Deal with that snake, recover the tied box and bring it back. Watch its warning before you jab."+(" Your pick works too; Rowan at camp can help you craft a stronger sword for 3 copper and 2 wood." if not game.trial.sword_owned else "")]
 		"otis":
 			if quarry_open: return ["The quarry trail is open! Mara is beside the rails and mine cart in Old Quarry."]
 			return ["That rockfall blocks the quarry trail. A starter pick won't shift it.","Build the hand drill at camp for 5 copper, then use it on the rocks. There's enough copper on this side of the quarry."]
 		"mara":
 			return ["Hard rock calls for better tools. I'll reinforce your drill and copper sword.","Bring 4 copper and 2 blue crystals in total: 2 copper and 1 crystal for each upgrade. Your drill will be faster and your sword stronger.","You have %d/4 copper and %d/2 blue crystals. Find crystal in Earth's three mines." % [mini(game.ore,4),mini(game.blue_crystals,2)]]
 		"iris":
-			if damaged_suit and navigation_part: return ["An old spacesuit and a navigation unit! Finn can repair the suit beside Willow Marsh's bridge."]
+			if expedition_found(): return ["You found the old expedition locker! Thank you for recovering its spacesuit and navigation unit."]
 			return ["There's an expedition locker at the circular ruins. A snake has made its home nearby.","With Mara's upgraded tools, deal with the ruins snake and drill open the locker. Bring me news of what you find."]
 		"finn":
 			return ["Let's make that old spacesuit safe for the journey.","Find my seal kit beside the campsite tent on Pinewood Trail. Bring it, the damaged suit and 2 fallen wood for the repair frame.",("You have %d/2 wood. I'll seal the suit and give you the recovered fuel regulator." if rocket_repair_required else "You have %d/2 wood. I'll seal the suit for your next adventure.") % mini(game.trial.wood,2)]
@@ -180,12 +183,11 @@ func finish(role: String, completed: bool) -> void:
 
 func progress_text(role: String) -> String:
 	if done(role): return "Complete"
-	if not available(role): return "Help "+ORDER[ORDER.find(role)-1].capitalize()+" first"
 	match role:
 		"bea": return "Return supplies to Bea" if cache_held else ("Recover the supply box" if snake_cleared(1,1) else "Snake · supplies · return")
 		"otis": return "Report to Otis" if quarry_open else ("Clear the rockfall" if game.upgraded else "Build hand drill · 5 copper")
 		"mara": return "%d/4 copper · %d/2 crystals" % [mini(game.ore,4),mini(game.blue_crystals,2)]
-		"iris": return "Report to Iris" if damaged_suit else "Search the ruins locker"
+		"iris": return "Report to Iris" if expedition_found() else "Search the ruins locker"
 		"finn": return "Seal kit · %d/2 wood" % mini(game.trial.wood,2)
 		"nova": return "Engine · navigation · regulator"
 	return "Talk to Rowan at camp"
@@ -212,7 +214,7 @@ func prop_exists(id: String) -> bool:
 	match id:
 		"supplies": return not cache_held and not done("bea")
 		"rockfall": return not quarry_open
-		"locker": return drill_improved and sword_improved and not damaged_suit and not done("iris") and not suit_ready
+		"locker": return locker_tools_ready() and not expedition_found() and not done("iris")
 		"seals": return not seal_kit and not suit_ready
 		"engine": return rocket_repair_required and not engine_part and not rocket_repaired
 	return false
@@ -358,7 +360,7 @@ func use_prop(id: String) -> bool:
 		"rockfall":
 			if not game.upgraded: hint = "The rockfall needs a hand drill. Craft one at camp for 5 copper."
 		"locker":
-			if not drill_improved or not sword_improved: hint = "Mara can upgrade both tools at Old Quarry before you open this locker."
+			if not locker_tools_ready(): hint = "Upgrade both tools with Mara at Old Quarry, or bring stronger tools from another planet."
 			elif not snake_cleared(3,1): hint = "Deal with the snake at the ruins before opening the locker."
 		"seals": seal_kit = true
 		"engine":
@@ -384,6 +386,7 @@ func finish_prop(id: String) -> void:
 		"rockfall": quarry_open = true
 		"locker":
 			damaged_suit = true
+			locker_recovered = true
 			navigation_part = true
 		"engine": engine_part = true
 	dust.append({"pos":interaction_position(id),"time":0.0})

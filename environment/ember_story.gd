@@ -69,8 +69,7 @@ func fit_floor(preferred: Vector2, region: int, cave: bool) -> Vector2:
 	return Vector2.INF
 func done(role: String) -> bool: return complete.get(role,false)
 func available(role: String) -> bool:
-	var index: int = ORDER.find(role)
-	return index == 0 or done(ORDER[index-1])
+	return role in ORDER
 func fragments() -> int:
 	return int(collected.has("cooler_dune"))+int(collected.has("cooler_oasis"))+int(collected.has("cooler_arch"))
 func action(role: String) -> String:
@@ -89,7 +88,7 @@ func action(role: String) -> String:
 	return "Accept quest" if not accepted.get(role,false) else "Done"
 func pages(role: String) -> Array[String]:
 	if done(role): return [closing(role)]
-	if not available(role): return ["Help "+ORDER[ORDER.find(role)-1].capitalize()+" first. The rocket is always ready: explore or fly anywhere while you prepare."]
+	if not available(role): return []
 	match role:
 		"sol": return ["I'm Sol. Welcome to Ember Dunes, home of the Sunstone Folk! Our camp cooling station needs three parts.","Find them in Dune Sea, Sunken Oasis and Redrock Arches. Bring them here and we'll make a safe place to rest.","Watch for alien scorpions! A raised tail warns of a venom sting. Dodge while it aims. Camp shade clears venom; the repaired cooler also restores hearts."]
 		"luma": return ["I'm Luma. Oasis glowleaf can stop scorpion venom!","Find two glowleaf plants: one in Sunken Oasis, one in Redrock Arches. Bring the empty flask from Lava Mine below Mesa Camp.","I'll make an antidote canteen with three doses. Press 3 or tap its icon while poisoned. Refill it at Sol's repaired cooling station."]
@@ -138,7 +137,7 @@ func entries() -> Array[Dictionary]:
 	for i in ORDER.size():
 		var role: String = ORDER[i]
 		var progress: String = ["%d / 3 cooling parts" % fragments(),"%d / 2 glowleaf · %s" % [int(collected.has("plant_oasis"))+int(collected.has("plant_arch")),"flask found" if collected.has("flask") else "find flask"],"%s · %s · %d gold / %d fire rubies" % ["Sunfang built" if sunfang else "Sunfang pending","Magma Drill built" if magma_drill else "Magma Drill pending",game.gold_ore,game.rubies],"Return the star map" if observatory_open else "Magma Drill · guardian · cooled lava"][i]
-		if not available(role): progress = "Help "+ORDER[i-1].capitalize()+" first"
+		if not done(role) and action(role) not in ["Done","Accept quest"]: progress = "Ready · return to "+role.capitalize()
 		result.append({"id":"ember_"+role,"title":role.capitalize()+" · "+TITLES[i],"detail":closing(role) if done(role) else details[i],"progress":progress,"done":done(role)})
 	return result
 func prop_exists(id: String) -> bool:

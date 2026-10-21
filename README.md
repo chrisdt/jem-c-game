@@ -8,6 +8,11 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 **Speedruns and shared best times:** finish the 14 story quests across all three worlds, then post a nickname to the leaderboard. The welcome screen offers a speedrun, relaxed play and best times. Enemy defeats are bonus statistics; optional Earth challenges stay optional. A small PHP endpoint stores a JSON text file on the host—no database or game-progress saving. [Rules and hosting setup](docs/SPEEDRUN_LEADERBOARD.md).
 
+Story quests can be accepted and handed in independently on every world when
+their actual item/equipment requirements are met. Nix no longer waits for Pip;
+his heart-crystal is at the centre of Prism Pass's ruined stone circle. Frost
+upgrade dialogue and the quest journal identify missing unique items and tools.
+
 **Ember Dunes now has Sunstone Folk and four quests:** repair Sol's cooling station, make Luma's antidote, forge Brasa's **Sunfang Sword and Magma Drill**, and recover Orin's ancient star map. Directional alien scorpions warn before venom stings and disappear in sandy puffs. [Desert playtest guide, recipes and controls](docs/EMBER_ADVENTURE.md).
 
 **Frost Canyon now has four Snow Sprite quests:** Pip restores the aurora trail, Nix forges the Frostfang Sword, Tavi fits the Crystal Drill and Eira recovers an expedition keepsake. Yeti encounters warn before dealing one and a half hearts, and disappear in snowy puffs when defeated. The rocket remains free to use. [Frozen playtest guide and exact recipes](docs/FROZEN_ADVENTURE.md).

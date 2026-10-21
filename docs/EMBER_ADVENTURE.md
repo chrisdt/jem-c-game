@@ -11,7 +11,9 @@ Canyon retain their separate quest lists.
 | Brasa, Dune Sea | Fire up the Sunforge | Recover the core in Sunfire Cavern. Bring an owned sword, **3 gold + 1 fire ruby** for Sunfang, and a hand drill, **4 gold + 1 fire ruby** for the Magma Drill. Talk once for each upgrade. |
 | Orin, Redrock Arches | The Buried Observatory | Use the Magma Drill to break cooled lava in Obsidian Rise, defeat its guardian scorpion and return the ancient star map. |
 
-The four quests progress in this order. Unique items can be collected early and
+All four quests can be accepted and handed in independently when their actual
+requirements are met. Orin needs the Magma Drill, but does not wait for Brasa's
+sword upgrade. Unique items can be collected early and
 are never consumed by cancelling a conversation. Brasa's completed recipe stops
 appearing; his quest finishes when both tools are built. The five surfaces and
 three mines provide **13 gold and 3 fire rubies**, covering the combined **7 gold

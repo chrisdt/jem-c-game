@@ -14,7 +14,6 @@ func greeting_text() -> String:
 	return "Could you lend a hand with some lost supplies?"
 
 func pages() -> Array[String]:
-	if not game.trial.sword_owned: return ["There's a snake near my supply box. Rowan at camp can help you prepare a copper sword: 3 copper and 2 fallen wood."]
 	return game.story.pages("bea")
 
 func final_action() -> String:

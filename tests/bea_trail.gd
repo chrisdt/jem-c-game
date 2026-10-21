@@ -81,9 +81,10 @@ func run() -> void:
 	game.cooldown = 0
 	await key(KEY_E)
 	await key(KEY_E)
-	check(bubble.body_label.text.contains("Rowan") and bubble.final_action == "Done","A player without a sword has no camp guidance")
+	check(bubble.body_label.text.contains("Rowan") and bubble.final_action == "Accept mission","A player without a sword cannot accept Bea independently with optional camp guidance")
 	await key(KEY_E)
 	check(bea.introduced and not rowan.introduced and rowan.mission == rowan.Mission.NOT_STARTED,"Completing Bea's conversation changed Rowan's mission")
+	check(game.story.accepted.get("bea",false),"Accepting Bea before Rowan did not keep her quest")
 	check(game.ore == 0 and game.trial.wood == 0 and not game.trial.sword_owned,"Bea's introduction granted resources or equipment")
 	# The same context action supports touch and clears a thumb left on the pad.
 	game.hud.set_touch_mode(true)
@@ -118,6 +119,7 @@ func run() -> void:
 	game.interact()
 	await key(KEY_E)
 	check(rowan.mission == rowan.Mission.ACTIVE and not rowan.completion_seen,"Bea changed Rowan's active mission or ending")
+	bubble.dismiss()
 	# Use the real camp craft to check Bea's equipment-aware advice.
 	await TRAVEL.enter(game,0,false)
 	game.player = game.CAMP
@@ -130,7 +132,7 @@ func run() -> void:
 	await TRAVEL.enter(game,1,false)
 	approach(game,bea)
 	game.interact()
-	check(bubble.final_action == "Accept mission" and bubble.body_label.text.contains("supply box") and rowan.mission == rowan.Mission.COMPLETE,"Bea did not offer Woodland Supplies after the sword craft or Rowan lost completion")
+	check(bubble.final_action == "Done" and bubble.body_label.text.contains("supply box") and rowan.mission == rowan.Mission.COMPLETE,"Crafting a sword reset Bea's independently accepted quest or Rowan lost completion")
 	bubble.dismiss()
 	await TRAVEL.enter(game,1,true)
 	check(not bea.visible and not bea.can_talk(),"Bea appeared inside Copper Hollow")

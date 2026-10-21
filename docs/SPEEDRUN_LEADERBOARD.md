@@ -7,7 +7,8 @@ tabs and later area loading count. Reloading or confirming R starts fresh.
 
 The finish line is **all 14 story quests**: six on Earth, four on Frost Canyon
 and four on Ember Dunes. Earth's four optional challenges do not block finishing;
-Nova's temporarily paused rocket repair quest is excluded. The rocket remains
+Nova's temporarily paused rocket repair quest is excluded. Story handoffs can
+be completed in any order once their real items and equipment are ready. The rocket remains
 available from the start. Defeated enemies and recoveries appear as bonus
 statistics, without changing the time ranking. Each defeated enemy counts once;
 scaring wildlife does not count as a defeat.

@@ -44,6 +44,7 @@ func gather(game) -> void:
 		check(game.mining_target == i,"Could not mine frozen material")
 		game.advance_mining(20)
 		check(rock.hp == 0,"Frozen material did not finish")
+		check(not game.message.contains("MISSION COMPLETE"),"Gathering minerals falsely claimed the story quest was complete")
 func approach(game, yeti, distance: float) -> Vector2:
 	for ray in 24:
 		var point: Vector2 = yeti.position+Vector2.from_angle(ray*TAU/24)*distance
