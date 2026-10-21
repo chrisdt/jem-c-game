@@ -1,6 +1,6 @@
-# Sunny Scout — Space gathering controls
+# Sunny Scout — Closed mine passages
 
-The complete browser game, exported with Godot 4.6.3 from source commit `99749aec20fdbaa100c63600fd44e7d037a581ea`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `cae2c71fa4a03e22ccec62b43941d780b7022b81`. The editable Godot project is on `main`.
 
 ## Upload
 
@@ -9,6 +9,13 @@ Download this branch with **Code → Download ZIP** and unzip it. Upload **every
 The intended site is https://playsunnyscout.com/play/. Publishing this build branch does not upload it to WP Engine. Manual deployment instructions are in `docs/DEPLOY_WPENGINE.md` on `main`. Reload the page after replacing the whole build; start a fresh session to see the new quest placements.
 
 ## This Earth update
+
+- Fixed the board texture crop to use Godot's actual imported texture dimensions. The size-limited wood texture previously left only tiny fragments and nails visible.
+- All 32 decorative timber openings across Moss Mine, Copper Hollow and Crystal Depths now have four full-width wood planks, X braces, nails and contact shadows.
+- Five natural rail workings in Moss Mine are closed with grounded rubble.
+- The three usable surface exits remain open. Exterior entrances and other planets are unchanged.
+
+Retains the preceding control, character and exploration updates below:
 
 - **Space / E** picks up nearby revealed wood and ready quest objects, with either the mining tool or sword equipped.
 - Space remains available for combat while a snake guards a supply box or locker. Hidden/out-of-range pickups and menus cannot bypass collection requirements.
@@ -56,6 +63,9 @@ Use landscape on iPad: a thumb pad handles movement; separate action, equipment 
 The illustrated loading screen, wooden signs, exploration mist, sparse randomized minerals, water/wildlife animation and bounded scenery streaming are retained. Review scenes/screenshots and test code are excluded from the playable export.
 
 ## Checked
+
+Boarding checks validate the real resized texture's opaque crop at 105 sample points, all 32 timber closures, five rubble closures, surface-exit clearance and Earth-only scope. Automatic mine entrance/exit tests pass. Full-game browser review uses the production 512-pixel wood import settings and includes all three mine overviews plus close-ups of timber and natural rail closures.
+
 
 The real-keyboard context test covers Space/E wood and quest pickups, both weapons, discovery/range/menu/help/held-key guards, protected-box combat, quest drilling requirements and retained work, mining and off-world behavior. The complete Earth campaign, combat, mission and touch-control checks also pass.
 
