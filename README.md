@@ -1,6 +1,6 @@
-# Sunny Scout — Painted Earth mines
+# Sunny Scout — Rocket ready from the start
 
-The complete browser game, exported with Godot 4.6.3 from source commit `2df21e567e3bc3d2a21be69fa2bdaa29bfb4b2d2`. The editable Godot project is on `main`.
+The complete browser game, exported with Godot 4.6.3 from source commit `69eca113534f5af001c3f4c6ef869caf3e229086`. The editable Godot project is on `main`.
 
 ## Upload
 
@@ -8,26 +8,20 @@ Unzip the download and upload **everything inside `build/web/`** to your website
 
 The intended site is https://playsunnyscout.com/play/. Publishing this branch does not upload it to WP Engine.
 
-## Painted mine backgrounds
+## Ready to explore
 
-- Moss Mine, Copper Hollow and Crystal Depths now have their permanently closed doorways painted directly into the existing background images.
-- The 32 timber closures follow their own frames' perspective and lantern lighting. Five natural rail workings in Moss Mine have integrated rubble.
-- The old separate boarding renderer is removed; no floating board or rockfall overlays are used for these decorative closures.
-- All three usable surface exits remain open. Source image dimensions and every pixel outside the local doorway edit areas are preserved, keeping the established map layout and walking boundaries aligned.
-- The initial pack contains Moss Mine; Copper Hollow and Crystal Depths retain their normal on-demand scenery loading. Upload the revised scenery JPGs as well as `index.pck` and `index.html`.
+The working camp rocket is available immediately. Approach it and press **E**, or tap the contextual action button on touch, to choose Earth, Frost Canyon or Ember Dunes. Takeoff, landing and return trips work without crafting or completing quests first.
 
-Other worlds and Earth quest props, including Otis's removable quarry rockfall, keep their existing behavior.
+Nova's rocket-repair quest, her appearance and the engine-part pickup are temporarily paused. Their code remains in the source: set `gameplay/rocket_repair_required=true` in `project.godot` and export again to restore the original repair chain and travel restrictions. Immediate travel grants no resources, equipment upgrades or quest completion.
+
+The six other Earth story quests remain available: Rowan, Bea, Otis, Mara, Iris and Finn. The Quests popup counts the six active quests and retains optional exploration. The welcome guide explains immediate rocket travel. Saving is deferred: progress lasts only while the current game is open; reload or confirmed reset starts fresh.
 
 ## Play
 
-**WASD / arrows** walks. **E / Space** picks up nearby revealed wood and ready quest objects with either weapon. Space stays an attack while a snake guards an object. With no ready pickup, **Space** attacks with the sword or mines nearby ore with the mining tool. Select the mining tool to drill quest objects; **E** talks and uses the camp workbench/rocket. **1** selects the mining tool, **2** selects the owned sword. **J / Quests** opens the expandable quest list. **R** asks before resetting.
+**WASD / arrows** walks. **E / Space** collects nearby revealed wood and ready quest objects. Space attacks while a snake guards an object; otherwise it attacks with the sword or mines nearby ore with the mining tool. Select the mining tool to drill quest objects; **E** talks and uses the camp workbench/rocket. **1** selects the mining tool; **2** selects the owned sword. **J / Quests** opens the expandable quest list. **R** asks before resetting.
 
-On touch, use the movement pad and the contextual action button; the separate Attack/Jab button remains available. The game is silent. Progress lasts for the current session; persistent saves are not part of this update.
-
-## Earth's adventure
-
-Talk to Rowan at camp, craft a sword for **3 copper + 2 wood**, and follow the seven quests through Bea, Otis, Mara, Iris, Finn and Nova. The hand drill costs **5 copper**. Repair the rocket and spacesuit to unlock travel. The Quests popup keeps instructions and completion state. Earth characters fade in with their shadows, give a short greeting wave, then puff away when their quests are complete. Sparse minerals, exploration mist, Buddy, wildlife, healing plants and mining progress remain available.
+On touch, use the movement pad and contextual action button; the separate Attack/Jab button remains available. The game is silent. Craft the sword for **3 copper + 2 wood** and the hand drill for **5 copper**. Earth characters fade in with contact shadows, wave on approach and puff away when their quests finish. Painted mine closures, wildlife, sparse minerals and exploration mist remain included.
 
 ## Checked
 
-Artwork checks verify all 37 local edits, original image sizes, the unchanged usable exits and exact preservation of all pixels outside the edit areas. The runtime overlay is absent. The Earth audit walks 30 routes both ways, checks all eight areas and 48 doorway/trail approaches. Automatic mine transitions, the complete quest chain and 200 expanded-Earth resource layouts with bounded scenery loading also pass. Eleven full-game browser views cover every mine overview and representative doorway/rubble/waterside close-ups, with no script or asset errors.
+Fresh-game keyboard and touch rocket access, both destination planets and return trips, resets, the absence of unearned rewards, six-quest journal counts and hidden repair content pass integration checks. The active six-quest story and retained seven-quest repair story both pass complete gathering/crafting playthroughs. Flight animation, touch controls, character presentation, object routes and mission/mining persistence also pass.
