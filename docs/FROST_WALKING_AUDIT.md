@@ -22,7 +22,7 @@ planets retain their previous behavior.
 
 ## Coverage
 
-The focused audit passes **27 artwork routes walked in both directions**, **9,580
+The focused audit passes **30 artwork routes walked in both directions**, **9,910
 real player-movement steps**, **30 trail approaches** and **18 mine approaches**.
 Every sampled floor point connects to its area's arrival through swept movement;
 no isolated samples remain. Explicit positive/negative checks cover the frozen
@@ -37,7 +37,7 @@ pools, bridge, heart-crystal landmark, mine pillars, central islands and water.
 | Prism Pass | 1830 | 1830 |
 | Aurora Shelf | 2000 | 2000 |
 | Glacier Crown | 1970 | 1970 |
-| Glacier Crown mine | 938 | 938 |
+| Glacier Crown mine | 1020 | 1020 |
 
 The eight maps include Canyon Camp, Frozen Basin, Prism Pass, Aurora Shelf,
 Glacier Crown, Frost Mine, Blue Echo Mine and Deep Prism Mine. Each directed
@@ -67,3 +67,20 @@ failure recovery. Base-world ore tests cover a further 150 layouts.
 Machine-readable audit results are written to ignored
 `build/frost-navigation-audit.json`. Review scenes, screenshots and test scripts
 are excluded from the production Web export.
+
+## Deep Prism access correction
+
+The first audit reached the northeast chamber on a diagonal route but missed the
+blocked direct stepped entrance. It also omitted the walkable stone shoreline
+along the pool. Both boundaries now include those approaches. Three additional
+routes cover the direct stair entrance, the lakeside path and its southern tip,
+walking each route in both directions. Those routes failed against the previous
+contour and pass with the correction. Negative samples keep the adjacent cliff
+face, central island and water blocked. All 12,103 sampled Frost floor points
+remain connected to their area arrivals.
+
+The compiled Web review walks from the Deep Prism arrival to each reported
+area, returns to the arrival, then visits it again using real player movement.
+All three browser routes passed (2,727 movement steps) with no browser errors.
+The final production pack also confirms the formerly blocked stair samples
+are walkable.

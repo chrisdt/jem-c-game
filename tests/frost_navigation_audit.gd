@@ -35,6 +35,9 @@ const ROUTES := [
 	[4,true,"deep prism western gallery",[Vector2(350,780),Vector2(420,730),Vector2(490,650),Vector2(580,550),Vector2(590,430),Vector2(620,360),Vector2(750,320),Vector2(880,310),Vector2(900,400),Vector2(950,490),Vector2(900,570),Vector2(750,580),Vector2(620,530),Vector2(590,430)]],
 	[4,true,"deep prism northwest chamber",[Vector2(620,360),Vector2(500,300),Vector2(400,260),Vector2(320,210)]],
 	[4,true,"deep prism northeast chamber",[Vector2(900,400),Vector2(1030,380),Vector2(1100,330),Vector2(1140,300),Vector2(1220,240)]],
+	[4,true,"deep prism direct stair entrance",[Vector2(1090,440),Vector2(1150,420),Vector2(1150,395),Vector2(1145,370),Vector2(1150,345),Vector2(1180,300),Vector2(1220,240)]],
+	[4,true,"deep prism lakeside path",[Vector2(900,570),Vector2(925,600),Vector2(950,620),Vector2(1000,610),Vector2(1050,615),Vector2(1075,615),Vector2(1100,590),Vector2(1180,580)]],
+	[4,true,"deep prism lakeside southern tip",[Vector2(950,620),Vector2(925,640),Vector2(900,665),Vector2(880,690),Vector2(870,715)]],
 ]
 var failures := 0
 var movement_samples := 0
@@ -160,6 +163,11 @@ func audit_landmarks() -> void:
 		[3,false,true,Vector2(800,730)],[3,false,false,Vector2(480,450)],[3,false,false,Vector2(1010,400)],
 		[4,false,true,Vector2(1240,800)],[4,false,true,Vector2(460,260)],[4,false,false,Vector2(770,570)],
 		[4,true,true,Vector2(620,360)],[4,true,false,Vector2(785,450)],[4,true,false,Vector2(1130,735)],
+		# The direct stairs and shoreline must be usable without opening the
+		# adjacent cliff faces, central island or water beneath the stone bank.
+		[4,true,true,Vector2(1150,395)],[4,true,true,Vector2(1075,615)],[4,true,true,Vector2(870,715)],
+		[4,true,false,Vector2(1200,400)],[4,true,false,Vector2(1000,675)],
+		[4,true,false,Vector2(1120,650)],[4,true,false,Vector2(900,770)],
 	]
 	for sample in samples:
 		check(can_walk(sample[0],sample[1],art_point(sample[0],sample[1],sample[3])) == sample[2],"Marked/unmarked Frost landmark disagrees: "+str(sample))
