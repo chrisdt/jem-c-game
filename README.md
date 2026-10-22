@@ -1,7 +1,7 @@
-# Sunny Scout — Earth surface walking update
+# Sunny Scout — Frost walking update
 
-Full browser game exported with Godot 4.6.3 from source commit `40f9b5280e9fbd10a03bc15f38fce87e989f5fdf`.
-Editable project: `main`. Build release: `2afd96958b524844f31c`.
+Full browser game exported with Godot 4.6.3 from source commit `b65c7da781b5b5125254e65e9c9bd8af70031726`.
+Editable project: `main`. Build release: `0f345f03e1f7306ded72`.
 
 ## Upload to WP Engine
 
@@ -23,19 +23,18 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Pinewood Trail, Willow Marsh, Sunstone Ridge and Old Quarry now follow the
-  supplied red walking-area markups. Landing Meadow and all three mine
-  markups remain included.
-- The marked bridge, fishing jetty, ruin interior, stone arch opening and
-  quarry pond ledge are usable. Unmarked rocks, forest, water, logs and
-  ruin walls are excluded. Red annotations are never displayed in play.
-- Quarry arrival clears the sign-side stones. Bea stands on adjacent clear
-  ground beside her log. Wood prefers grass and can rest on marked dirt or
-  stone, preserving all six crafting pickups with the new boundaries.
-- Checked 32 routes both ways, 14,995 connected Earth floor samples, 30 trail
-  approaches, 18 mine approaches, 200 randomized expanded-Earth ore layouts,
-  quest access, Buddy following, wildlife, healing plants and pickups.
-- Original background paintings and the other planets are unchanged.
+- All five Frost surface screens and all three Frost mines follow the supplied
+  red walking-area markups. Red is never displayed during play.
+- Marked frozen pools are walkable, including the small southwest Frozen Basin
+  pool and its approach. The canyon bridge and heart-crystal landmark connect
+  to the rest of their maps. Unmarked cliffs, rock islands and mine water stay
+  blocked.
+- Canyon Camp and Prism Pass west arrivals clear the unmarked rocks. Frost
+  trails and mine doors have wider, swept hit areas and safe return spawns.
+- Checked 27 routes both ways, 12,021 connected floor samples, 30 trail
+  approaches, 18 mine approaches, all four Frost quests, all quest/enemy
+  approaches, and 550 randomized ore layouts across the existing worlds.
+- Earth, Ember and the original background paintings retain their setup.
 
 ## Play and compete
 
