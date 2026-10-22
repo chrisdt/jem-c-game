@@ -1,7 +1,7 @@
-# Sunny Scout — Mission item icons
+# Sunny Scout — Frost trail cleanup
 
-Full browser game exported with Godot 4.6.3 from source commit `6fb97b33e0416db0b9ec77a040706b19f5e224c2`.
-Editable project: `main`. Build release: `66f32f40ab068cd3f6dd`.
+Full browser game exported with Godot 4.6.3 from source commit `45b4482639d7637ba6c36c757848d56628427f94`.
+Editable project: `main`. Build release: `1b7b3e88337a78518749`.
 
 ## Upload to WP Engine
 
@@ -23,16 +23,13 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Character mission dialogue now shows the matching item artwork in parentheses
-  beside requested materials, equipment and collectible names across Earth,
-  Frost Canyon and Ember Dunes. Quantities and item names stay readable.
-- Uses the same artwork as pickups and equipment, including beacon fragments,
-  the heart-crystal, power coupling, Sunforge core, glowleaf and empty flask.
-- Dialogue measures wrapped text and icons together to keep recipes clear of
-  the buttons. Keyboard, touch, quest offers and cancellation remain supported.
-- Verified 78 actual mission pages in keyboard/touch layouts, character bubble
-  input, Rowan/Bea and all Frost/Ember quest flows, plus nine browser views.
-- Includes previous world, mine creature, mining and controls improvements.
+- Removed Canyon Camp's short dead-end footprint spur below the right-facing
+  sign near the mine. Blended the area with matching snow using a local retouch.
+- Verified that pixels outside the small edited area are unchanged, preserving
+  the main walking trails, mine approach, cliffs and connected crossroads.
+- Checked the retouched background in the browser and exported all 31 assets.
+- Includes the mission item icons in dialogue across all three worlds and all
+  previous world, mine creature, mining and controls improvements.
 
 ## Play and compete
 
