@@ -1,7 +1,7 @@
-# Sunny Scout — Redrock passage fix
+# Sunny Scout — Controls guide update
 
-Full browser game exported with Godot 4.6.3 from source commit `f22e7ce9f3bb1d80c7bc4ab973b5626144c83b1d`.
-Editable project: `main`. Build release: `cdbf9b42a10925971d2b`.
+Full browser game exported with Godot 4.6.3 from source commit `004665176243564d98040a9cd0fab0aa4af341cf`.
+Editable project: `main`. Build release: `43ed060982d0bc269340`.
 
 ## Upload to WP Engine
 
@@ -23,16 +23,17 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Opens the clear sandy passage between the cactus beds below Redrock Arches'
-  east trail. The previous walking boundary cut across the visible ground;
-  it now follows the cactus and rock edges so players can walk down and back up.
-- Two new regression routes cover straight approaches through the passage.
-  All 32 desert artwork routes pass both ways, with 14,655 connected floor
-  samples, 30 trail approaches, 18 mine approaches and reachable quest objects.
-- Chromium walks down, back up and down again on three lanes across the
-  corrected passage. Both cactus beds and the adjoining rocks remain blocked.
-- Includes the frozen-pond cache and guardian, matching Prism Pass exit trail,
-  refreshed beacon artwork and previous Earth, Frost and Ember updates.
+- The welcome screen is now a concise How to Play guide. It lists movement,
+  mine/trail entrances, E interaction, E/Space gathering and mining, equipment
+  keys 1/2, Space attacks, antidote key 3, Quests J, help, restart and Escape.
+- Phones and tablets see touch instructions for the movement pad, action,
+  equipment slots, attacks, antidote and menus. The speedrun goal and rules
+  stay in a short footer beside the existing play and leaderboard choices.
+- Startup checks cover keyboard/touch starts, one-time loading and restored
+  gameplay sizing. Chromium review covers keyboard and touch guides at normal,
+  wide and portrait sizes, with no browser errors.
+- Includes the Redrock passage fix, frozen-pond guardian encounter, matching
+  Prism Pass exit trail, refreshed beacon artwork and previous world updates.
 
 ## Play and compete
 
