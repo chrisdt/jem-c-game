@@ -1,7 +1,7 @@
-# Sunny Scout — Ember walking update
+# Sunny Scout — Deep Prism access fix
 
-Full browser game exported with Godot 4.6.3 from source commit `fe379c4f0b7857dac4a16a55d166aa5212f85936`.
-Editable project: `main`. Build release: `3bfc1e3c34050d539a9c`.
+Full browser game exported with Godot 4.6.3 from source commit `0c30ba8bd9a9d8ac0aeb4b1deda2927d760234cc`.
+Editable project: `main`. Build release: `41723d973d09d80a3f9a`.
 
 ## Upload to WP Engine
 
@@ -23,19 +23,18 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- All five Ember surface screens and all three Ember mines follow the supplied
-  walking-area markups. Red annotations are never displayed during play.
-- Magma Vault uses the edited background with the diagonal rock barrier removed,
-  leaving a broad clear junction. Its remaining rock ridges, pillars and lava
-  stay blocked. The raised rock above the Lava Mine bridge also stays blocked,
-  as requested; the bridge connects both galleries.
-- Dune Sea's mine return clears the unmarked rock spur. Dune Sea and Sunken
-  Oasis trail triggers sit on the marked sand. Desert trails and mine doors
-  use wider swept hit areas with safe arrival positions.
-- Checked 30 routes both ways, 14,629 connected floor samples, 30 trail approaches,
-  18 mine approaches, all four desert quests, 600 randomized ore layouts and
-  all eight screens in Chromium. Quest items and Sunforge upgrades remain
-  reachable. Earth and Frost retain their existing setup.
+- Deep Prism Mine's direct stepped entrance now connects the main gallery to
+  the northeast chamber. The stone shoreline path is usable along the pool,
+  including its southern tip; the water and adjacent rock faces stay blocked.
+- Three regression routes reproduce the reported blocked approaches against
+  the previous contour and pass with the correction. All 30 Frost routes pass
+  in both directions, along with 12,103 connected floor samples, 30 trail
+  approaches, 18 mine approaches and all Snow Sprite/quest-item approaches.
+- Chromium walks from the mine arrival to each reported area, returns, and
+  visits it again: all three routes pass with no browser errors. The final
+  production pack also confirms the previously blocked stair points are open.
+- Includes the previous Earth, Frost and Ember walking-area updates and the
+  cleared Magma Vault background. This fix changes only Deep Prism navigation.
 
 ## Play and compete
 
