@@ -1,6 +1,7 @@
 extends RefCounted
 
 const PEOPLE: Texture2D = preload("res://assets/frozen/snow_sprites.png")
+const BEACON_FRAGMENT: Texture2D = preload("res://assets/frozen/beacon_fragment.png")
 const ITEMS: Texture2D = preload("res://assets/frozen/items.png")
 const YETI: Texture2D = preload("res://assets/frozen/yeti.png")
 const MINER_JAB: Texture2D = preload("res://assets/frozen/frost_jab.png")
@@ -25,6 +26,18 @@ static func texture(sheet: Texture2D, key: String, row: int, col: int) -> Textur
 static func person_cell(role: String, waving: bool) -> Rect2i:
 	return Rect2i(rect(metadata.snow_sprites[int(waving)][["pip","nix","tavi","eira"].find(role)].region))
 static func item(index: int) -> Texture2D:
+	if index == 2:
+		if not textures.has("beacon_fragment"):
+			var part := AtlasTexture.new()
+			part.atlas = BEACON_FRAGMENT
+			# Trim the dedicated illustration's transparent padding. Coordinates
+			# scale with the import size; no neighbouring sheet cells can bleed in.
+			var source_size := Vector2(1308,1203)
+			var scale := BEACON_FRAGMENT.get_size()/source_size
+			part.region = Rect2(Vector2(344,154)*scale,Vector2(652,904)*scale)
+			part.filter_clip = true
+			textures["beacon_fragment"] = part
+		return textures["beacon_fragment"]
 	return texture(ITEMS,"items",index/4,index%4)
 static func yeti_pose(row: int, frame: int) -> Dictionary:
 	var record: Dictionary = metadata.yeti[row][frame]

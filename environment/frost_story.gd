@@ -12,9 +12,9 @@ const PEOPLE := {
 	"eira":{"region":3,"foot":Vector2(1110,620)},
 }
 const PROPS := {
-	"beacon_west":{"region":1,"cave":false,"foot":Vector2(650,740),"cell":2,"width":46.0},
-	"beacon_east":{"region":2,"cave":false,"foot":Vector2(820,850),"cell":2,"width":46.0},
-	"beacon_aurora":{"region":3,"cave":false,"foot":Vector2(650,660),"cell":2,"width":46.0},
+	"beacon_west":{"region":1,"cave":false,"foot":Vector2(650,740),"cell":2,"width":42.0},
+	"beacon_east":{"region":2,"cave":false,"foot":Vector2(820,850),"cell":2,"width":42.0},
+	"beacon_aurora":{"region":3,"cave":false,"foot":Vector2(650,660),"cell":2,"width":42.0},
 	"trail_west":{"region":1,"cave":false,"foot":Vector2(650,740),"cell":6,"width":50.0},
 	"trail_east":{"region":2,"cave":false,"foot":Vector2(820,850),"cell":6,"width":50.0},
 	"trail_aurora":{"region":3,"cave":false,"foot":Vector2(650,660),"cell":6,"width":50.0},
@@ -205,8 +205,9 @@ func sync_area() -> void:
 		prop.offset = Vector2(-prop.texture.get_width()*0.5,-prop.texture.get_height()*0.85)
 		prop.scale = Vector2(spec.width/prop.texture.get_width(),spec.width/prop.texture.get_width()*0.72)
 		if id.begins_with("beacon_") or id == "heart_crystal":
-			prop.scale.y = prop.scale.x*0.85
+			prop.scale.y = prop.scale.x if id.begins_with("beacon_") else prop.scale.x*0.85
 			prop.offset.y = -prop.texture.get_height()
+		if id == "heart_crystal":
 			# A dark silhouette separates the brass/crystal outline from snow.
 			# It inherits the collectible's fog fade and disappears with it.
 			var outline := Sprite2D.new()
@@ -296,7 +297,10 @@ func _draw() -> void:
 		var alpha: float = props[id].modulate.a
 		draw_set_transform(props[id].position,0,Vector2(1,0.3))
 		var fragment: bool = id.begins_with("beacon_") or id == "heart_crystal"
-		draw_circle(Vector2.ZERO,23 if fragment else 17,Color(0.02,0.07,0.12,alpha*(0.32 if fragment else 0.15)))
+		var beacon: bool = id.begins_with("beacon_")
+		var radius := 17 if beacon or not fragment else 23
+		var opacity := 0.18 if beacon else (0.32 if fragment else 0.15)
+		draw_circle(Vector2.ZERO,radius,Color(0.02,0.07,0.12,alpha*opacity))
 		if fragment:
 			draw_set_transform(Vector2.ZERO)
 			var sparkle: Vector2 = props[id].position+Vector2(0.42,-0.65)*PROPS[id].width
