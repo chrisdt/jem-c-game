@@ -1,7 +1,7 @@
-# Sunny Scout — Deep Prism access fix
+# Sunny Scout — Frost beacon artwork update
 
-Full browser game exported with Godot 4.6.3 from source commit `0c30ba8bd9a9d8ac0aeb4b1deda2927d760234cc`.
-Editable project: `main`. Build release: `41723d973d09d80a3f9a`.
+Full browser game exported with Godot 4.6.3 from source commit `8b948948417a47f6d6785da4ad65714fbda18025`.
+Editable project: `main`. Build release: `da1bb506a07ec5d77942`.
 
 ## Upload to WP Engine
 
@@ -23,18 +23,14 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Deep Prism Mine's direct stepped entrance now connects the main gallery to
-  the northeast chamber. The stone shoreline path is usable along the pool,
-  including its southern tip; the water and adjacent rock faces stay blocked.
-- Three regression routes reproduce the reported blocked approaches against
-  the previous contour and pass with the correction. All 30 Frost routes pass
-  in both directions, along with 12,103 connected floor samples, 30 trail
-  approaches, 18 mine approaches and all Snow Sprite/quest-item approaches.
-- Chromium walks from the mine arrival to each reported area, returns, and
-  visits it again: all three routes pass with no browser errors. The final
-  production pack also confirms the previously blocked stair points are open.
-- Includes the previous Earth, Frost and Ember walking-area updates and the
-  cleared Magma Vault background. This fix changes only Deep Prism navigation.
+- Pip's three beacon fragments use a new dedicated crystal-and-brass prop
+  with a snow-dusted stone base, natural proportions and a softer ground shadow.
+  Removes the old heavy duplicate outline and stray neighbouring atlas fragment.
+- Checked the replacement on Frozen Basin, Prism Pass and Aurora Shelf in
+  Chromium with no browser errors. All four Frost quests still pass, including
+  real fragment pickups, beacon restoration and the equipment upgrade recipes.
+- Includes the Deep Prism stair-entrance and shoreline fixes, plus the previous
+  Earth, Frost and Ember walking updates and cleared Magma Vault background.
 
 ## Play and compete
 
