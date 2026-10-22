@@ -1,7 +1,7 @@
-# Sunny Scout — Landing Meadow walking update
+# Sunny Scout — Earth mine walking update
 
-Full browser game exported with Godot 4.6.3 from source commit `d293774f094564bbc928cae4b07f80b8917911fa`.
-Editable project: `main`. Build release: `fab09de2c7ec474ecf6a`.
+Full browser game exported with Godot 4.6.3 from source commit `185b53fc89cddb16d4f470978794b17f9b354746`.
+Editable project: `main`. Build release: `83815547dc466ece5132`.
 
 ## Upload to WP Engine
 
@@ -23,15 +23,16 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Landing Meadow walking now follows the supplied red-ground markup, including
-  the outer clearings and the approaches to Moss Mine and both signed trails.
-- Unpainted camp, water, rocky banks, boulders, shrubs and signs remain solid.
-  Sunny uses a small footprint at his feet and slides around solid boundaries.
-- The dog and enemies use the same marked ground. Existing grass/ore placement
-  remains separate; the red annotation is not visible in the game.
-- Checked 36 routes in both directions, all eight Earth areas, 30 trail
-  approaches and 18 mine approaches. No sampled floor remains disconnected.
-  Also checked 150 ore layouts, keyboard/touch startup and companion following.
+- Moss Mine, Copper Hollow and Crystal Depths now follow the supplied red
+  walking-area markups. Landing Meadow keeps its previous marked boundary.
+- Unpainted walls, pools, rock pillars and boarded doorways remain solid.
+  Moss Mine's two unmarked lower alcoves are closed to walking and spawning.
+- Mineral deposits leave room around their footprint so they cannot block a
+  narrow corridor and strand Buddy. Material quantities remain the same.
+- Checked 28 walking routes in both directions, every connected Earth floor
+  sample, all 18 mine entrance/exit approaches and all 30 trail approaches.
+  Also checked 150 landing ore layouts, 200 expanded-Earth layouts, quest
+  object access, Buddy following and mine combat. Source paintings are unchanged.
 
 ## Play and compete
 
