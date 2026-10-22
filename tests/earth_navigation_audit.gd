@@ -11,7 +11,7 @@ const GRID := 24.0
 const ROUTES := [
 	[0,false,"camp to mine",[Vector2(420,350),Vector2(560,450),Vector2(710,500),Vector2(900,430),Vector2(1040,350),Vector2(1100,320)]],
 	[0,false,"east and southern trails",[Vector2(1380,445),Vector2(1120,470),Vector2(760,515),Vector2(690,700),Vector2(740,835),Vector2(750,925)]],
-	[0,false,"pond rim",[Vector2(760,600),Vector2(840,560),Vector2(1000,565),Vector2(1100,625),Vector2(1120,780),Vector2(1020,845),Vector2(850,850),Vector2(750,800)]],
+	[0,false,"pond rim",[Vector2(760,600),Vector2(840,560),Vector2(1000,565),Vector2(1150,625),Vector2(1150,780),Vector2(1020,845),Vector2(850,850),Vector2(750,800)]],
 	[1,false,"full east-west trail",[Vector2(200,495),Vector2(500,530),Vector2(750,510),Vector2(1090,530),Vector2(1300,510)]],
 	[1,false,"campsite and mine approach",[Vector2(750,510),Vector2(650,360),Vector2(450,260),Vector2(315,220),Vector2(250,190)]],
 	[1,false,"mine and south trail",[Vector2(750,880),Vector2(750,650),Vector2(750,510),Vector2(950,380),Vector2(1085,285)]],
@@ -151,7 +151,11 @@ func audit_trails(game) -> void:
 			var gate: Vector2 = EARTH.portal(region,link.side)
 			var inward: Vector2 = {"west":Vector2.RIGHT,"east":Vector2.LEFT,"north":Vector2.DOWN,"south":Vector2.UP}[link.side]
 			var lateral := inward.orthogonal()
-			for offset in [-90.0,0.0,90.0]:
+			# The markup excludes the sign beside the east path and a shrub
+			# beside the south path. Probe clear ground beside those islands.
+			var offsets := [-90.0,0.0,90.0]
+			if region == 0: offsets[0] = -60.0 if link.side == "south" else -45.0
+			for offset in offsets:
 				await TRAVEL.enter(game,region,false)
 				game.story.quarry_open = true
 				game.mine_transition_cooldown = 0

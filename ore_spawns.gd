@@ -4,14 +4,15 @@ const MINE = preload("res://mine_layout.gd")
 const FROST = preload("res://frost_layout.gd")
 const DESERT = preload("res://desert_layout.gd")
 const DENSITY = preload("res://ore_density.gd")
+const LANDING = preload("res://landing_layout.gd")
 const GRID := 16.0
 const SPACING := 150.0
 const FOOTPRINT := [Vector2.ZERO, Vector2(-38,0), Vector2(38,0), Vector2(0,-20), Vector2(0,20)]
 const ART_BOUNDS := Rect2(-50,-52,100,86)
 const START_VIEW_MARGIN := 32.0
 
-# Open grass and paths in the painting. The cliff, border forest and southern
-# rock outcrops are outside this region; individual boulders are cut out below.
+# Conservative decoration/ore placement area, not the walking boundary.
+# Player, enemies and companion use LANDING's annotated ground instead.
 static var GREEN_GROUND := PackedVector2Array([
 	Vector2(110,260), Vector2(450,160), Vector2(720,170),
 	Vector2(770,300), Vector2(900,365), Vector2(1000,380),
@@ -83,7 +84,7 @@ static func can_walk(world: int, cave: bool, point: Vector2) -> bool:
 		return FROST.can_walk(point, cave)
 	if cave:
 		return MINE.can_walk(point)
-	return Rect2(90,180,1810,1110).has_point(point) and ((point - Vector2(1270,960)) / Vector2(173,117)).length_squared() >= 1
+	return LANDING.can_walk(point)
 
 static func footprint_fits(world: int, cave: bool, point: Vector2) -> bool:
 	for offset in FOOTPRINT:

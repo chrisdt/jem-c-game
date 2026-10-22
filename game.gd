@@ -8,6 +8,7 @@ const CAVE := Vector2(1480, 340)
 const MINE_EXIT := Vector2(150, 610)
 const MINE_SPAWN := Vector2(420, 620)
 const MINE_LAYOUT = preload("res://mine_layout.gd")
+const LANDING_LAYOUT = preload("res://landing_layout.gd")
 const MINE_ART: Texture2D = preload("res://assets/moss_mine.png")
 const SHIP := Vector2(240, 400)
 const FROST_LAYOUT = preload("res://frost_layout.gd")
@@ -720,8 +721,8 @@ func move_player(direction: Vector2, delta: float) -> void:
 		next = FROST_LAYOUT.move_on_floor(player,direction.normalized() * SPEED * delta,underground)
 	elif underground:
 		next = MINE_LAYOUT.move_on_floor(player, direction.normalized() * SPEED * delta)
-	elif ((next - Vector2(1270, 960)) / Vector2(173, 117)).length() < 1.0:
-		next = player
+	else:
+		next = LANDING_LAYOUT.move_on_floor(player,direction.normalized()*SPEED*delta)
 	var travelled := player.distance_to(next)
 	if world == 0 and earth_region == 1 and not underground and not story.quarry_open:
 		var barrier: Rect2 = story.ROCKFALL_BARRIER

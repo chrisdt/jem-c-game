@@ -221,7 +221,7 @@ func prop_exists(id: String) -> bool:
 
 func floor_at(point: Vector2, region: int, cave: bool) -> bool:
 	if region > 0: return EARTH.can_walk(region,cave,point)
-	return game.ORE_SPAWNS.can_walk(0,cave,point) and (cave or game.ORE_SPAWNS.green_ground(point))
+	return game.ORE_SPAWNS.can_walk(0,cave,point)
 
 func fitted_position(id: String) -> Vector2:
 	if prop_positions.has(id): return prop_positions[id]

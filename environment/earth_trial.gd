@@ -106,7 +106,7 @@ func floor_at(point: Vector2) -> bool:
 		return game.regions().can_walk(game.current_region(),game.underground,point) if game.current_region() > 0 else (game.FROST_LAYOUT.can_walk(point,game.underground) if game.world == 1 else game.DESERT_LAYOUT.can_walk(point,game.underground))
 	if game.earth_region > 0: return game.EARTH.can_walk(game.earth_region,game.underground,point)
 	if game.underground: return MINE.can_walk(point)
-	return FLOOR.can_walk(0,false,point) and FLOOR.green_ground(point)
+	return FLOOR.can_walk(0,false,point)
 
 func clear_line(start: Vector2, finish: Vector2) -> bool:
 	var steps := maxi(1,ceili(start.distance_to(finish)/6.0))

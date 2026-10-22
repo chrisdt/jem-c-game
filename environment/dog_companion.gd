@@ -140,7 +140,7 @@ func floor_at(point: Vector2) -> bool:
 	if not Rect2(Vector2(12,12),EARTH.SIZE-Vector2(24,24)).has_point(point): return false
 	if game.earth_region > 0: return EARTH.floor_contains(game.earth_region,game.underground,point)
 	if game.underground: return MOSS.floor_contains(point)
-	return GROUND.can_walk(0,false,point) and GROUND.green_ground(point)
+	return GROUND.can_walk(0,false,point)
 
 func can_stand(point: Vector2, avoid_ore := true) -> bool:
 	for offset in [Vector2.ZERO,Vector2.UP,Vector2.DOWN,Vector2.LEFT,Vector2.RIGHT]:

@@ -1,11 +1,12 @@
 # Earth walking and doorway audit
 
-Checked 21 October 2026. Earth only: all five surface districts and all three mines.
+Checked 22 October 2026. Earth only: all five surface districts and all three mines.
 
-The audit passes **30 routes walked in both directions**, **10,704 real player-movement steps**, **18,739 connected floor samples**, **30 trail approaches** and **18 mine approaches**. No sampled floor positions or interior rooms remain disconnected.
+The audit passes **30 routes walked in both directions**, **10,736 real player-movement steps**, **17,991 connected floor samples**, **30 trail approaches** and **18 mine approaches**. No sampled floor positions or interior rooms remain disconnected. The separate Landing Meadow markup test adds six routes walked both ways (1,859 real-control steps).
 
 ## Corrections
 
+- **Landing Meadow markup:** red means walkable ground. `landing_layout.gd` traces the supplied 1499 × 1049 annotation in background coordinates, with holes for its unpainted camp, pond, boulders, signs and shrubs. Movement checks Sunny's feet with an eight-unit ground radius and sweeps/slides around boundaries. Player movement, enemy floor checks, story placement and the companion use this navigation; the existing conservative grass/ore placement mask remains separate. The scenery is unchanged and the red overlay is never shown in play. Trail probes avoid the unpainted east sign and southern shrub.
 - **Moss Mine:** opened the painted dirt apron below the central timber doorway. Its old boundary cut across clear ground. Also corrected the corridor above the right central pillar, where a polygon corner blocked the visible route. The pool, solid pillars and cliff walls remain blocked.
 - **Sunstone Ridge:** tightened the back-wall collision around the circular ruins so the clear interior floor is usable.
 - **Pinewood Trail:** removed a phantom walkable pocket on the solid cliff backdrop at the upper-right edge. This was outside the playable trails, rather than an inaccessible room.
@@ -15,11 +16,11 @@ The audit passes **30 routes walked in both directions**, **10,704 real player-m
 
 ## Floor coverage
 
-Every floor sample below is linked to the area’s arrival by swept movement that checks the complete player footprint. The 24-unit grid is supplemented by direct swept joins around tight diagonal bends. The result includes 18,731 successful links, with no isolated samples.
+Every floor sample below is linked to the area’s arrival by swept movement that checks the complete player footprint. The 24-unit grid is supplemented by direct swept joins around tight diagonal bends. The result includes 17,983 successful links, with no isolated samples.
 
 | Area | Valid floor samples | Reachable |
 | --- | ---: | ---: |
-| Landing Meadow | 3,387 | 3,387 |
+| Landing Meadow | 2,639 | 2,639 |
 | Moss Mine | 965 | 965 |
 | Pinewood Trail | 3,221 | 3,221 |
 | Copper Hollow | 1,414 | 1,414 |
@@ -53,6 +54,7 @@ Run the focused audit:
 
 ```sh
 godot --headless --path . --script tests/earth_navigation_audit.gd
+godot --headless --path . --script tests/landing_markup.gd
 ```
 
 Its machine-readable results are written to ignored `build/earth-navigation-audit.json`. Existing regression scripts are `navigation_paths.gd`, `mine_layout.gd`, `mine_transitions.gd`, `ore_spawns.gd` and `earth_expansion.gd` under `tests/`. The complete campaign test separately earns the quarry clearance and launch requirements. Review scenes and audit output are excluded from browser exports.
