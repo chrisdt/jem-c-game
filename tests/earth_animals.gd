@@ -125,7 +125,7 @@ func run() -> void:
 	dog.advance(5)
 	check(dog.position == before and dog.elapsed == time_before,"Dog kept moving behind the planet menu")
 	game.planet_menu.visible = false
-	follow_route(game,2,false,[Vector2(215,715),Vector2(270,785),Vector2(470,855),Vector2(700,880),Vector2(950,830),Vector2(1150,755),Vector2(1230,640),Vector2(1200,520),Vector2(1100,490),Vector2(1040,490),Vector2(970,490),Vector2(920,480),Vector2(720,425),Vector2(650,310)])
+	follow_route(game,2,false,[Vector2(150,675),Vector2(185,740),Vector2(270,785),Vector2(470,855),Vector2(700,880),Vector2(950,830),Vector2(1150,755),Vector2(1230,640),Vector2(1200,520),Vector2(1100,490),Vector2(1040,490),Vector2(970,490),Vector2(920,480),Vector2(720,425),Vector2(650,310)])
 	follow_route(game,1,true,[Vector2(750,770),Vector2(750,660),Vector2(775,550),Vector2(790,470),Vector2(690,440),Vector2(585,360),Vector2(545,280),Vector2(430,280),Vector2(250,260)])
 	check(dog.navigation != null,"Companion never exercised a route around a wall")
 	follow_route(game,4,true,[Vector2(290,790),Vector2(350,690),Vector2(400,590),Vector2(430,540),Vector2(560,505),Vector2(650,480),Vector2(690,410),Vector2(810,340),Vector2(805,230),Vector2(770,170)])

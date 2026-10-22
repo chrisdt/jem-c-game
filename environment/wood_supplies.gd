@@ -54,6 +54,20 @@ func sync_area() -> void:
 						point = candidate
 						placement.placed.append(point)
 						break
+				# The marked quarry floor can contain no usable grass. Fallen
+				# wood can rest on dirt/stone too; keep every crafting supply
+				# on reachable ground rather than silently removing the pile.
+				if not point.is_finite():
+					for candidate in alternatives:
+						var fits := true
+						for foot in [Vector2.ZERO,Vector2(-22,0),Vector2(22,0),Vector2(0,-14),Vector2(0,14)]:
+							if not clear_floor(candidate+foot):
+								fits = false
+								break
+						if fits:
+							point = candidate
+							placement.placed.append(point)
+							break
 			if point.is_finite(): piles.append({"position":point,"collected":false,"seen":false,"fade":0.0})
 	queue_redraw()
 

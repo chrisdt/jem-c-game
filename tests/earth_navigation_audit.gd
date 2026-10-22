@@ -13,16 +13,20 @@ const ROUTES := [
 	[0,false,"east and southern trails",[Vector2(1380,445),Vector2(1120,470),Vector2(760,515),Vector2(690,700),Vector2(740,835),Vector2(750,925)]],
 	[0,false,"pond rim",[Vector2(760,600),Vector2(840,560),Vector2(1000,565),Vector2(1150,625),Vector2(1150,780),Vector2(1020,845),Vector2(850,850),Vector2(750,800)]],
 	[1,false,"full east-west trail",[Vector2(200,495),Vector2(500,530),Vector2(750,510),Vector2(1090,530),Vector2(1300,510)]],
-	[1,false,"campsite and mine approach",[Vector2(750,510),Vector2(650,360),Vector2(450,260),Vector2(315,220),Vector2(250,190)]],
+	[1,false,"campsite and mine approach",[Vector2(750,510),Vector2(650,360),Vector2(590,280),Vector2(450,260),Vector2(315,220),Vector2(250,200)]],
 	[1,false,"mine and south trail",[Vector2(750,880),Vector2(750,650),Vector2(750,510),Vector2(950,380),Vector2(1085,285)]],
 	[2,false,"whole bridge deck",[Vector2(640,205),Vector2(650,310),Vector2(720,425),Vector2(920,480),Vector2(970,490),Vector2(1040,490),Vector2(1100,490),Vector2(1310,500)]],
 	[2,false,"west meadow loop",[Vector2(650,310),Vector2(400,295),Vector2(275,350),Vector2(275,425),Vector2(570,440),Vector2(720,425)]],
-	[2,false,"southern pond banks",[Vector2(1200,520),Vector2(1230,640),Vector2(1150,755),Vector2(950,830),Vector2(700,880),Vector2(470,855),Vector2(270,785),Vector2(215,715)]],
+	[2,false,"southern pond banks",[Vector2(1200,520),Vector2(1230,640),Vector2(1150,755),Vector2(950,830),Vector2(700,880),Vector2(470,855),Vector2(270,785),Vector2(185,740),Vector2(150,675)]],
 	[3,false,"north to west trail",[Vector2(710,205),Vector2(830,290),Vector2(800,400),Vector2(700,460),Vector2(500,520),Vector2(400,555),Vector2(200,480)]],
 	[3,false,"southern ridge loop",[Vector2(400,555),Vector2(350,690),Vector2(350,770),Vector2(600,820),Vector2(800,865),Vector2(1050,860),Vector2(1190,780),Vector2(1220,660),Vector2(1100,540),Vector2(900,470),Vector2(700,460)]],
 	[3,false,"circular ruins",[Vector2(900,470),Vector2(1010,405),Vector2(1170,390),Vector2(1200,300),Vector2(1200,250)]],
-	[4,false,"quarry rails to mine",[Vector2(200,440),Vector2(430,485),Vector2(800,520),Vector2(980,375),Vector2(1100,270)]],
-	[4,false,"quarry eastern and southern loop",[Vector2(800,520),Vector2(1050,610),Vector2(1310,645),Vector2(1260,800),Vector2(1030,900),Vector2(760,920),Vector2(750,740),Vector2(800,520)]],
+	[4,false,"quarry rails to mine",[Vector2(200,470),Vector2(430,485),Vector2(800,520),Vector2(980,375),Vector2(1100,270)]],
+	[4,false,"quarry eastern and southern loop",[Vector2(800,520),Vector2(1050,610),Vector2(1310,645),Vector2(1260,800),Vector2(1030,970),Vector2(760,970),Vector2(750,740),Vector2(800,520)]],
+	[1,false,"marked northern clearing",[Vector2(700,30),Vector2(680,60),Vector2(650,90),Vector2(625,150),Vector2(600,220),Vector2(600,280),Vector2(650,360)]],
+	[2,false,"marked fishing jetty",[Vector2(150,675),Vector2(175,653),Vector2(220,665),Vector2(265,675)]],
+	[3,false,"marked stone arch",[Vector2(1200,550),Vector2(1310,550),Vector2(1320,600),Vector2(1320,640),Vector2(1310,710),Vector2(1180,780)]],
+	[4,false,"marked pond ledge",[Vector2(800,520),Vector2(650,550),Vector2(470,590),Vector2(400,590),Vector2(300,620),Vector2(150,692),Vector2(40,730)]],
 	[0,true,"central doorway apron regression",[Vector2(490,460),Vector2(550,445),Vector2(580,415),Vector2(610,400),Vector2(650,400),Vector2(690,405),Vector2(710,425),Vector2(720,470),Vector2(750,520),Vector2(820,520),Vector2(875,480)]],
 	[0,true,"northwest side chamber",[Vector2(210,455),Vector2(320,460),Vector2(430,440),Vector2(490,390),Vector2(500,350),Vector2(470,320),Vector2(425,280),Vector2(410,240),Vector2(360,230)]],
 	[0,true,"north side chamber",[Vector2(500,460),Vector2(680,460),Vector2(710,370),Vector2(750,340),Vector2(780,330),Vector2(790,280),Vector2(780,235),Vector2(800,200)]],
@@ -86,6 +90,18 @@ func audit_grid(region: int, cave: bool) -> void:
 			if can_walk(region,cave,Vector2(cell)*GRID): floor_cells[cell] = true
 	var entry: Vector2 = EARTH.MINE_SPAWNS[region] if cave else (Vector2(620,530) if region == 0 else EARTH.arrival(region,EARTH.LINKS[region][0].side))
 	var first := Vector2i((entry/GRID).round())
+	# Rounding a safe arrival can put the seed on a nearby sign/rock. Join
+	# the arrival to a valid floor sample before auditing its component.
+	if not floor_cells.has(first):
+		var closest := floor_cells.keys()
+		closest.sort_custom(func(a,b): return (Vector2(a)*GRID).distance_squared_to(entry) < (Vector2(b)*GRID).distance_squared_to(entry))
+		for cell in closest:
+			var point := Vector2(cell)*GRID
+			var floor_check := func(p: Vector2): return can_walk(region,cave,p)
+			if MOTION.move(entry,point-entry,floor_check).distance_to(point) < 0.1:
+				first = cell
+				break
+	check(floor_cells.has(first),"Area arrival cannot join any marked floor sample")
 	var visited := {first:true}
 	var queue: Array[Vector2i] = [first]
 	var head := 0
@@ -134,7 +150,7 @@ func audit_grid(region: int, cave: bool) -> void:
 			if floor_cells.has(cell+direction): neighbours += 1
 		if neighbours >= 3: interior_missed += 1
 	check(interior_missed == 0,"Disconnected walkable floor in %s cave=%s: %d interior grid cells" % [EARTH.NAMES[region],cave,interior_missed])
-	check(missed.is_empty(),"Isolated floor samples remain in %s cave=%s: %s" % [EARTH.NAMES[region],cave,missed])
+	check(missed.is_empty(),"Isolated floor samples remain in %s cave=%s: %d samples, first %s" % [EARTH.NAMES[region],cave,missed.size(),missed.slice(0,12)])
 	report.areas.append({"district":EARTH.NAMES[region],"mine":cave,"floor_samples":floor_cells.size(),"reachable":visited.size(),"unreachable_interior":interior_missed,"boundary_slivers":missed.map(func(p): return str(Vector2(p)*GRID/EARTH.SIZE*EARTH.ART_SIZE))})
 
 func finish_transition(game) -> void:
@@ -150,10 +166,18 @@ func audit_trails(game) -> void:
 			var gate: Vector2 = EARTH.portal(region,link.side)
 			var inward: Vector2 = {"west":Vector2.RIGHT,"east":Vector2.LEFT,"north":Vector2.DOWN,"south":Vector2.UP}[link.side]
 			var lateral := inward.orthogonal()
-			# The markup excludes the sign beside the east path and a shrub
-			# beside the south path. Probe clear ground beside those islands.
-			var offsets := [-90.0,0.0,90.0]
-			if region == 0: offsets[0] = -60.0 if link.side == "south" else -45.0
+			# Probe the outermost straight approaches on the marked path, plus
+			# its middle. Old fixed offsets can now start on an unpainted rock.
+			var approaches: Array[float] = []
+			for offset in range(-120,121,10):
+				var start: Vector2 = gate+inward*150+lateral*offset
+				var end: Vector2 = gate+inward*30+lateral*offset
+				if not can_walk(region,false,start): continue
+				var floor_check := func(p: Vector2): return can_walk(region,false,p)
+				if MOTION.move(start,end-start,floor_check).distance_to(end) < 0.1: approaches.append(float(offset))
+			check(approaches.size() >= 3,"No broad marked trail approach: %s %s" % [EARTH.NAMES[region],link.side])
+			if approaches.size() < 3: continue
+			var offsets := [approaches[0],approaches[approaches.size()/2],approaches[-1]]
 			for offset in offsets:
 				await TRAVEL.enter(game,region,false)
 				game.story.quarry_open = true

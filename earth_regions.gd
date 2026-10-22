@@ -33,7 +33,7 @@ const GATES := [
 	{"west":Vector2(85,495),"east":Vector2(1420,505),"south":Vector2(750,955)},
 	{"north":Vector2(640,90),"east":Vector2(1420,500)},
 	{"north":Vector2(710,90),"west":Vector2(85,465)},
-	{"west":Vector2(85,440)},
+	{"west":Vector2(85,420)},
 ]
 const MINE_ENTRANCES := [Vector2(1480,340),Vector2(1090,245) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(1100,225) / ART_SIZE * SIZE]
 const MINE_EXITS := [Vector2(150,610),Vector2(750,875) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(160,835) / ART_SIZE * SIZE]
@@ -56,22 +56,7 @@ static func clear_of_people(region: int, point: Vector2, radius := 120.0) -> boo
 		if point.distance_to(foot-FOOT_OFFSET) < radius: return false
 	return true
 
-# Only solid side features are excluded; broad grassy clearings remain open.
-# The artwork and these outlines are reviewed together in earth_expansion.gd.
-const SURFACE_BLOCKERS := {
-	1:[Vector4(1085,150,215,80),Vector4(510,330,32,23),Vector4(170,835,75,55),Vector4(630,920,45,30),Vector4(1050,980,55,35)],
-	2:[Vector4(490,645,270,140),Vector4(1060,245,205,85),Vector4(435,370,45,30),Vector4(945,555,58,52),Vector4(975,660,60,35)],
-	3:[Vector4(265,310,105,65),Vector4(430,225,110,48),Vector4(690,590,65,45),Vector4(460,700,65,35),Vector4(1025,785,80,45),Vector4(1185,215,85,25),Vector4(1090,315,55,40),Vector4(1275,315,50,35),Vector4(1350,690,50,30)],
-	4:[Vector4(440,750,240,120),Vector4(1180,470,110,70),Vector4(1080,765,100,55),Vector4(580,660,85,40),Vector4(380,610,90,50),Vector4(1325,355,85,70)],
-}
-# Extra outlines for cliffs and the marsh's winding water. The bridge deck is
-# explicitly exempt, so the visible crossing remains usable across its width.
-static var SURFACE_WALLS := {
-	1:[PackedVector2Array([Vector2(845,180),Vector2(980,150),Vector2(1020,220),Vector2(960,300),Vector2(850,300)]),PackedVector2Array([Vector2(1200,190),Vector2(1370,140),Vector2(1400,300),Vector2(1310,350),Vector2(1210,300)]),PackedVector2Array([Vector2(1260,135),Vector2(1500,135),Vector2(1500,300),Vector2(1390,300)])],
-	2:[PackedVector2Array([Vector2(1100,325),Vector2(1150,350),Vector2(1125,400),Vector2(1080,430),Vector2(1045,465),Vector2(990,455),Vector2(1030,405),Vector2(1090,375)]),PackedVector2Array([Vector2(970,510),Vector2(1045,520),Vector2(1030,580),Vector2(1000,615),Vector2(1030,665),Vector2(950,705),Vector2(820,710),Vector2(815,675),Vector2(930,655),Vector2(965,625),Vector2(925,595)])],
-	3:[],
-	4:[PackedVector2Array([Vector2(80,145),Vector2(550,80),Vector2(825,140),Vector2(990,100),Vector2(1000,235),Vector2(890,310),Vector2(820,360),Vector2(710,300),Vector2(640,280),Vector2(600,210),Vector2(400,230),Vector2(330,300),Vector2(200,330),Vector2(145,260)])],
-}
+const SURFACE_MARKUP = preload("res://earth_surface_markup.gd")
 const TREES := {
 	1:[Vector3(360,360,2),Vector3(620,255,2),Vector3(410,745,2),Vector3(950,740,0)],
 	2:[Vector3(235,265,0),Vector3(555,210,1),Vector3(790,920,0),Vector3(1260,670,1)],
@@ -117,7 +102,9 @@ static func crosses_opening(start: Vector2, finish: Vector2, centre: Vector2, ex
 
 static func arrival(region: int, side: String) -> Vector2:
 	var inward: Vector2 = {"west":Vector2.RIGHT,"east":Vector2.LEFT,"north":Vector2.DOWN,"south":Vector2.UP}[side]
-	return portal(region,side)+inward*150.0
+	# Enter below the quarry's sign-side stones, facing the clear trail.
+	var shoulder := Vector2(0,40) if region == 4 and side == "west" else Vector2.ZERO
+	return portal(region,side)+inward*150.0+shoulder
 
 static func has_mine(region: int) -> bool:
 	return MINE_IDS[region] >= 0
@@ -133,21 +120,7 @@ static func floor_contains(region: int, cave: bool, point: Vector2) -> bool:
 		for wall in MINE_WALLS[region]:
 			if Geometry2D.is_point_in_polygon(art,wall): return false
 		return true
-	var inside := Rect2(100,180,1800,1110).has_point(point)
-	for link in LINKS[region]:
-		var gate: Vector2 = portal(region,link.side)
-		var opening := Rect2(gate-Vector2(150,180),Vector2(300,360))
-		inside = inside or opening.has_point(point)
-	if not inside or not Rect2(Vector2.ZERO,SIZE).has_point(point):
-		return false
-	if region == 2 and Rect2(935,465,165,52).has_point(art):
-		return true
-	for wall in SURFACE_WALLS[region]:
-		if Geometry2D.is_point_in_polygon(art,wall): return false
-	for obstacle in SURFACE_BLOCKERS[region]:
-		if ((art-Vector2(obstacle.x,obstacle.y))/Vector2(obstacle.z,obstacle.w)).length_squared() < 1:
-			return false
-	return true
+	return SURFACE_MARKUP.floor_contains(region,point)
 
 static func can_walk(region: int, cave: bool, point: Vector2) -> bool:
 	for offset in [Vector2.ZERO,Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
