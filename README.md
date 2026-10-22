@@ -1,7 +1,7 @@
-# Sunny Scout — Controls guide update
+# Sunny Scout — Frost paths and off-world mines
 
-Full browser game exported with Godot 4.6.3 from source commit `004665176243564d98040a9cd0fab0aa4af341cf`.
-Editable project: `main`. Build release: `43ed060982d0bc269340`.
+Full browser game exported with Godot 4.6.3 from source commit `94e2469b3abb8891013f50baa047a12ced2bf98c`.
+Editable project: `main`. Build release: `cd9a628b599663b3f7d5`.
 
 ## Upload to WP Engine
 
@@ -23,17 +23,24 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- The welcome screen is now a concise How to Play guide. It lists movement,
-  mine/trail entrances, E interaction, E/Space gathering and mining, equipment
-  keys 1/2, Space attacks, antidote key 3, Quests J, help, restart and Escape.
-- Phones and tablets see touch instructions for the movement pad, action,
-  equipment slots, attacks, antidote and menus. The speedrun goal and rules
-  stay in a short footer beside the existing play and leaderboard choices.
-- Startup checks cover keyboard/touch starts, one-time loading and restored
-  gameplay sizing. Chromium review covers keyboard and touch guides at normal,
-  wide and portrait sizes, with no browser errors.
-- Includes the Redrock passage fix, frozen-pond guardian encounter, matching
-  Prism Pass exit trail, refreshed beacon artwork and previous world updates.
+- Clears the snowy outcrops beside Canyon Camp's Frozen Basin and Prism Pass
+  signs, joins the footprint trails and opens the walking connections. The
+  Glacier Crown exit from Prism Pass continues through clear snow to the edge.
+- Rare minerals now take five seconds before drill bonuses. Earth, Frost and
+  Ember deposits retain their own progress after movement, damage, menus and
+  leaving an area. Crystal Drill: three seconds; Magma Drill: 2.25 seconds.
+- All nine mines have hostile crawling and flying creatures. Frost has Crystal
+  Crawlers and Icewings; Ember has Ash Crawlers and Cinderwings, with original
+  four-pose animations, warned attacks, safe entrances, solid walls and
+  persistent partial damage/defeats. Surface creatures remain friendly.
+- Moves the Sunforge core onto the lantern-side crate in Sunfire Cavern, and
+  Obsidian Rise's cooled-lava mission rock and guardian into the central sand.
+- Food concept art proposes frostberries and emberfruit as wild pickups.
+  Prepared meals remain camp-recipe ideas only, with local alien ingredients;
+  food is not implemented in this build.
+- Checked all nine mines, both off-world stories, 33 Frost walking routes,
+  twelve interrupted mining jobs, seeded ore placement, keyboard/touch controls
+  and startup. Includes the previous controls guide and world fixes.
 
 ## Play and compete
 
