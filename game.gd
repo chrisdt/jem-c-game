@@ -372,7 +372,7 @@ func talk_to_npc(npc: HUMAN_NPC) -> void:
 	if is_instance_valid(story) and story.working(): return
 	character_bubble.set_touch_mode(hud.touch_mode)
 	dialogue_npc = npc
-	if character_bubble.show_dialogue(str(npc.name),npc.pages(),npc,Vector2(0,-npc.height),npc.final_action()):
+	if character_bubble.show_dialogue(str(npc.name),npc.pages(),npc,Vector2(0,-npc.height),npc.final_action(),world):
 		npc.greeted = true
 		npc.conversation_started()
 	else:

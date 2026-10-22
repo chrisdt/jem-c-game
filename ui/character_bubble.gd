@@ -8,6 +8,7 @@ signal page_changed(index: int)
 
 const STYLE = preload("res://ui/expedition_style.gd")
 const TOUCH = preload("res://ui/touch_controls.gd")
+const ITEM_ICONS = preload("res://ui/mission_item_icons.gd")
 const INK := Color("183e3c")
 enum Mode { CLOSED, HINT, DIALOGUE }
 
@@ -17,7 +18,7 @@ var touch_mode := false
 # Left, top, right, bottom; callers can reserve their HUD and touch controls.
 var safe_insets := Vector4(18,124,18,164)
 var panel: Panel
-var body_label: Label
+var body_label: RichTextLabel
 var speaker_label: Label
 var page_label: Label
 var next_button: Button
@@ -28,6 +29,7 @@ var tail_border: Line2D
 var anchor: Node2D
 var head_offset := Vector2(0,-92)
 var pages: Array[String] = []
+var dialogue_world := 0
 var final_action := "Close"
 var remaining := 0.0
 var previous_focus: Control
@@ -58,7 +60,14 @@ func _ready() -> void:
 	panel.add_theme_stylebox_override("panel",box)
 	shield.add_child(panel)
 	speaker_label = make_label(true,15)
-	body_label = make_label(false,18)
+	body_label = RichTextLabel.new()
+	body_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body_label.scroll_active = false
+	body_label.add_theme_font_override("normal_font",STYLE.BODY)
+	body_label.add_theme_font_size_override("normal_font_size",18)
+	body_label.add_theme_color_override("default_color",INK)
+	body_label.add_theme_stylebox_override("normal",StyleBoxEmpty.new())
+	panel.add_child(body_label)
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_label.add_theme_constant_override("line_spacing",3)
 	page_label = make_label(false,13)
@@ -87,7 +96,7 @@ func make_label(heading: bool, font_size: int) -> Label:
 func is_dialogue_open() -> bool:
 	return mode == Mode.DIALOGUE
 
-func show_dialogue(speaker: String, text_pages: Array[String], target: Node2D, offset := Vector2(0,-92), last_action := "Close") -> bool:
+func show_dialogue(speaker: String, text_pages: Array[String], target: Node2D, offset := Vector2(0,-92), last_action := "Close", world := 0) -> bool:
 	if mode == Mode.DIALOGUE or not valid_target(target,offset) or text_pages.is_empty(): return false
 	var clean: Array[String] = []
 	for text in text_pages:
@@ -99,6 +108,7 @@ func show_dialogue(speaker: String, text_pages: Array[String], target: Node2D, o
 	pages = clean
 	page_index = 0
 	final_action = last_action
+	dialogue_world = world
 	speaker_label.text = speaker.to_upper()
 	mode = Mode.DIALOGUE
 	shield.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -131,7 +141,6 @@ func set_touch_mode(value: bool) -> void:
 	if mode != Mode.CLOSED: update_page()
 
 func update_page() -> void:
-	body_label.text = pages[page_index]
 	speaker_label.visible = mode == Mode.DIALOGUE
 	page_label.visible = mode == Mode.DIALOGUE
 	next_button.visible = mode == Mode.DIALOGUE
@@ -144,8 +153,14 @@ func update_page() -> void:
 	panel.size.x = width
 	var body_top := (57.0 if touch_mode else 45.0) if mode == Mode.DIALOGUE else 16.0
 	var body_width := width-36
-	var text_size := STYLE.BODY.get_multiline_string_size(body_label.text,HORIZONTAL_ALIGNMENT_LEFT,body_width,18)
-	var text_height := maxf(28,text_size.y+body_label.text.count("\n")*3+6)
+	body_label.size.x = body_width
+	if mode == Mode.DIALOGUE:
+		ITEM_ICONS.fill(body_label,pages[page_index],dialogue_world)
+	else:
+		body_label.clear()
+		body_label.add_text(pages[page_index])
+	# Measure after wrapping inline images, so the footer never covers a recipe.
+	var text_height := maxf(28,body_label.get_content_height()+6)
 	body_label.position = Vector2(18,body_top)
 	body_label.size = Vector2(body_width,text_height)
 	speaker_label.position = Vector2(18,15)

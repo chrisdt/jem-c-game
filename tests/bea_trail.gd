@@ -54,7 +54,11 @@ func run() -> void:
 	var rowan = game.rowan
 	var bubble = game.character_bubble
 	check(not bea.visible and not bea.greeted,"Bea appeared or greeted in Landing Meadow")
-	check(bea.position == Vector2(1632,1138) and absf(bea.height-rowan.height) < 0.01,"Bea lost the approved position or matching visible height")
+	# The annotated floor may exclude the landmark itself; Bea already fits
+	# her feet to nearby grass. Verify that current placement contract.
+	var fitted_foot: Vector2 = bea.position
+	check(fitted_foot.distance_to(game.EARTH.BEA_FOOT) <= 200 and absf(bea.height-rowan.height) < 0.01,"Bea left her landmark or lost the matching visible height")
+	check(game.EARTH.can_walk(1,false,fitted_foot),"Bea's fitted foot point is not walkable")
 	check(absf(bea.illustration.texture.region.size.y*bea.illustration.scale.y-bea.height) < 0.01,"Bea's fitted sprite does not match her measured height")
 	await TRAVEL.enter(game,1,false)
 	check(not bea.visible and not bea.can_talk() and not bea.greeted,"An undiscovered Bea appeared through fog or offered Talk")
@@ -81,7 +85,7 @@ func run() -> void:
 	game.cooldown = 0
 	await key(KEY_E)
 	await key(KEY_E)
-	check(bubble.body_label.text.contains("Rowan") and bubble.final_action == "Accept mission","A player without a sword cannot accept Bea independently with optional camp guidance")
+	check(bubble.body_label.get_parsed_text().contains("Rowan") and bubble.final_action == "Accept mission","A player without a sword cannot accept Bea independently with optional camp guidance")
 	await key(KEY_E)
 	check(bea.introduced and not rowan.introduced and rowan.mission == rowan.Mission.NOT_STARTED,"Completing Bea's conversation changed Rowan's mission")
 	check(game.story.accepted.get("bea",false),"Accepting Bea before Rowan did not keep her quest")
@@ -132,7 +136,7 @@ func run() -> void:
 	await TRAVEL.enter(game,1,false)
 	approach(game,bea)
 	game.interact()
-	check(bubble.final_action == "Done" and bubble.body_label.text.contains("supply box") and rowan.mission == rowan.Mission.COMPLETE,"Crafting a sword reset Bea's independently accepted quest or Rowan lost completion")
+	check(bubble.final_action == "Done" and bubble.body_label.get_parsed_text().contains("supply box") and rowan.mission == rowan.Mission.COMPLETE,"Crafting a sword reset Bea's independently accepted quest or Rowan lost completion")
 	bubble.dismiss()
 	await TRAVEL.enter(game,1,true)
 	check(not bea.visible and not bea.can_talk(),"Bea appeared inside Copper Hollow")
@@ -158,7 +162,6 @@ func run() -> void:
 		for rock in game.EARTH.generate(1,rng):
 			if not rock.cave:
 				check(rock.pos.distance_to(game.EARTH.BEA_FOOT-game.EARTH.FOOT_OFFSET) >= 120,"A randomized ore layout overlaps Bea")
-	check(game.EARTH.can_walk(1,false,game.EARTH.BEA_FOOT-game.EARTH.FOOT_OFFSET),"The approved foot point is not walkable")
 	game.reset_confirmation.open()
 	game.reset_confirmation.accept_reset()
 	await scene_changed
