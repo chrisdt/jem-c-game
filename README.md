@@ -1,7 +1,7 @@
-# Sunny Scout — Frost beacon artwork update
+# Sunny Scout — Prism Pass trail update
 
-Full browser game exported with Godot 4.6.3 from source commit `8b948948417a47f6d6785da4ad65714fbda18025`.
-Editable project: `main`. Build release: `da1bb506a07ec5d77942`.
+Full browser game exported with Godot 4.6.3 from source commit `5bab801242aec8e566f055c6065581675246195f`.
+Editable project: `main`. Build release: `6145eac964e1ae0ffc31`.
 
 ## Upload to WP Engine
 
@@ -23,14 +23,14 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Pip's three beacon fragments use a new dedicated crystal-and-brass prop
-  with a snow-dusted stone base, natural proportions and a softer ground shadow.
-  Removes the old heavy duplicate outline and stray neighbouring atlas fragment.
-- Checked the replacement on Frozen Basin, Prism Pass and Aurora Shelf in
-  Chromium with no browser errors. All four Frost quests still pass, including
-  real fragment pickups, beacon restoration and the equipment upgrade recipes.
-- Includes the Deep Prism stair-entrance and shoreline fixes, plus the previous
-  Earth, Frost and Ember walking updates and cleared Magma Vault background.
+- Prism Pass's east exit has a painted snow trail that continues past the
+  Glacier Crown sign and off the right edge. Its white snowy centre, subtle
+  footprints and scattered blue-gray pebbles match the other Frost trails.
+- Checked the painted approach in Chromium, crossed into Glacier Crown and
+  walked back to Prism Pass using the real trail transitions. All 30 Frost
+  movement routes, 30 trail approaches and 18 mine approaches still pass.
+- Includes the refreshed Pip beacon-fragment artwork, Deep Prism stair and
+  shoreline corrections, and the previous Earth, Frost and Ember updates.
 
 ## Play and compete
 
