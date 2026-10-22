@@ -19,6 +19,7 @@ var start_button: Button
 var walk_text: Label
 var mine_text: Label
 var combat_text: Label
+var menu_text: Label
 var footer: Label
 var load_status: Label
 var progress: ProgressBar
@@ -53,15 +54,12 @@ func _ready() -> void:
 	var panel := STYLE.panel(content,Vector2(676,62),Vector2(544,680))
 	var eyebrow := STYLE.label(panel,"YOUR EXPLORER'S GUIDE",Vector2(32,22),Vector2(480,24),14,true)
 	eyebrow.add_theme_color_override("font_color",STYLE.GOLD)
-	STYLE.label(panel,"Ready for an adventure?",Vector2(32,49),Vector2(480,42),30,true)
-	STYLE.label(panel,"Three worlds. Fourteen quests. How fast can you finish?",Vector2(32,95),Vector2(480,28),15)
-	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Find your way","")
-	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Collect and upgrade","")
-	combat_text = guide_row(panel,316,TRIAL_ART.icon(0),"3. Craft your Earth sword","")
-	if ProjectSettings.get_setting("gameplay/rocket_repair_required",false):
-		guide_row(panel,408,CATALOG.planet_icon(1),"4. Get ready for space","Help Earth's neighbours prepare your tools,\nrepair your spacesuit and fix the rocket.")
-	else:
-		guide_row(panel,408,CATALOG.planet_icon(1),"4. Finish all three worlds","Finish 14 story quests to stop the clock.\nMenus and travel count; extras are optional.")
+	STYLE.label(panel,"How to play",Vector2(32,49),Vector2(480,42),30,true)
+	STYLE.label(panel,"The controls for your three-world adventure.",Vector2(32,95),Vector2(480,28),15)
+	walk_text = guide_row(panel,132,CATALOG.planet_icon(0),"1. Move and explore","")
+	mine_text = guide_row(panel,224,CATALOG.ORES[0][0],"2. Talk, use and mine","")
+	combat_text = guide_row(panel,316,TRIAL_ART.icon(0),"3. Tools and combat","")
+	menu_text = guide_row(panel,408,CATALOG.planet_icon(1),"4. Quests and help","")
 	start_button = STYLE.button(panel,"Start speedrun",Vector2(32,506),Vector2(480,60),22)
 	start_button.pressed.connect(start_exploring)
 	board_button = STYLE.button(panel,"Best times",Vector2(32,578),Vector2(232,46),18)
@@ -70,7 +68,7 @@ func _ready() -> void:
 	relax_button.pressed.connect(func(): start_exploring(false))
 	score_panel = SCORE_PANEL.new()
 	add_child(score_panel)
-	footer = STYLE.label(panel,"",Vector2(32,638),Vector2(480,28),13)
+	footer = STYLE.label(panel,"",Vector2(32,638),Vector2(480,32),12)
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	load_status = STYLE.label(panel,"",Vector2(32,586),Vector2(480,22),14)
 	load_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -115,10 +113,11 @@ func guide_row(panel: Control, y: float, icon: Texture2D, title: String, text: S
 
 func set_touch_mode(value: bool) -> void:
 	touch_mode = value
-	walk_text.text = "Drag the left pad to walk.\nFollow signs; walk into mine entrances." if value else "WASD / arrows to walk.\nFollow signs; walk into mine entrances."
-	mine_text.text = "Tap action to mine. Move away to pause.\nReturn to resume; drill upgrade: 5 copper." if value else "E / Space mines nearby ore. Move to pause.\nReturn to resume; drill upgrade: 5 copper."
-	combat_text.text = "Gather 3 copper + 2 wood; craft at camp.\nTap Attack / Jab. Open Quests for more." if value else "E / Space gathers. Craft: 3 copper + 2 wood.\n1 tool, 2 sword; Space attacks. J: Quests."
-	footer.text = "Clock starts on Earth · No mid-run saves · Use a nickname"
+	walk_text.text = "Drag the left pad · Walk\nWalk into mine doors and signed trails." if value else "WASD / arrow keys · Walk\nWalk into mine doors and signed trails."
+	mine_text.text = "Tap action · Talk / use / gather / mine\nMove away to pause mining." if value else "E · Talk / use / open camp or rocket\nE / Space · Gather / mine. Move to pause."
+	combat_text.text = "Tap tool / sword slots · Choose equipment\nTap Attack / Jab · Fight   Tap antidote · Cure" if value else "1 · Mining tool   2 · Sword   Space · Attack\n3 · Use antidote (once earned)"
+	menu_text.text = "Tap Quests · Missions   Tap ? · Controls\nUse Close / X buttons to leave menus." if value else "J · Quests   ? button · Controls\nR · Restart (asks first)   Esc · Close panels"
+	footer.text = "Speedrun: finish 14 story quests (extras optional).\nMenus + travel count · No mid-run saves · Use a nickname"
 
 func start_exploring(timed := true) -> void:
 	if score_panel.visible or stage != Stage.GUIDE:

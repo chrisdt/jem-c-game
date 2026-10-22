@@ -42,7 +42,7 @@ func run() -> void:
 		root.size = original_size
 		await process_frame
 		assert(not root.has_node("GreenPlanet"),"The world started before the player chose to explore")
-		assert(welcome.walk_text.text.contains("WASD") and welcome.mine_text.text.contains("5 copper"))
+		assert(welcome.walk_text.text.contains("WASD") and welcome.mine_text.text.contains("E / Space"))
 		await key(KEY_D,true)
 		await key(KEY_D,false)
 		assert(current_scene == welcome and welcome.stage == welcome.Stage.GUIDE,"Walking skipped the guide")
