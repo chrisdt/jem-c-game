@@ -87,6 +87,7 @@ static func can_walk(world: int, cave: bool, point: Vector2) -> bool:
 	return LANDING.can_walk(point)
 
 static func footprint_fits(world: int, cave: bool, point: Vector2) -> bool:
+	if world == 0 and cave and not MINE.MARKUP.ore_clear(point,MINE.can_walk): return false
 	for offset in FOOTPRINT:
 		if not can_walk(world, cave, point + offset):
 			return false

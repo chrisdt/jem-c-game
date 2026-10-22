@@ -84,16 +84,10 @@ const ORE_ZONES := {
 	3:[Rect2(600,380,280,170),Rect2(330,690,230,130),Rect2(800,730,260,130),Rect2(1000,480,230,130)],
 	4:[Rect2(500,440,250,180),Rect2(800,650,230,130),Rect2(1100,470,220,130),Rect2(470,250,230,130)],
 }
-# Floor outlines traced against the final paintings, rather than connecting
-# room centres through rock. Holes preserve the large freestanding rock islands.
-static var MINE_FLOORS := {
-	1:PackedVector2Array([Vector2(665,1045),Vector2(830,1045),Vector2(855,940),Vector2(840,850),Vector2(855,765),Vector2(920,690),Vector2(1000,670),Vector2(1040,715),Vector2(1230,720),Vector2(1400,640),Vector2(1400,535),Vector2(1300,500),Vector2(1225,420),Vector2(1270,330),Vector2(1370,300),Vector2(1400,220),Vector2(1340,165),Vector2(1210,175),Vector2(1120,215),Vector2(1030,200),Vector2(970,180),Vector2(880,135),Vector2(850,85),Vector2(680,85),Vector2(625,115),Vector2(570,170),Vector2(460,205),Vector2(360,235),Vector2(260,195),Vector2(180,150),Vector2(115,180),Vector2(110,240),Vector2(165,290),Vector2(250,320),Vector2(300,380),Vector2(305,485),Vector2(240,540),Vector2(145,520),Vector2(135,595),Vector2(180,650),Vector2(310,680),Vector2(405,650),Vector2(500,690),Vector2(580,650),Vector2(630,690),Vector2(640,760),Vector2(670,840),Vector2(650,910)]),
-	4:PackedVector2Array([Vector2(120,910),Vector2(220,930),Vector2(295,865),Vector2(365,800),Vector2(410,720),Vector2(445,645),Vector2(500,575),Vector2(620,570),Vector2(670,605),Vector2(710,665),Vector2(670,715),Vector2(715,770),Vector2(830,820),Vector2(950,835),Vector2(940,790),Vector2(900,735),Vector2(950,660),Vector2(1030,625),Vector2(1120,635),Vector2(1200,615),Vector2(1370,575),Vector2(1405,520),Vector2(1350,480),Vector2(1290,450),Vector2(1280,370),Vector2(1330,315),Vector2(1430,290),Vector2(1415,210),Vector2(1370,170),Vector2(1230,160),Vector2(1155,210),Vector2(1100,300),Vector2(1050,350),Vector2(980,365),Vector2(910,325),Vector2(870,250),Vector2(875,165),Vector2(820,115),Vector2(700,110),Vector2(650,155),Vector2(680,220),Vector2(740,300),Vector2(740,350),Vector2(675,375),Vector2(600,400),Vector2(560,360),Vector2(515,325),Vector2(470,250),Vector2(455,205),Vector2(400,175),Vector2(300,150),Vector2(275,175),Vector2(300,230),Vector2(385,290),Vector2(400,360),Vector2(385,390),Vector2(310,420),Vector2(250,400),Vector2(200,355),Vector2(140,350),Vector2(120,400),Vector2(210,445),Vector2(300,485),Vector2(360,510),Vector2(350,570),Vector2(355,615),Vector2(330,670),Vector2(280,720),Vector2(245,770),Vector2(180,800),Vector2(120,800)]),
-}
-static var MINE_WALLS := {
-	1:[PackedVector2Array([Vector2(620,195),Vector2(710,175),Vector2(820,195),Vector2(900,250),Vector2(855,310),Vector2(840,370),Vector2(800,420),Vector2(700,390),Vector2(680,340),Vector2(600,300)]),PackedVector2Array([Vector2(435,350),Vector2(490,345),Vector2(560,390),Vector2(580,440),Vector2(650,480),Vector2(630,555),Vector2(570,600),Vector2(490,610),Vector2(450,570),Vector2(395,500),Vector2(395,415)]),PackedVector2Array([Vector2(1030,370),Vector2(1120,345),Vector2(1200,380),Vector2(1160,445),Vector2(1140,500),Vector2(1130,540),Vector2(1070,580),Vector2(1020,600),Vector2(980,670),Vector2(925,700),Vector2(850,640),Vector2(850,550),Vector2(920,475),Vector2(980,425)])],
-	4:[PackedVector2Array([Vector2(760,405),Vector2(830,400),Vector2(855,430),Vector2(840,480),Vector2(870,515),Vector2(815,530),Vector2(760,510),Vector2(730,480)]),PackedVector2Array([Vector2(1090,450),Vector2(1140,445),Vector2(1165,480),Vector2(1160,530),Vector2(1200,550),Vector2(1150,575),Vector2(1090,560),Vector2(1065,500)]),PackedVector2Array([Vector2(400,390),Vector2(440,375),Vector2(480,410),Vector2(495,465),Vector2(460,490),Vector2(400,470)])],
-}
+# Navigation follows the red-ground annotations; the paintings stay unchanged.
+const MINE_MARKUP = preload("res://earth_mine_markup.gd")
+static var MINE_FLOORS: Dictionary = MINE_MARKUP.FLOORS
+static var MINE_WALLS: Dictionary = MINE_MARKUP.WALLS
 const MINE_ORE_ZONES := {
 	1:[Rect2(225,245,240,65),Rect2(1080,250,230,65),Rect2(200,570,155,70),Rect2(1180,580,160,65),Rect2(650,115,190,50),Rect2(690,450,135,65)],
 	4:[Rect2(550,425,155,120),Rect2(680,140,150,80),Rect2(1180,220,210,75),Rect2(740,690,130,80),Rect2(930,420,120,140),Rect2(310,195,90,50),Rect2(690,550,225,65)],
@@ -134,6 +128,7 @@ static func key(region: int, cave: bool) -> String:
 static func floor_contains(region: int, cave: bool, point: Vector2) -> bool:
 	var art := point / SIZE * ART_SIZE
 	if cave:
+		art = point / SIZE * MINE_MARKUP.ART_SIZE
 		if not Geometry2D.is_point_in_polygon(art,MINE_FLOORS[region]): return false
 		for wall in MINE_WALLS[region]:
 			if Geometry2D.is_point_in_polygon(art,wall): return false
@@ -169,6 +164,7 @@ static func spawn_clear(region: int, cave: bool, point: Vector2, hard: bool) -> 
 		if not can_walk(region,cave,point+offset):
 			return false
 	if cave:
+		if not MINE_MARKUP.ore_clear(point,func(p: Vector2): return can_walk(region,true,p)): return false
 		if region == 4 and point.distance_to(Vector2(1230,440)) < 125: return false
 		return point.distance_to(MINE_EXITS[region]) >= 210 and (not hard or point.distance_to(MINE_SPAWNS[region]) >= 450)
 	if not clear_of_people(region,point): return false

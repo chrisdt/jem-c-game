@@ -25,20 +25,18 @@ const ROUTES := [
 	[4,false,"quarry eastern and southern loop",[Vector2(800,520),Vector2(1050,610),Vector2(1310,645),Vector2(1260,800),Vector2(1030,900),Vector2(760,920),Vector2(750,740),Vector2(800,520)]],
 	[0,true,"central doorway apron regression",[Vector2(490,460),Vector2(550,445),Vector2(580,415),Vector2(610,400),Vector2(650,400),Vector2(690,405),Vector2(710,425),Vector2(720,470),Vector2(750,520),Vector2(820,520),Vector2(875,480)]],
 	[0,true,"northwest side chamber",[Vector2(210,455),Vector2(320,460),Vector2(430,440),Vector2(490,390),Vector2(500,350),Vector2(470,320),Vector2(425,280),Vector2(410,240),Vector2(360,230)]],
-	[0,true,"north side chamber",[Vector2(500,460),Vector2(680,460),Vector2(720,400),Vector2(780,330),Vector2(790,280),Vector2(780,235),Vector2(800,200)]],
+	[0,true,"north side chamber",[Vector2(500,460),Vector2(680,460),Vector2(710,370),Vector2(750,340),Vector2(780,330),Vector2(790,280),Vector2(780,235),Vector2(800,200)]],
 	[0,true,"northeast side chamber",[Vector2(870,520),Vector2(940,450),Vector2(990,400),Vector2(1090,390),Vector2(1160,410),Vector2(1220,340),Vector2(1300,270),Vector2(1350,245)]],
 	[0,true,"far east gallery",[Vector2(1090,390),Vector2(1160,440),Vector2(1190,470),Vector2(1300,470),Vector2(1360,460)]],
-	[0,true,"southeast gallery",[Vector2(1120,540),Vector2(1050,580),Vector2(1060,650),Vector2(1120,750),Vector2(1250,820),Vector2(1320,850)]],
-	[0,true,"south pool rim and gallery",[Vector2(520,480),Vector2(570,530),Vector2(570,620),Vector2(560,650),Vector2(610,720),Vector2(650,780),Vector2(650,850),Vector2(675,880)]],
-	[0,true,"southwest side chamber",[Vector2(500,520),Vector2(480,590),Vector2(435,650),Vector2(360,700),Vector2(330,720)]],
+	[0,true,"southeast gallery",[Vector2(1160,560),Vector2(1160,610),Vector2(1160,680),Vector2(1155,735),Vector2(1215,795),Vector2(1320,850)]],
 	[1,true,"central copper galleries",[Vector2(750,770),Vector2(750,660),Vector2(775,550),Vector2(790,470),Vector2(690,440),Vector2(585,360),Vector2(545,280),Vector2(430,280),Vector2(250,260)]],
-	[1,true,"north copper loop",[Vector2(545,280),Vector2(610,185),Vector2(750,130),Vector2(890,180),Vector2(980,270),Vector2(1000,340),Vector2(930,395),Vector2(790,470)]],
-	[1,true,"west and southwest copper loop",[Vector2(250,260),Vector2(325,355),Vector2(350,470),Vector2(310,560),Vector2(230,605),Vector2(370,625),Vector2(470,650),Vector2(590,625),Vector2(650,660),Vector2(750,720)]],
-	[1,true,"east copper gallery",[Vector2(1000,340),Vector2(1180,280),Vector2(1290,265),Vector2(1240,350),Vector2(1200,440),Vector2(1250,540),Vector2(1330,590),Vector2(1200,635),Vector2(1120,660)]],
+	[1,true,"north copper loop",[Vector2(545,280),Vector2(610,185),Vector2(750,130),Vector2(890,180),Vector2(980,270),Vector2(950,330),Vector2(930,395),Vector2(790,470)]],
+	[1,true,"west and southwest copper approach",[Vector2(250,260),Vector2(325,355),Vector2(350,470),Vector2(310,560),Vector2(230,605),Vector2(370,625),Vector2(440,630)]],
+	[1,true,"east copper gallery",[Vector2(950,330),Vector2(1050,280),Vector2(1180,280),Vector2(1290,265),Vector2(1240,350),Vector2(1200,440),Vector2(1250,540),Vector2(1330,590),Vector2(1200,635),Vector2(1140,655)]],
 	[4,true,"crystal central and north galleries",[Vector2(290,790),Vector2(350,690),Vector2(400,590),Vector2(430,540),Vector2(560,505),Vector2(650,480),Vector2(690,410),Vector2(810,340),Vector2(805,230),Vector2(770,170)]],
 	[4,true,"crystal western gallery",[Vector2(560,505),Vector2(570,425),Vector2(500,370),Vector2(450,290),Vector2(350,205)]],
 	[4,true,"crystal northeast gallery",[Vector2(810,340),Vector2(910,390),Vector2(1000,425),Vector2(1130,355),Vector2(1200,270),Vector2(1310,240)]],
-	[4,true,"crystal dry lake rim",[Vector2(1000,425),Vector2(990,530),Vector2(970,590),Vector2(850,640),Vector2(800,710),Vector2(870,760)]],
+	[4,true,"crystal dry lake rim",[Vector2(1000,425),Vector2(990,530),Vector2(970,590),Vector2(800,620),Vector2(750,670),Vector2(750,720),Vector2(800,760),Vector2(870,800)]],
 ]
 var failures := 0
 var movement_samples := 0
@@ -77,6 +75,7 @@ func walk_route(game, spec: Array, reverse := false) -> void:
 			attempts += 1
 			movement_samples += 1
 		check(game.player.distance_to(goal) < 1,"Real walking stopped on %s at art %s; goal %s" % [spec[2],game.player/EARTH.SIZE*EARTH.ART_SIZE,point])
+		if game.player.distance_to(goal) >= 1: return
 	if not reverse: report.routes.append({"district":EARTH.NAMES[spec[0]],"mine":spec[1],"route":spec[2],"waypoints":points.size(),"directions":"both"})
 
 func audit_grid(region: int, cave: bool) -> void:
@@ -185,15 +184,16 @@ func audit_trails(game) -> void:
 func audit_mines(game) -> void:
 	for region in [0,1,4]:
 		for cave in [false,true]:
-			for offset in ([-25.0,0.0,25.0] if cave and region == 0 else ([-45.0,0.0,45.0] if cave else [-75.0,0.0,75.0])):
+			for offset in ([-10.0,0.0,25.0] if cave and region == 0 else ([-45.0,0.0,45.0] if cave else [-75.0,0.0,75.0])):
 				await TRAVEL.enter(game,region,cave)
 				game.mine_transition_cooldown = 0
 				game.earth_trail_cooldown = 100
 				var door: Vector2 = game.exit_position() if cave else game.cave_position()
 				var inward := Vector2.RIGHT if cave and region in [0,4] else (Vector2.UP if cave else Vector2.DOWN)
 				var lateral := inward.orthogonal()
-				var approach_distance := 120.0 if cave and region == 4 else 155.0
+				var approach_distance := (100.0 if offset < 0 else 120.0) if cave and region == 4 else 155.0
 				game.player = door+inward*approach_distance+lateral*offset
+				check(can_walk(region,cave,game.player),"Mine probe starts outside marked floor: %d/%s offset=%s" % [region,cave,offset])
 				for step in 80:
 					if game.earth_transition or game.underground != cave: break
 					game.move_player(-inward,0.04)

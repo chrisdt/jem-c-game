@@ -12,7 +12,7 @@ func run() -> void:
 	assert(not Geometry2D.triangulate_polygon(layout.FLOOR).is_empty())
 	assert(layout.can_walk(game.MINE_SPAWN))
 	assert(layout.can_walk(game.MINE_EXIT))
-	for blocked in [Vector2(755, 640), Vector2(780, 450), Vector2(1070, 515), Vector2(50, 50), Vector2(1000, 900)]:
+	for blocked in [Vector2(755, 640), Vector2(780, 450), Vector2(1070, 515), Vector2(50, 50), Vector2(1000, 900), Vector2(675, 880), Vector2(330, 720)]:
 		assert(not layout.can_walk(layout.from_art(blocked)))
 	# Even a slow frame must not jump through a pillar to the floor beyond it.
 	var start: Vector2 = layout.from_art(Vector2(710, 425)) - layout.FOOT_OFFSET
@@ -20,7 +20,7 @@ func run() -> void:
 	assert(layout.can_walk(stopped))
 	assert(stopped.x < layout.from_art(Vector2(780, 450)).x)
 	# Explore actual traversable floor from the spawn to find every deposit,
-	# the exit, and the six side chambers, rather than teleporting the player.
+	# the exit, and the four marked side chambers, rather than teleporting the player.
 	const GRID := 16.0
 	var first := Vector2i((game.MINE_SPAWN / GRID).round())
 	var queue: Array[Vector2i] = [first]
@@ -43,7 +43,7 @@ func run() -> void:
 	for rock in game.rocks:
 		if rock.cave:
 			targets.append(rock.pos)
-	for alcove in [Vector2(420, 230), Vector2(800, 220), Vector2(1350, 245), Vector2(1280, 830), Vector2(675, 880), Vector2(330, 720)]:
+	for alcove in [Vector2(420, 230), Vector2(800, 220), Vector2(1350, 245), Vector2(1280, 830)]:
 		targets.append(layout.from_art(alcove))
 	for target in targets:
 		var reachable := false

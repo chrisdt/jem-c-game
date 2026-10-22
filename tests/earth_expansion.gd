@@ -46,6 +46,7 @@ func route(game, region: int, cave: bool, points: Array) -> void:
 			game.move_player(remaining.normalized(),minf(remaining.length(),6)/game.SPEED)
 			attempts += 1
 		check(game.player.distance_to(goal) < 1,"Cannot follow painted Earth path: %d %s %s; stopped %s" % [region,cave,point,game.player/EARTH.SIZE*EARTH.ART_SIZE])
+		if game.player.distance_to(goal) >= 1: return
 
 func finish_transition(game) -> void:
 	var deadline := Time.get_ticks_msec()+12000
@@ -111,14 +112,14 @@ func run() -> void:
 	route(game,4,false,[Vector2(800,520),Vector2(1050,610),Vector2(1310,645),Vector2(1260,800),Vector2(1030,900),Vector2(760,920),Vector2(750,740),Vector2(800,520)])
 	# Galleries circle the copper mine's three rock islands.
 	route(game,1,true,[Vector2(750,770),Vector2(750,660),Vector2(775,550),Vector2(790,470),Vector2(690,440),Vector2(585,360),Vector2(545,280),Vector2(430,280),Vector2(250,260)])
-	route(game,1,true,[Vector2(545,280),Vector2(610,185),Vector2(750,130),Vector2(890,180),Vector2(980,270),Vector2(1000,340),Vector2(930,395),Vector2(790,470)])
-	route(game,1,true,[Vector2(250,260),Vector2(325,355),Vector2(350,470),Vector2(310,560),Vector2(230,605),Vector2(370,625),Vector2(470,650),Vector2(590,625),Vector2(650,660),Vector2(750,720)])
-	route(game,1,true,[Vector2(1000,340),Vector2(1180,280),Vector2(1290,265),Vector2(1240,350),Vector2(1200,440),Vector2(1250,540),Vector2(1330,590),Vector2(1200,635),Vector2(1120,660)])
+	route(game,1,true,[Vector2(545,280),Vector2(610,185),Vector2(750,130),Vector2(890,180),Vector2(980,270),Vector2(950,330),Vector2(930,395),Vector2(790,470)])
+	route(game,1,true,[Vector2(250,260),Vector2(325,355),Vector2(350,470),Vector2(310,560),Vector2(230,605),Vector2(370,625),Vector2(440,630)])
+	route(game,1,true,[Vector2(950,330),Vector2(1050,280),Vector2(1180,280),Vector2(1290,265),Vector2(1240,350),Vector2(1200,440),Vector2(1250,540),Vector2(1330,590),Vector2(1200,635),Vector2(1140,655)])
 	# Crystal galleries and the dry western rim of the underground lake.
 	route(game,4,true,[Vector2(290,790),Vector2(350,690),Vector2(400,590),Vector2(430,540),Vector2(560,505),Vector2(650,480),Vector2(690,410),Vector2(810,340),Vector2(805,230),Vector2(770,170)])
 	route(game,4,true,[Vector2(560,505),Vector2(570,425),Vector2(500,370),Vector2(450,290),Vector2(350,205)])
 	route(game,4,true,[Vector2(810,340),Vector2(910,390),Vector2(1000,425),Vector2(1130,355),Vector2(1200,270),Vector2(1310,240)])
-	route(game,4,true,[Vector2(1000,425),Vector2(990,530),Vector2(970,590),Vector2(850,640),Vector2(800,710),Vector2(870,760)])
+	route(game,4,true,[Vector2(1000,425),Vector2(990,530),Vector2(970,590),Vector2(800,620),Vector2(750,670),Vector2(750,720),Vector2(800,760),Vector2(870,800)])
 	for hazard in [[2,false,Vector2(490,645)],[2,false,Vector2(1060,245)],[2,false,Vector2(1000,560)],[3,false,Vector2(690,590)],[4,false,Vector2(440,750)],[4,false,Vector2(600,180)],[1,true,Vector2(750,310)],[1,true,Vector2(500,480)],[1,true,Vector2(1000,550)],[4,true,Vector2(800,470)],[4,true,Vector2(1130,510)],[4,true,Vector2(1160,780)]]:
 		check(not EARTH.can_walk(hazard[0],hazard[1],EARTH.from_art(hazard[2])-EARTH.FOOT_OFFSET),"Earth water/rock wall became walkable: %s" % [hazard])
 	var rng := RandomNumberGenerator.new()
