@@ -1,7 +1,7 @@
-# Sunny Scout — Independent quests and Frost Canyon fixes
+# Sunny Scout — Landing Meadow walking update
 
-Full browser game exported with Godot 4.6.3 from source commit `8508ef52a9562f504fac170fee888a4ebf3daaf3`.
-Editable project: `main`. Build release: `2097db982708621af18c`.
+Full browser game exported with Godot 4.6.3 from source commit `d293774f094564bbc928cae4b07f80b8917911fa`.
+Editable project: `main`. Build release: `fab09de2c7ec474ecf6a`.
 
 ## Upload to WP Engine
 
@@ -23,25 +23,15 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Accept and hand in story quests independently on all three worlds, once their
-  actual equipment and ingredients are ready. Nix no longer waits for Pip;
-  Tavi no longer waits for Nix, and Luma no longer waits for Sol.
-- **Nix / Frostfang:** bring your owned Earth sword, **4 frost ore + 1 amethyst**
-  and the **heart-crystal from the centre of Prism Pass's ruined stone circle**.
-  Return to **Nix in Frozen Basin** and confirm **Forge Frostfang Sword**.
-  Earth's camp workbench builds the starter sword and hand drill.
-- The heart-crystal stays on the central pedestal and can be picked up with
-  E, Space or the touch action from the walkable ground in front. Nix/Tavi
-  dialogue and journal progress show missing unique items and starter tools.
-- Pip's three fragments are larger and have dark snow contrast, contact shadows
-  and subtle gold glints after exploration reveals them. Returning them replaces
-  them with permanent trail lanterns. E / touch action inspects a restored
-  beacon and explains it; Space remains usable for combat nearby.
-- Reporting the expedition discovery to Iris still works after Finn consumes
-  the damaged suit for repairs. Stronger imported tools can open the Earth
-  expedition locker; a Magma Drill also opens the frozen cache.
-- Mineral collection no longer claims an entire world mission is complete.
-  Actual story completions still determine the 14-quest speedrun finish.
+- Landing Meadow walking now follows the supplied red-ground markup, including
+  the outer clearings and the approaches to Moss Mine and both signed trails.
+- Unpainted camp, water, rocky banks, boulders, shrubs and signs remain solid.
+  Sunny uses a small footprint at his feet and slides around solid boundaries.
+- The dog and enemies use the same marked ground. Existing grass/ore placement
+  remains separate; the red annotation is not visible in the game.
+- Checked 36 routes in both directions, all eight Earth areas, 30 trail
+  approaches and 18 mine approaches. No sampled floor remains disconnected.
+  Also checked 150 ore layouts, keyboard/touch startup and companion following.
 
 ## Play and compete
 
