@@ -26,8 +26,8 @@ the return triggers. Earth and Frost retain their existing trigger behavior.
 
 ## Coverage
 
-The audit passes **30 artwork routes in both directions**, **11,756 real-control
-steps**, **14,629 connected floor samples**, **30 trail approaches** and **18 mine
+The audit passes **32 artwork routes in both directions**, **11,972 real-control
+steps**, **14,655 connected floor samples**, **30 trail approaches** and **18 mine
 approaches**. The dense floor audit covers all eight supplied maps. Tight bends in Magma Vault
 are joined through independently authored routes, with every segment proven by
 the same swept collision before joining its floor samples. No sampled points
@@ -42,7 +42,7 @@ checked for valid ground as well as successful travel and no automatic bounce ba
 | Dune Sea | 2762 | 2762 |
 | Dune Sea mine | 1542 | 1542 |
 | Sunken Oasis | 2016 | 2016 |
-| Redrock Arches | 1828 | 1828 |
+| Redrock Arches | 1854 | 1854 |
 | Obsidian Rise | 2461 | 2461 |
 | Obsidian Rise mine | 1340 | 1340 |
 
@@ -65,3 +65,17 @@ layouts, automatic travel, bounded scenery streaming and failure/retry recovery.
 
 Machine-readable results are written to ignored `build/ember-navigation-audit.json`.
 Review scenes, tests and screenshots are excluded from the production Web export.
+
+## Redrock east passage correction
+
+A playthrough found that the eastern outer contour cut into the visible sand
+between the two cactus beds below Redrock Arches' east trail. The previous audit
+followed a winding route through the narrow remaining gap and missed the blocked
+straight approach. The contour now follows the cactus/rock edges, leaving the
+clear sand open. Two new independent artwork routes cover straight movement up
+and down the passage; negative samples keep both cactus beds and the adjoining
+rock face solid. A focused real-control check reproduces the old block and passes
+both directions on three lanes across the corrected passage.
+
+The browser review walks all three lanes down, back up and down again. No scenery
+art, trail destinations, quest requirements or other map boundaries are changed.

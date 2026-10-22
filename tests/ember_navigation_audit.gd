@@ -30,6 +30,8 @@ const ROUTES := [
 	[3,false,"arch north to east connection",[Vector2(750,205),Vector2(800,350),Vector2(900,430),Vector2(1050,480),Vector2(1320,510)]],
 	[3,false,"walk under redrock arch",[Vector2(900,430),Vector2(1100,300),Vector2(1140,250),Vector2(1160,210)]],
 	[3,false,"redrock southern circuit",[Vector2(800,350),Vector2(850,450),Vector2(800,500),Vector2(750,550),Vector2(600,630),Vector2(600,750),Vector2(700,840),Vector2(900,900),Vector2(1150,900),Vector2(1340,780),Vector2(1320,700),Vector2(1310,690),Vector2(1300,660),Vector2(1280,630),Vector2(1280,600),Vector2(1320,510)]],
+	[3,false,"redrock east passage inner lane",[Vector2(1320,560),Vector2(1320,620),Vector2(1320,680),Vector2(1320,740),Vector2(1320,790)]],
+	[3,false,"redrock east passage outer lane",[Vector2(1340,560),Vector2(1340,620),Vector2(1340,680),Vector2(1340,740),Vector2(1340,790)]],
 	[4,false,"obsidian west to mine",[Vector2(200,415),Vector2(300,430),Vector2(350,390),Vector2(420,430),Vector2(500,480),Vector2(650,450),Vector2(950,420),Vector2(1100,370),Vector2(1160,240)]],
 	[4,false,"obsidian lower circuit",[Vector2(300,430),Vector2(250,550),Vector2(300,700),Vector2(550,800),Vector2(800,740),Vector2(1000,750),Vector2(1150,700),Vector2(1250,630),Vector2(1300,600),Vector2(1330,450),Vector2(1330,350),Vector2(1160,240)]],
 	[4,false,"observatory landmark",[Vector2(300,430),Vector2(350,320),Vector2(380,260),Vector2(460,220),Vector2(530,200)]],
@@ -204,6 +206,9 @@ func audit_landmarks() -> void:
 		[1,true,true,Vector2(750,720)],[1,true,false,Vector2(750,450)],[1,true,false,Vector2(230,275)],
 		[2,false,true,Vector2(790,50)],[2,false,false,Vector2(625,525)],[2,false,false,Vector2(1070,710)],
 		[3,false,true,Vector2(1140,250)],[3,false,false,Vector2(465,410)],[3,false,false,Vector2(1050,710)],
+		# Reported clear-sand passage stays open between both solid cactus beds.
+		[3,false,true,Vector2(1330,640)],[3,false,true,Vector2(1340,700)],
+		[3,false,false,Vector2(1240,645)],[3,false,false,Vector2(1400,605)],[3,false,false,Vector2(1450,650)],
 		[4,false,true,Vector2(1160,240)],[4,false,false,Vector2(430,560)],[4,false,false,Vector2(1000,670)],
 		[4,true,true,Vector2(600,390)],[4,true,true,Vector2(400,500)],[4,true,false,Vector2(780,400)],[4,true,false,Vector2(1210,730)],
 	]
