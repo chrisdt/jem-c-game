@@ -1,7 +1,7 @@
-# Sunny Scout — Frost trail cleanup
+# Sunny Scout — Godot dialogue compatibility fix
 
-Full browser game exported with Godot 4.6.3 from source commit `45b4482639d7637ba6c36c757848d56628427f94`.
-Editable project: `main`. Build release: `1b7b3e88337a78518749`.
+Full browser game exported with Godot 4.6.3 from source commit `0495838c60617d85aa11dbd2222325b9fffe38cd`.
+Editable project: `main`. Build release: `35375e5df59485649047`.
 
 ## Upload to WP Engine
 
@@ -23,13 +23,13 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Removed Canyon Camp's short dead-end footprint spur below the right-facing
-  sign near the mine. Blended the area with matching snow using a local retouch.
-- Verified that pixels outside the small edited area are unchanged, preserving
-  the main walking trails, mine approach, cliffs and connected crossroads.
-- Checked the retouched background in the browser and exported all 31 assets.
-- Includes the mission item icons in dialogue across all three worlds and all
-  previous world, mine creature, mining and controls improvements.
+- Fixed mission item icons failing to compile in Godot 4.7.2. The icon renderer
+  now uses shared add_image arguments and default pixel units, compatible with
+  both the new ImageUnit enums and the previous percentage flags.
+- Tested cold startup, real dialogue, 78 mission pages, keyboard/touch paging
+  and cancellation on Godot 4.6.3 and 4.7.2. Web export uses Godot 4.6.3.
+- Includes the matching mission icons across all worlds, the cleaned Frost
+  footprint spur, and previous world, mining, creature and controls updates.
 
 ## Play and compete
 
