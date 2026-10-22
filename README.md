@@ -1,7 +1,7 @@
-# Sunny Scout — Frost paths and off-world mines
+# Sunny Scout — Connected Frost crossroads
 
-Full browser game exported with Godot 4.6.3 from source commit `94e2469b3abb8891013f50baa047a12ced2bf98c`.
-Editable project: `main`. Build release: `cd9a628b599663b3f7d5`.
+Full browser game exported with Godot 4.6.3 from source commit `6b3476e6fc162b31a16913f930432fcf3f5b0b4e`.
+Editable project: `main`. Build release: `4167af5d84a69ccb65be`.
 
 ## Upload to WP Engine
 
@@ -23,24 +23,14 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Clears the snowy outcrops beside Canyon Camp's Frozen Basin and Prism Pass
-  signs, joins the footprint trails and opens the walking connections. The
-  Glacier Crown exit from Prism Pass continues through clear snow to the edge.
-- Rare minerals now take five seconds before drill bonuses. Earth, Frost and
-  Ember deposits retain their own progress after movement, damage, menus and
-  leaving an area. Crystal Drill: three seconds; Magma Drill: 2.25 seconds.
-- All nine mines have hostile crawling and flying creatures. Frost has Crystal
-  Crawlers and Icewings; Ember has Ash Crawlers and Cinderwings, with original
-  four-pose animations, warned attacks, safe entrances, solid walls and
-  persistent partial damage/defeats. Surface creatures remain friendly.
-- Moves the Sunforge core onto the lantern-side crate in Sunfire Cavern, and
-  Obsidian Rise's cooled-lava mission rock and guardian into the central sand.
-- Food concept art proposes frostberries and emberfruit as wild pickups.
-  Prepared meals remain camp-recipe ideas only, with local alien ingredients;
-  food is not implemented in this build.
-- Checked all nine mines, both off-world stories, 33 Frost walking routes,
-  twelve interrupted mining jobs, seeded ore placement, keyboard/touch controls
-  and startup. Includes the previous controls guide and world fixes.
+- Canyon Camp's west, north, south and bridge footprint trails now meet at
+  one continuous four-way intersection, with a curved western approach that
+  matches the surrounding snow tracks.
+- Verified all 33 Frost routes in both directions, including the new painted
+  west-to-east crossing, all trail/mine approaches and solid hazards. Browser
+  review checks the updated crossroads artwork.
+- Includes the four animated alien mine creatures, faster resumable mining,
+  relocated quest items and all previous world and controls updates.
 
 ## Play and compete
 
