@@ -6,6 +6,7 @@ const SIZE := Vector2(2000,1400)
 const ART_SIZE := Vector2(1500,1050)
 const FOOT_OFFSET := Vector2(0,20)
 const MOTION = preload("res://floor_motion.gd")
+const FROST_MARKUP = preload("res://frost_markup.gd")
 const DENSITY = preload("res://ore_density.gd")
 var world: int
 var NAMES: Array
@@ -50,11 +51,12 @@ func _init(planet: int) -> void:
 			[{"side":"north_west","target":1,"arrival":"south"},{"side":"north_east","target":2,"arrival":"south"}],
 			[{"side":"west","target":2,"arrival":"east"}],
 		]
-		GATES = [{"west":Vector2(85,480),"east":Vector2(1420,320)}, {"east":Vector2(1420,465),"south":Vector2(790,955)}, {"west":Vector2(85,425),"east":Vector2(1420,455),"south":Vector2(750,955)}, {"north_west":Vector2(315,90),"north_east":Vector2(1190,90)}, {"west":Vector2(85,520)}]
+		GATES = [{"west":Vector2(55,465),"east":Vector2(1420,320)}, {"east":Vector2(1420,465),"south":Vector2(790,955)}, {"west":Vector2(55,435),"east":Vector2(1420,455),"south":Vector2(750,955)}, {"north_west":Vector2(315,90),"north_east":Vector2(1190,90)}, {"west":Vector2(85,520)}]
 		MINE_ENTRANCES = [Vector2(1620,280),from_art(Vector2(425,205)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(1220,205))]
 		MINE_EXITS = [Vector2(968,1230),from_art(Vector2(750,920)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(200,850))]
 		MINE_SPAWNS = [Vector2(968,1115),from_art(Vector2(750,780)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(350,780))]
-		SURFACE_BLOCKERS = {1:[Vector4(1030,250,190,85),Vector4(400,860,145,65),Vector4(425,110,170,65),Vector4(365,350,50,40),Vector4(1100,755,70,45)],2:[Vector4(750,345,155,100),Vector4(1270,170,160,90),Vector4(340,435,95,45),Vector4(1120,430,95,45),Vector4(960,720,120,55),Vector4(500,655,115,65)],3:[Vector4(750,710,225,90),Vector4(750,240,100,60),Vector4(480,450,90,55),Vector4(1010,380,100,65),Vector4(980,550,45,30),Vector4(730,600,35,20)],4:[Vector4(1240,800,145,75),Vector4(1210,120,160,65),Vector4(460,250,65,35),Vector4(770,570,135,65),Vector4(590,390,100,65),Vector4(1010,460,95,60),Vector4(570,680,130,50)]}
+		# Frost floor edges and islands live in the authored markup catalogue.
+		SURFACE_BLOCKERS = {1:[],2:[],3:[],4:[]}
 	else:
 		NAMES = ["Mesa Camp","Dune Sea","Sunken Oasis","Redrock Arches","Obsidian Rise"]
 		SURFACE_IDS = [4,18,20,21,22]
@@ -91,14 +93,9 @@ func _init(planet: int) -> void:
 	}
 
 	if world == 1:
-		MINE_CONNECTORS[4] = [PackedVector2Array([Vector2(950,380),Vector2(1120,320)])]
 		MINE_EXITS[4] = from_art(Vector2(250,850))
 		MINE_SPAWNS[4] = from_art(Vector2(350,740))
-		MINE_BLOCKERS[4] = [Vector4(785,450,100,85),Vector4(1130,735,210,115),Vector4(500,410,65,55),Vector4(640,665,120,80),Vector4(1000,290,100,55)]
-		MINE_FLOORS[4] = PackedVector2Array([Vector2(315,970),Vector2(185,950),Vector2(140,900),Vector2(170,845),Vector2(240,790),Vector2(280,740),Vector2(270,700),Vector2(320,640),Vector2(330,560),Vector2(350,510),Vector2(300,465),Vector2(260,420),Vector2(200,375),Vector2(140,350),Vector2(130,300),Vector2(230,250),Vector2(250,210),Vector2(240,160),Vector2(310,130),Vector2(400,145),Vector2(430,200),Vector2(480,230),Vector2(600,240),Vector2(680,260),Vector2(790,220),Vector2(870,230),Vector2(940,280),Vector2(1040,260),Vector2(1070,190),Vector2(1140,130),Vector2(1250,150),Vector2(1320,190),Vector2(1380,240),Vector2(1370,290),Vector2(1300,335),Vector2(1280,370),Vector2(1220,400),Vector2(1170,390),Vector2(1120,350),Vector2(1060,350),Vector2(1030,385),Vector2(1050,420),Vector2(1150,440),Vector2(1260,450),Vector2(1270,500),Vector2(1210,535),Vector2(1170,540),Vector2(1130,570),Vector2(1030,580),Vector2(1000,630),Vector2(950,670),Vector2(900,700),Vector2(840,680),Vector2(800,660),Vector2(730,650),Vector2(680,610),Vector2(630,600),Vector2(610,640),Vector2(550,675),Vector2(500,700),Vector2(490,740),Vector2(430,755),Vector2(400,800),Vector2(345,810),Vector2(340,870),Vector2(350,915)])
 		MINE_ORE_ZONES[4] = [Rect2(270,200,150,100),Rect2(1130,200,140,100),Rect2(540,320,140,130),Rect2(650,540,300,60),Rect2(950,380,180,100),Rect2(420,290,350,55)]
-		MINE_BLOCKERS[1] = [Vector4(750,430,260,180),Vector4(370,310,95,45),Vector4(1130,310,95,45),Vector4(1210,490,70,50),Vector4(500,690,100,55),Vector4(1020,680,90,50),Vector4(290,480,70,40)]
-		MINE_FLOORS[1] = PackedVector2Array([Vector2(650,1040),Vector2(800,1040),Vector2(900,950),Vector2(870,830),Vector2(1010,790),Vector2(1130,800),Vector2(1300,710),Vector2(1350,660),Vector2(1300,600),Vector2(1220,560),Vector2(1270,500),Vector2(1350,470),Vector2(1410,390),Vector2(1340,340),Vector2(1270,300),Vector2(1250,230),Vector2(1150,180),Vector2(1090,160),Vector2(1000,200),Vector2(960,150),Vector2(900,110),Vector2(800,135),Vector2(690,120),Vector2(620,110),Vector2(550,135),Vector2(480,200),Vector2(410,180),Vector2(330,200),Vector2(250,260),Vector2(260,320),Vector2(180,340),Vector2(110,380),Vector2(140,450),Vector2(260,500),Vector2(300,550),Vector2(210,610),Vector2(170,665),Vector2(260,720),Vector2(360,770),Vector2(470,760),Vector2(560,800),Vector2(610,830),Vector2(620,930)])
 		ORE_ZONES[2] = [Rect2(530,470,470,100),Rect2(650,570,160,150),Rect2(1120,500,190,130),Rect2(530,175,400,60)]
 		ORE_ZONES[3] = [Rect2(540,330,365,230),Rect2(920,460,210,110),Rect2(300,500,100,90),Rect2(1090,240,100,140)]
 		ORE_ZONES[4] = [Rect2(600,400,330,110),Rect2(900,620,230,110),Rect2(320,320,150,130),Rect2(1060,240,100,110),Rect2(340,750,400,70)]
@@ -133,6 +130,7 @@ func has_mine(region: int) -> bool:
 	return MINE_IDS[region] >= 0
 
 func floor_contains(region: int, cave: bool, point: Vector2) -> bool:
+	if world == 1: return FROST_MARKUP.floor_contains(region,cave,point)
 	var art := point/SIZE*ART_SIZE
 	if cave:
 		var inside_mine := Geometry2D.is_point_in_polygon(art,MINE_FLOORS[region])

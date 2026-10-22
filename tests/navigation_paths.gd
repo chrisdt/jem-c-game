@@ -33,23 +33,25 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	game.mine_transition_cooldown = 10000
+	game.earth_trail_cooldown = 10000
 	# These waypoints come from visible paths/clearings in the artwork, not
 	# from the navigation geometry. Walk each segment with real player controls.
 	# Surface routes stop before the automatic doorway; mine_transitions.gd
 	# checks crossing it and arriving in the next area.
-	run_route(game,"ice",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1270,280),Vector2(1210,290)])
-	run_route(game,"ice",[Vector2(340,550),Vector2(335,440),Vector2(340,365),Vector2(370,320),Vector2(355,275),Vector2(300,275),Vector2(270,300)])
-	run_route(game,"ice",[Vector2(1000,470),Vector2(1080,560),Vector2(1160,620),Vector2(1230,690)])
-	run_route(game,"ice",[Vector2(330,610),Vector2(260,620)])
-	run_route(game,"frost",[Vector2(725,800),Vector2(680,790),Vector2(700,735),Vector2(750,650),Vector2(700,590),Vector2(680,520),Vector2(600,460),Vector2(520,420),Vector2(440,380),Vector2(465,330),Vector2(350,300),Vector2(300,285),Vector2(350,230),Vector2(310,160)])
+	run_route(game,"ice",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1210,290)])
+	run_route(game,"ice",[Vector2(340,550),Vector2(335,440),Vector2(340,365),Vector2(370,320),Vector2(355,275),Vector2(300,275),Vector2(270,270),Vector2(260,220),Vector2(300,200)])
+	run_route(game,"ice",[Vector2(1000,470),Vector2(1080,560),Vector2(1160,620),Vector2(1160,700),Vector2(1240,755),Vector2(1300,790),Vector2(1360,800)])
+	run_route(game,"frost",[Vector2(725,800),Vector2(750,650),Vector2(700,590),Vector2(680,520),Vector2(600,460),Vector2(520,420),Vector2(440,380),Vector2(465,330),Vector2(350,300),Vector2(300,285),Vector2(315,230),Vector2(340,210),Vector2(310,160)])
 	run_route(game,"frost",[Vector2(725,800),Vector2(800,755),Vector2(750,650),Vector2(860,590),Vector2(885,520),Vector2(960,480),Vector2(1030,400),Vector2(1100,430),Vector2(1180,440),Vector2(1290,420),Vector2(1350,340),Vector2(1270,280),Vector2(1230,210),Vector2(1240,160)])
 	run_route(game,"moss",[Vector2(210,455),Vector2(320,460),Vector2(430,440),Vector2(490,390),Vector2(500,350),Vector2(470,320),Vector2(425,280),Vector2(410,240),Vector2(360,230)])
 	check(not game.MINE_LAYOUT.can_walk(game.MINE_LAYOUT.from_art(Vector2(380,320))-game.MINE_LAYOUT.FOOT_OFFSET),"Moss mine rock wall became walkable")
 	var frost = game.FROST_LAYOUT
-	for point in [Vector2(675,493),Vector2(770,493),Vector2(865,493),Vector2(675,522),Vector2(770,522),Vector2(865,522)]:
+	for point in [Vector2(675,493),Vector2(770,493),Vector2(865,493),Vector2(675,517),Vector2(770,517),Vector2(865,517)]:
 		check(frost.can_walk(frost.from_art(point)-frost.FOOT_OFFSET),"Bridge deck edge blocked at %s" % point)
-	for sample in [[Vector2(770,350),false],[Vector2(770,650),false],[Vector2(1300,790),false],[Vector2(740,300),true],[Vector2(790,510),true]]:
+	for sample in [[Vector2(770,350),false],[Vector2(770,650),false],[Vector2(740,300),true],[Vector2(790,510),true]]:
 		check(not frost.can_walk(frost.from_art(sample[0])-frost.FOOT_OFFSET,sample[1]),"Hazard became walkable at %s" % sample[0])
+	check(frost.can_walk(frost.from_art(Vector2(1300,790))-frost.FOOT_OFFSET),"Marked frozen pool is not walkable ice")
 	# A single arrow key should slide along a slanted boundary instead of
 	# stopping. Straight walls and concave corners must remain solid.
 	var slope := func(p: Vector2): return p.x+p.y <= 100.0

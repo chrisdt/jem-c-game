@@ -114,18 +114,24 @@ func walk_route(game, planet: int, region: int, cave: bool, points: Array) -> vo
 func art_routes(game) -> void:
 	walk_route(game,1,1,false,[Vector2(1300,480),Vector2(1100,505),Vector2(750,450),Vector2(590,340),Vector2(450,245)])
 	walk_route(game,1,1,false,[Vector2(750,450),Vector2(600,540),Vector2(650,660),Vector2(760,800),Vector2(790,920)])
-	walk_route(game,1,2,false,[Vector2(200,450),Vector2(430,510),Vector2(650,525),Vector2(800,500),Vector2(1000,450),Vector2(1200,500),Vector2(1320,455)])
-	walk_route(game,1,2,false,[Vector2(650,525),Vector2(540,430),Vector2(505,330),Vector2(600,220),Vector2(750,175),Vector2(890,230),Vector2(950,330),Vector2(950,400),Vector2(800,500)])
-	walk_route(game,1,2,false,[Vector2(800,500),Vector2(750,650),Vector2(820,770),Vector2(750,900)])
-	walk_route(game,1,3,false,[Vector2(315,205),Vector2(390,300),Vector2(330,450),Vector2(420,560),Vector2(620,575),Vector2(760,520),Vector2(1000,590),Vector2(1100,520),Vector2(1190,430),Vector2(1120,290),Vector2(1190,205)])
-
-	walk_route(game,1,4,false,[Vector2(200,520),Vector2(330,540),Vector2(440,420),Vector2(550,300),Vector2(750,380),Vector2(950,350),Vector2(1120,285),Vector2(1210,240)])
-	walk_route(game,1,4,false,[Vector2(330,540),Vector2(430,650),Vector2(400,770),Vector2(600,805),Vector2(820,760),Vector2(1050,650),Vector2(1150,650),Vector2(1140,530),Vector2(1200,430)])
-
+	walk_route(game,1,1,false,[Vector2(750,450),Vector2(840,350),Vector2(930,290),Vector2(1040,250),Vector2(1130,250)])
+	walk_route(game,1,1,false,[Vector2(750,450),Vector2(550,470),Vector2(430,530),Vector2(330,570),Vector2(280,600)])
+	walk_route(game,1,1,false,[Vector2(280,650),Vector2(265,700),Vector2(285,745),Vector2(310,780),Vector2(350,815),Vector2(390,845),Vector2(450,850),Vector2(495,855)])
 	walk_route(game,1,1,true,[Vector2(750,780),Vector2(750,680),Vector2(580,630),Vector2(440,570),Vector2(420,460),Vector2(500,350),Vector2(540,260),Vector2(650,205),Vector2(830,205),Vector2(980,250),Vector2(1040,400),Vector2(1080,490),Vector2(1050,580),Vector2(900,650),Vector2(750,680)])
 	walk_route(game,1,1,true,[Vector2(420,460),Vector2(290,400),Vector2(180,400)])
-
-	walk_route(game,1,4,true,[Vector2(350,740),Vector2(400,650),Vector2(410,560),Vector2(490,500),Vector2(580,450),Vector2(620,360),Vector2(750,320),Vector2(880,310),Vector2(900,400),Vector2(950,490),Vector2(900,570),Vector2(750,580),Vector2(620,530),Vector2(580,450)])
+	walk_route(game,1,1,true,[Vector2(1080,490),Vector2(1120,550),Vector2(1190,630),Vector2(1200,690)])
+	walk_route(game,1,2,false,[Vector2(170,455),Vector2(260,495),Vector2(430,510),Vector2(650,525),Vector2(800,500),Vector2(1000,480),Vector2(1200,500),Vector2(1320,455)])
+	walk_route(game,1,2,false,[Vector2(650,525),Vector2(540,430),Vector2(505,330),Vector2(600,220),Vector2(750,175),Vector2(890,230),Vector2(950,330),Vector2(950,400),Vector2(800,500)])
+	walk_route(game,1,2,false,[Vector2(800,500),Vector2(750,650),Vector2(820,770),Vector2(750,900)])
+	walk_route(game,1,2,false,[Vector2(1200,500),Vector2(1280,425),Vector2(1280,325),Vector2(1250,285),Vector2(1260,230),Vector2(1270,200)])
+	walk_route(game,1,3,false,[Vector2(315,205),Vector2(390,300),Vector2(330,450),Vector2(420,560),Vector2(620,575),Vector2(760,520),Vector2(1000,590),Vector2(1070,600),Vector2(1100,570),Vector2(1100,520),Vector2(1190,430),Vector2(1120,290),Vector2(1190,205)])
+	walk_route(game,1,3,false,[Vector2(760,520),Vector2(800,610),Vector2(800,730),Vector2(700,740),Vector2(600,710)])
+	walk_route(game,1,3,false,[Vector2(600,710),Vector2(470,740),Vector2(550,810),Vector2(700,870),Vector2(850,880),Vector2(1000,830),Vector2(1090,750),Vector2(1100,650),Vector2(1000,590)])
+	walk_route(game,1,4,false,[Vector2(200,520),Vector2(330,540),Vector2(440,420),Vector2(450,350),Vector2(470,320),Vector2(550,300),Vector2(750,380),Vector2(950,350),Vector2(1120,285),Vector2(1210,240)])
+	walk_route(game,1,4,false,[Vector2(330,540),Vector2(430,650),Vector2(400,770),Vector2(600,805),Vector2(820,760),Vector2(1050,650),Vector2(1150,650),Vector2(1140,530),Vector2(1200,430)])
+	walk_route(game,1,4,false,[Vector2(1050,650),Vector2(1150,650),Vector2(1200,750),Vector2(1240,800),Vector2(1290,790)])
+	walk_route(game,1,4,false,[Vector2(440,420),Vector2(420,340),Vector2(460,260)])
+	walk_route(game,1,4,true,[Vector2(350,780),Vector2(420,730),Vector2(490,650),Vector2(580,550),Vector2(590,430),Vector2(620,360),Vector2(750,320),Vector2(880,310),Vector2(900,400),Vector2(950,490),Vector2(900,570),Vector2(750,580),Vector2(620,530),Vector2(590,430)])
 	walk_route(game,1,4,true,[Vector2(620,360),Vector2(500,300),Vector2(400,260),Vector2(320,210)])
 	walk_route(game,1,4,true,[Vector2(900,400),Vector2(1030,380),Vector2(1100,330),Vector2(1140,300),Vector2(1220,240)])
 
@@ -198,8 +204,14 @@ func run() -> void:
 						if deposits[j].cave == rock.cave: check(deposits[j].pos.distance_to(rock.pos) >= 155,"New deposits overlap")
 			for cave in [false,true]:
 				if cave and not data.has_mine(region): continue
-				for hazard in (data.MINE_BLOCKERS[region] if cave else data.SURFACE_BLOCKERS[region]):
-					check(not data.can_walk(region,cave,data.from_art(Vector2(hazard.x,hazard.y))-data.FOOT_OFFSET),"Rock/lava/water center became walkable")
+				if planet == 1:
+					# Frozen pools and the ruined circle were explicitly painted
+					# walkable. Test unpainted islands independently of old ellipses.
+					var hazard: Vector2 = ({1:Vector2(750,430),4:Vector2(785,450)} if cave else {1:Vector2(350,390),2:Vector2(750,345),3:Vector2(480,450),4:Vector2(770,570)})[region]
+					check(not data.can_walk(region,cave,data.from_art(hazard)-data.FOOT_OFFSET),"Unmarked Frost rock became walkable")
+				else:
+					for hazard in (data.MINE_BLOCKERS[region] if cave else data.SURFACE_BLOCKERS[region]):
+						check(not data.can_walk(region,cave,data.from_art(Vector2(hazard.x,hazard.y))-data.FOOT_OFFSET),"Rock/lava/water center became walkable")
 	art_routes(game)
 	game.world = 0
 	game.set_current_region(0)

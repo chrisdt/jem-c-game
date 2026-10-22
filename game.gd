@@ -751,7 +751,7 @@ func check_mine_transition(previous: Vector2) -> void:
 	if not regions().has_mine(current_region()):
 		return
 	var doorway := exit_position() if underground else cave_position()
-	if world == 0:
+	if world in [0,1]:
 		if not EARTH.crosses_opening(previous,player,doorway,EARTH.MINE_TRIGGER_EXTENTS): return
 	else:
 		var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
@@ -784,7 +784,7 @@ func check_earth_trail(previous: Vector2) -> void:
 	for link in regions().LINKS[current_region()]:
 		var point: Vector2 = regions().portal(current_region(),link.side)
 		var crossed: bool
-		if world == 0:
+		if world in [0,1]:
 			crossed = EARTH.crosses_opening(previous,player,point,EARTH.trail_trigger_extents(link.side))
 		else:
 			var closest := Geometry2D.get_closest_point_to_segment(point,previous,player)
