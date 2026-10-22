@@ -26,6 +26,10 @@ const ALIEN_MINE_HOMES := {
 	1:{0:[Vector2(520,420),Vector2(1030,400)],1:[Vector2(420,460),Vector2(1050,580)],4:[Vector2(580,450),Vector2(950,490)]},
 	2:{0:[Vector2(420,460),Vector2(1230,530)],1:[Vector2(300,500),Vector2(1200,420)],4:[Vector2(600,390),Vector2(1000,330)]},
 }
+const ALIEN_BAT_HOMES := {
+	1:{0:[Vector2(440,380),Vector2(860,590),Vector2(1180,440)],1:[Vector2(540,260),Vector2(1040,400),Vector2(900,650)],4:[Vector2(400,260),Vector2(900,570),Vector2(1220,240)]},
+	2:{0:[Vector2(550,450),Vector2(1260,350),Vector2(1100,450)],1:[Vector2(630,140),Vector2(1120,280),Vector2(1100,800)],4:[Vector2(450,180),Vector2(900,520),Vector2(1000,830)]},
+}
 const RAT_HOMES := {
 	0:[Vector2(350,440),Vector2(650,850)],
 	1:[Vector2(750,700),Vector2(300,590)],
@@ -87,30 +91,35 @@ func populate(world: int, region: int, cave: bool, catalog, game: Node) -> void:
 			add_creature(CREATURE.Kind.RAT,home,world,region,cave,catalog,game,landmarks)
 		for home in BAT_HOMES[region]:
 			add_creature(CREATURE.Kind.BAT,home,world,region,cave,catalog,game,landmarks)
+	elif cave:
+		for home in ALIEN_MINE_HOMES[world][region]:
+			add_creature(CREATURE.Kind.RAT,home,world,region,cave,catalog,game,landmarks)
+		for home in ALIEN_BAT_HOMES[world][region]:
+			add_creature(CREATURE.Kind.BAT,home,world,region,cave,catalog,game,landmarks)
 	else:
-		var homes: Array = ALIEN_MINE_HOMES[world][region] if cave else SURFACE_HOMES[world][region]
-		for home in homes:
+		for home in SURFACE_HOMES[world][region]:
 			add_creature(CREATURE.Kind.FROSTLING if world == 1 else CREATURE.Kind.DUNE_SPRITE,home,world,region,cave,catalog,game,landmarks)
 
 func add_creature(kind: int, home: Vector2, world: int, region: int, cave: bool, catalog, game: Node, landmarks: Array[Vector2]) -> void:
 	var slot := spawn_slot
 	spawn_slot += 1
 	var mine_id: int = catalog.MINE_IDS[region] if cave else -1
-	if world == 0 and cave and is_instance_valid(game) and game.has_method("area_id"):
+	if cave and is_instance_valid(game) and game.has_method("area_id"):
 		if game.scared_wildlife.get(mine_id,{}).has(slot): return
 	var creature := CREATURE.new()
-	creature.name = "Creature%d" % creatures.size()
+	creature.name = (CREATURE.ALIEN_ART.NAMES[world-1][int(kind == CREATURE.Kind.BAT)] if world > 0 and cave else "Creature")+str(creatures.size())
 	creature.kind = kind
+	creature.mine_world = world if cave else 0
 	creature.scare_id = slot
 	creature.scare_area = mine_id
-	creature.hostile = world == 0 and cave and is_instance_valid(game) and is_instance_valid(game.get("trial"))
+	creature.hostile = cave and is_instance_valid(game) and is_instance_valid(game.get("trial"))
 	if creature.hostile:
 		creature.health = game.trial.mine_health.get(mine_id,{}).get(slot,creature.max_health())
 	creature.position = home*SCALE
 	creature.cave = cave
 	creature.game = game
 	creature.wander_radius = 125.0 if cave else 175.0
-	if kind == CREATURE.Kind.RAT and RAT_BOUNDS.has(region):
+	if world == 0 and kind == CREATURE.Kind.RAT and RAT_BOUNDS.has(region):
 		var bounds: Rect2 = RAT_BOUNDS[region][RAT_HOMES[region].find(home)]
 		creature.wander_bounds = Rect2(bounds.position*SCALE,bounds.size*SCALE)
 	creature.landmarks = landmarks

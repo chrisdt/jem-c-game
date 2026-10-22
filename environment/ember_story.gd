@@ -18,10 +18,10 @@ const PROPS := {
 	"plant_oasis":{"region":2,"cave":false,"foot":Vector2(1300,690),"cell":3,"width":33.0},
 	"plant_arch":{"region":3,"cave":false,"foot":Vector2(1350,730),"cell":3,"width":33.0},
 	"flask":{"region":0,"cave":true,"foot":Vector2(1100,650),"cell":4,"width":24.0},
-	"core":{"region":1,"cave":true,"foot":Vector2(1120,650),"cell":5,"width":34.0},
-	"observatory":{"region":4,"cave":false,"foot":Vector2(1500,760),"cell":6,"width":94.0},
+	"core":{"region":1,"cave":true,"foot":Vector2(1547,949),"cell":5,"width":34.0,"landmark":true},
+	"observatory":{"region":4,"cave":false,"foot":Vector2(1100,610),"cell":6,"width":94.0},
 }
-const SCORPION_HOMES := {1:Vector2(1200,1050),2:Vector2(1330,900),4:Vector2(1410,750)}
+const SCORPION_HOMES := {1:Vector2(1200,1050),2:Vector2(1330,900),4:Vector2(1200,670)}
 var game: Node
 var npcs: Array = []
 var accepted: Dictionary = {}
@@ -93,7 +93,7 @@ func pages(role: String) -> Array[String]:
 		"sol": return ["I'm Sol. Welcome to Ember Dunes, home of the Sunstone Folk! Our camp cooling station needs three parts.","Find them in Dune Sea, Sunken Oasis and Redrock Arches. Bring them here and we'll make a safe place to rest.","Watch for alien scorpions! A raised tail warns of a venom sting. Dodge while it aims. Camp shade clears venom; the repaired cooler also restores hearts."]
 		"luma": return ["I'm Luma. Oasis glowleaf can stop scorpion venom!","Find two glowleaf plants: one in Sunken Oasis, one in Redrock Arches. Bring the empty flask from Lava Mine below Mesa Camp.","I'll make an antidote canteen with three doses. Press 3 or tap its icon while poisoned. Refill it at Sol's repaired cooling station."]
 		"brasa":
-			var recipes: Array[String] = ["I'm Brasa, the Sunforge smith. Recover the power core from Sunfire Cavern beneath Dune Sea."]
+			var recipes: Array[String] = ["I'm Brasa, the Sunforge smith. Recover the power core from the crate beneath a lantern in Sunfire Cavern, below Dune Sea."]
 			if not sunfang: recipes.append("Sunfang Sword: bring an owned Earth sword, 3 gold and 1 fire ruby.")
 			if not magma_drill: recipes.append("Magma Drill: bring a hand drill, 4 gold and 1 fire ruby.")
 			recipes.append("Both upgrades work with both outfits on every world. Return for each unfinished tool; completed recipes disappear. Frost equipment helps but isn't required.")
@@ -203,7 +203,7 @@ func sync_area() -> void:
 			props[id].visible = prop_exists(id)
 			continue
 		if not prop_exists(id): continue
-		if not positions.has(id): positions[id] = fit_floor(spec.foot,spec.region,spec.cave)
+		if not positions.has(id): positions[id] = spec.foot if spec.get("landmark",false) else fit_floor(spec.foot,spec.region,spec.cave)
 		var point: Vector2 = positions[id]
 		if not point.is_finite(): continue
 		var prop := Sprite2D.new()
@@ -212,6 +212,7 @@ func sync_area() -> void:
 		prop.centered = false
 		prop.offset = Vector2(-prop.texture.get_width()*0.5,-prop.texture.get_height()*0.85)
 		prop.scale = Vector2(spec.width/prop.texture.get_width(),spec.width/prop.texture.get_width()*0.72)
+		if id == "core": prop.offset.y = -prop.texture.get_height()
 		prop.modulate.a = fades.get(id,0.0)
 		add_child(prop)
 		props[id] = prop
@@ -245,7 +246,6 @@ func use_prop(id: String) -> bool:
 		elif game.trial.selected_tool != 0:
 			game.message = "Select your Magma Drill to uncover the observatory."
 		else:
-			work = 0
 			job = id
 			game.walking = false
 			game.message = "Breaking the cooled lava crust..."
@@ -257,7 +257,6 @@ func use_prop(id: String) -> bool:
 func cancel_work() -> void:
 	if job.is_empty(): return
 	job = ""
-	work = 0
 	game.restore_walk_visual()
 func working() -> bool: return not job.is_empty()
 func _process(delta: float) -> void:

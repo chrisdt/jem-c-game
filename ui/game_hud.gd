@@ -207,7 +207,7 @@ func update_help_copy() -> void:
 	if trial_active:
 		help_text.text = "Drag pad · walk\nTap action · gather / mine\nMove to pause; return to resume\nOpen Quests for your next step" if touch_mode else "WASD / arrows · walk\n1 tool · 2 sword · Space attack\nE / Space · gather / mine\nJ · Quests   E · talk / use\n3 · antidote (when earned)"
 	else:
-		help_text.text = "Drag pad   Walk\nTap action   Mine, use or cancel\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or cancel\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
+		help_text.text = "Drag pad   Walk\nTap action   Mine, use or pause\nWalk into doors and signed trails\nReload page   Start a new game" if touch_mode else "WASD / arrows   Walk\nE / Space   Mine, use or pause\nWalk into mine doors to enter / leave\nR   Reset (asks first)"
 
 func present_trial(state: Dictionary) -> void:
 	set_trial_visibility(not state.menu and not state.flying)

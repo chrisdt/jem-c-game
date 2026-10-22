@@ -8,6 +8,9 @@ const MOTION = preload("res://floor_motion.gd")
 const TRAVEL = preload("res://tests/support/area_travel.gd")
 const GRID := 24.0
 const ROUTES := [
+	[0,false,"cleared Frozen Basin junction",[Vector2(70,470),Vector2(150,450),Vector2(240,450),Vector2(300,450),Vector2(340,440),Vector2(340,550)]],
+	[0,false,"cleared Prism Pass junction",[Vector2(1190,330),Vector2(1280,330),Vector2(1340,340),Vector2(1400,330),Vector2(1460,320)]],
+	[2,false,"Glacier Crown signed exit",[Vector2(1320,455),Vector2(1400,450),Vector2(1460,435),Vector2(1490,435)]],
 	[0,false,"camp and canyon bridge",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1210,290)]],
 	[0,false,"northern ice arch",[Vector2(340,550),Vector2(335,440),Vector2(340,365),Vector2(370,320),Vector2(355,275),Vector2(300,275),Vector2(270,270),Vector2(260,220),Vector2(300,200)]],
 	[0,false,"eastern frozen pool",[Vector2(1000,470),Vector2(1080,560),Vector2(1160,620),Vector2(1160,700),Vector2(1240,755),Vector2(1300,790),Vector2(1360,800)]],
@@ -154,6 +157,8 @@ func audit_landmarks() -> void:
 	# Expected samples are selected from the supplied red paintings, not from
 	# the navigation data. Red frozen pools and the landmark are usable ground.
 	var samples := [
+		[0,false,true,Vector2(250,500)],[0,false,true,Vector2(1340,355)],
+		[0,false,false,Vector2(160,405)],
 		[0,false,true,Vector2(300,840)],[0,false,true,Vector2(770,500)],[0,false,true,Vector2(1300,790)],
 		[0,false,false,Vector2(770,350)],[0,false,false,Vector2(770,650)],[0,false,false,Vector2(430,590)],
 		[0,true,true,Vector2(750,650)],[0,true,false,Vector2(790,510)],[0,true,false,Vector2(1220,350)],

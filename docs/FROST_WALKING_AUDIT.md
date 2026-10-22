@@ -12,8 +12,8 @@ placement and ore generation therefore agree on the same floor.
 Red frozen pools are usable ice, including the small southwest Frozen Basin
 pool and its approach. The marked canyon bridge and Prism Pass stone-circle
 interior remain connected. Unmarked chasms, cliffs, rock islands and Deep Prism
-water stay excluded. Original scenery files are unchanged; red annotations are
-never displayed in the game.
+water stay excluded. Red annotations are never displayed in the game. Canyon Camp and Prism Pass
+now include the matching cleared snow trails described below.
 
 Canyon Camp's west gate and Prism Pass's west gate follow the marked openings
 and keep their arrivals clear of the unpainted stones. Frost trails and mines use
@@ -22,7 +22,7 @@ planets retain their previous behavior.
 
 ## Coverage
 
-The focused audit passes **30 artwork routes walked in both directions**, **9,910
+The focused audit passes **33 artwork routes walked in both directions**, **10,288
 real player-movement steps**, **30 trail approaches** and **18 mine approaches**.
 Every sampled floor point connects to its area's arrival through swept movement;
 no isolated samples remain. Explicit positive/negative checks cover the frozen
@@ -30,7 +30,7 @@ pools, bridge, heart-crystal landmark, mine pillars, central islands and water.
 
 | Area | Floor samples | Reachable |
 | --- | ---: | ---: |
-| Canyon Camp | 1222 | 1222 |
+| Canyon Camp | 1250 | 1250 |
 | Canyon Camp mine | 731 | 731 |
 | Frozen Basin | 2014 | 2014 |
 | Frozen Basin mine | 1316 | 1316 |
@@ -84,3 +84,12 @@ area, returns to the arrival, then visits it again using real player movement.
 All three browser routes passed (2,727 movement steps) with no browser errors.
 The final production pack also confirms the formerly blocked stair samples
 are walkable.
+
+## Cleared signed junctions
+
+Canyon Camp's two isolated outcrops beside the Frozen Basin and Prism Pass signs
+are removed from the painting. Footprint trails connect across the cleared snow.
+The western contour includes the new trail width and the northeast connection
+joins the existing floor. The other outcrops, ice banks and canyon remain blocked.
+Prism Pass's Glacier Crown exit has an unobstructed matching footprint trail off
+the east edge. Three independent routes check these paths in both directions.

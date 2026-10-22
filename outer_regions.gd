@@ -191,5 +191,5 @@ func generate(region: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 					if previous.cave == cave and previous.pos.distance_to(point) < 155: separated = false; break
 				if separated: chosen = point; break
 			assert(chosen.is_finite(),"No clear space for outer-world ore in %d/%d" % [world,region])
-			rocks.append({"pos":chosen,"hp":4 if hard else 2,"seconds":10.0 if hard else 3.0,"hard":hard,"cave":cave,"discovered":false})
+			rocks.append({"pos":chosen,"hp":4 if hard else 2,"seconds":5.0 if hard else 3.0,"hard":hard,"cave":cave,"discovered":false})
 	return rocks

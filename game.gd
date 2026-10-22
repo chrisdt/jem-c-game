@@ -127,7 +127,7 @@ const MINE_FRAMES: SpriteFrames = preload("res://assets/scout_mining_frames.tres
 const MINER_FRAMES: SpriteFrames = preload("res://assets/miner_frames.tres")
 const MINER_MINE_FRAMES: SpriteFrames = preload("res://assets/miner_mining_frames.tres")
 const COPPER_SECONDS := 2.0
-const CRYSTAL_SECONDS := 9.0
+const CRYSTAL_SECONDS := 5.0
 const ORE_REVEAL_SECONDS := 0.75
 const STRIKE_SECONDS := 0.66
 const IMPACT_PHASE := 0.22
@@ -1008,7 +1008,7 @@ func start_mining(index: int) -> void:
 		message = "Too tough! Bring 5 copper from Earth to a workbench for a hand drill."
 		return
 	mining_target = index
-	mining_elapsed = rock.get("work",0.0) if world == 0 else 0.0
+	mining_elapsed = rock.get("work",0.0)
 	var first_strike := 0.08 if upgraded else IMPACT_PHASE
 	var interval := 0.12 if upgraded else STRIKE_SECONDS
 	next_strike = first_strike if mining_elapsed < first_strike else first_strike+(floorf((mining_elapsed-first_strike)/interval)+1)*interval
@@ -1016,12 +1016,11 @@ func start_mining(index: int) -> void:
 	walking = false
 	face_direction(rock.pos - player)
 	var cancel_hint := "Move or tap Pause; this deposit keeps your progress." if hud.touch_mode else "Walk or press E / Space to pause; this deposit keeps your progress."
-	if world != 0: cancel_hint = "Move or tap Cancel to stop." if hud.touch_mode else "Walk or press E / Space to cancel."
 	message = "%s %s. %s" % ["Drilling" if upgraded else "Mining",material_name(rock),cancel_hint]
 	update_mining_visual()
 
 func cancel_mining() -> void:
-	var paused := world == 0 and mining_target >= 0 and mining_target < rocks.size()
+	var paused := mining_target >= 0 and mining_target < rocks.size()
 	if paused: rocks[mining_target]["work"] = mining_elapsed
 	mining_target = -1
 	mining_elapsed = 0.0
@@ -1070,9 +1069,8 @@ func advance_mining(delta: float) -> void:
 		cancel_mining()
 		return
 	mining_elapsed = minf(mining_elapsed + delta*mining_rate(), rock.seconds)
-	if world == 0:
-		rock["work"] = mining_elapsed
-		if mining_elapsed >= 0.6: trial.mining_encounter(rock)
+	rock["work"] = mining_elapsed
+	if world == 0 and mining_elapsed >= 0.6: trial.mining_encounter(rock)
 	while next_strike <= mining_elapsed:
 		emit_impact(rock, false)
 		impact_flash = 0.16
@@ -1080,7 +1078,7 @@ func advance_mining(delta: float) -> void:
 	update_mining_visual()
 	if mining_elapsed >= rock.seconds:
 		rock.hp = 0
-		if world == 0: rock["work"] = rock.seconds
+		rock["work"] = rock.seconds
 		emit_impact(rock, true)
 		mining_target = -1
 		mining_elapsed = 0.0
@@ -1185,7 +1183,7 @@ func refresh_ui() -> void:
 		context = "E / Space   Pause drilling · %.1fs" % (2-story.job_progress.get(story.job,0.0))
 	elif mining_target >= 0:
 		var rock: Dictionary = rocks[mining_target]
-		context = "E / Space   %s %s · %.1fs" % ["Pause" if world == 0 else "Cancel","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)/mining_rate()]
+		context = "E / Space   %s %s · %.1fs" % ["Pause","drilling" if upgraded else "mining",maxf(0,rock.seconds-mining_elapsed)/mining_rate()]
 	elif not underground and has_base() and player.distance_to(ship_position()) < 95:
 		context = "E   Rocket needs repairs · talk to Nova" if world == 0 and not story.launch_ready() else "E   Choose a world"
 	elif npc != null:
@@ -1205,7 +1203,7 @@ func refresh_ui() -> void:
 		actionable = false
 	elif nearest_rock() >= 0:
 		var rock: Dictionary = rocks[nearest_rock()]
-		var saved: float = rock.get("work",0.0) if world == 0 else 0.0
+		var saved: float = rock.get("work",0.0)
 		context = "E / Space   %s %s · %.1fs" % ["Resume" if saved > 0 else ("Drill" if upgraded else "Mine"),material_name(rock),(rock.seconds-saved)/mining_rate()]
 		if rock.hard and not upgraded:
 			context = "Hand drill needed · build at camp"

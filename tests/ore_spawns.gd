@@ -41,7 +41,7 @@ func run() -> void:
 		5:reachable(game.DESERT_LAYOUT,game.DESERT_LAYOUT.MINE_SPAWN,true,true)
 	}
 	var seen := {}
-	for painted_rock in [Vector2(430,575),Vector2(555,890),Vector2(1340,340)]:
+	for painted_rock in [Vector2(430,575),Vector2(555,890),Vector2(1250,295)]:
 		check(not game.ORE_SPAWNS.footprint_fits(1,false,game.FROST_LAYOUT.from_art(painted_rock)),"Frost ore can overlap a painted rock outcrop")
 	check(not game.ORE_SPAWNS.clear_of_landmarks(1,false,game.FROST_LAYOUT.from_art(Vector2(290,690)),game.tree_cover()),"Frost ore can overlap the camp dome roof")
 	for world in 3:
@@ -66,7 +66,7 @@ func run() -> void:
 			for i in game.rocks.size():
 				var rock: Dictionary = game.rocks[i]
 				check(not rock.discovered,"Random generation pre-discovered ore")
-				check(rock.seconds == ((10.0 if rock.hard else 3.0) if world > 0 else (9.0 if rock.hard else 2.0)),"Random generation changed mining times")
+				check(rock.seconds == ((5.0 if rock.hard else 3.0) if world > 0 else (5.0 if rock.hard else 2.0)),"Random generation changed mining times")
 				surface_count += 0 if rock.cave else 1
 				hard_count += 1 if rock.hard else 0
 				var area: int = world * 2 + int(rock.cave)

@@ -92,7 +92,7 @@ func run() -> void:
 		for rock in game.rocks:
 			var cells: Dictionary = mine if rock.cave else surface
 			check(cells.has(Vector2i((rock.pos / 16).round())),"Desert ore is unreachable: %s" % rock.pos)
-			check(rock.seconds == (10 if rock.hard else 3) and not rock.discovered,"Desert ore starts discovered or uses the wrong mining duration")
+			check(rock.seconds == (5 if rock.hard else 3) and not rock.discovered,"Desert ore starts discovered or uses the wrong mining duration")
 			check(not rock.cave or not LAYOUT.lava_contains(rock.pos + LAYOUT.FOOT_OFFSET),"Ore spawned in lava")
 	var locations: Array = game.rocks.map(func(rock): return rock.pos)
 	# These waypoints follow the visible lower and upper sandy routes.
@@ -135,7 +135,7 @@ func run() -> void:
 	check(game.mining_target == -1,"Fire ruby bypassed the stronger-pick upgrade")
 	game.upgraded = true
 	game.start_mining(rare)
-	game.advance_mining(9.9)
+	game.advance_mining(4.9)
 	check(game.rubies == 0 and not game.desert_won,"Ruby mining completed early")
 	game.advance_mining(0.11)
 	check(game.rubies == 1 and game.desert_won,"Third-world mission did not complete")
@@ -156,5 +156,5 @@ func run() -> void:
 	check(game.gold_ore == 3 and game.rubies == 1 and game.desert_won and game.rocks[rare].hp == 0,"Three-planet trips lost desert mission progress")
 	check(game.rocks.map(func(rock): return rock.pos) == locations and game.fog.is_revealed(5,LAYOUT.MINE_SPAWN),"Three-planet travel reset ore locations or discoveries")
 	if failures == 0:
-		print("PASS: destination picker, all three planets, desert loop routes, lava/mesa collision, bridge and galleries, 50 reachable layouts, 3s/10s mining, mission and session progress")
+		print("PASS: destination picker, all three planets, desert loop routes, lava/mesa collision, bridge and galleries, 50 reachable layouts, 3s/5s mining, mission and session progress")
 	quit(1 if failures else 0)

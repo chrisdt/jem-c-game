@@ -8,7 +8,7 @@ const SIZE := Vector2(2000,1400)
 static var SURFACES := {
 	0: [
 		PackedVector2Array([
-			Vector2(0,412),Vector2(85,435),Vector2(160,449),Vector2(217,432),Vector2(263,404),
+			Vector2(0,412),Vector2(85,425),Vector2(160,425),Vector2(217,415),Vector2(263,395),
 			Vector2(281,367),Vector2(244,371),Vector2(207,385),Vector2(145,363),Vector2(112,344),
 			Vector2(115,310),Vector2(194,288),Vector2(215,250),Vector2(211,204),Vector2(234,177),
 			Vector2(302,177),Vector2(355,192),Vector2(420,203),Vector2(485,220),Vector2(519,242),
@@ -41,6 +41,10 @@ static var SURFACES := {
 		]),
 		PackedVector2Array([
 			Vector2(650,484),Vector2(890,484),Vector2(890,526),Vector2(650,526),
+		]),
+		PackedVector2Array([
+			Vector2(1210,315),Vector2(1380,300),Vector2(1430,315),Vector2(1430,365),
+			Vector2(1370,395),Vector2(1280,390),Vector2(1210,360),
 		]),
 	],
 	1: [
@@ -258,10 +262,6 @@ static var MINES := {
 
 static var HOLES := {
 	"0s": [
-		PackedVector2Array([
-			Vector2(185,470),Vector2(216,477),Vector2(238,503),Vector2(281,514),Vector2(291,536),
-			Vector2(272,551),Vector2(235,553),Vector2(210,540),Vector2(176,528),
-		]),
 		PackedVector2Array([
 			Vector2(402,571),Vector2(417,544),Vector2(439,543),Vector2(453,565),Vector2(466,596),
 			Vector2(451,613),Vector2(417,610),Vector2(380,598),

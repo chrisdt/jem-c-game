@@ -17,6 +17,7 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
+	game.trial.invulnerable = 10000
 	var total := 0
 	var maps := 0
 	for world in range(3):
@@ -31,7 +32,7 @@ func run() -> void:
 				var habitat := LIFE.new()
 				root.add_child(habitat)
 				habitat.populate(world,region,cave,game.regions(),game)
-				var expected := (5 if cave else 0) if world == 0 else (2 if cave else 4)
+				var expected := 5 if cave else (0 if world == 0 else 4)
 				check(habitat.creatures.size() == expected,"Wrong creature population: %d/%d/%s" % [world,region,cave])
 				if expected == 0:
 					habitat.free()
@@ -47,7 +48,7 @@ func run() -> void:
 					actor.advance(0)
 					poses.append({})
 					check(actor.can_stand(actor.position),"No safe starting floor: %d/%d/%s actor %d at %s" % [world,region,cave,i,actor.position/LIFE.SCALE])
-					if world > 0:
+					if world > 0 and not cave:
 						check(actor.kind == (CREATURE.Kind.FROSTLING if world == 1 else CREATURE.Kind.DUNE_SPRITE),"Earth animals appeared on another planet")
 					else:
 						check(actor.kind in [CREATURE.Kind.RAT,CREATURE.Kind.BAT],"Alien appeared in an Earth mine")

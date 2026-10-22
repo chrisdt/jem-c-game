@@ -264,12 +264,12 @@ func check_jab_hits() -> void:
 
 func targets() -> Array:
 	if not is_active(): return []
+	if game.underground:
+		var habitat: Node = game.local_life if game.current_region() == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
+		return habitat.creatures if habitat != null else []
 	if game.world == 1: return game.frost_story.yetis
 	if game.world == 2: return game.ember_story.scorpions
-	if game.world != 0: return []
-	if not game.underground: return snakes
-	var habitat: Node = game.local_life if game.earth_region == 0 else (game.earth_stream.scenery.get_node_or_null("AmbientLife") if is_instance_valid(game.earth_stream.scenery) else null)
-	return habitat.creatures if habitat != null else []
+	return snakes
 
 func advance(delta: float) -> void:
 	sync_area()
@@ -316,6 +316,7 @@ func hurt_player(amount: int, venom_tick := false) -> bool:
 	if is_instance_valid(game.ember_story): game.ember_story.cancel_work()
 	invulnerable = 1.3
 	game.message = "A yeti hit! Return to Canyon Camp to warm up and recover." if game.world == 1 else ("A scorpion hit! Dodge its raised tail; camp shade clears venom." if game.world == 2 else "A small bite! Berries heal one heart; apples heal two.")
+	if game.underground: game.message = "A cave creature hit! Dodge its warning, then use your sword or mining tool."
 	if health == 0:
 		game.run_session.record_recovery()
 		clear_poison()

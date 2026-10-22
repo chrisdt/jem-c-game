@@ -201,7 +201,7 @@ func run() -> void:
 				seen[signature] = true
 				for i in deposits.size():
 					var rock: Dictionary = deposits[i]
-					check(not rock.discovered and rock.seconds == (10 if rock.hard else 3),"New world changed reveal/tool/mining rules")
+					check(not rock.discovered and rock.seconds == (5 if rock.hard else 3),"New world changed reveal/tool/mining rules")
 					check(floors[rock.cave].has(Vector2i((rock.pos/20).round())),"New ore is unreachable in %d/%d: %s" % [planet,region,rock.pos/data.SIZE*data.ART_SIZE])
 					for j in i:
 						if deposits[j].cave == rock.cave: check(deposits[j].pos.distance_to(rock.pos) >= 155,"New deposits overlap")

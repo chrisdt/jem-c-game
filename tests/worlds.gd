@@ -132,7 +132,7 @@ func run() -> void:
 	game.player = game.rocks[rare].pos
 	game.update_exploration()
 	game.start_mining(rare)
-	game.advance_mining(9.5)
+	game.advance_mining(4.5)
 	assert(game.scout.sprite_frames == game.DRILL_VISUAL.MINING[1])
 	assert(game.amethysts == 0 and not game.ice_won)
 	game.advance_mining(0.5)
@@ -157,5 +157,5 @@ func run() -> void:
 	game.planet_menu.choose(0 if game.world == 1 else 1)
 	game.advance_flight(10)
 	assert(game.world == 1 and game.ice_won and game.rocks[rare].hp == 0)
-	print("PASS: rocket travel, distinct surface/mine routes, bridge and canyon collision, all ore reachable, 3s/10s materials, upgrade, second mission and progress retained on return")
+	print("PASS: rocket travel, distinct surface/mine routes, bridge and canyon collision, all ore reachable, 3s/5s materials, upgrade, second mission and progress retained on return")
 	quit()

@@ -175,5 +175,5 @@ static func generate(region: int, rng: RandomNumberGenerator) -> Array[Dictionar
 					chosen = point
 					break
 			assert(chosen.is_finite(),"No clear space: region=%d cave=%s deposit=%d seed=%d" % [region,cave,i,rng.seed])
-			rocks.append({"pos":chosen,"hp":4 if hard else 2,"seconds":9.0 if hard else 2.0,"hard":hard,"cave":cave,"discovered":false})
+			rocks.append({"pos":chosen,"hp":4 if hard else 2,"seconds":5.0 if hard else 2.0,"hard":hard,"cave":cave,"discovered":false})
 	return rocks

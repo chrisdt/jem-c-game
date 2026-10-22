@@ -39,14 +39,14 @@ const FROST_OUTCROPS := [
 	Vector4(173,260,46,50), Vector4(290,155,35,45),
 	Vector4(370,190,50,65), Vector4(450,325,75,85),
 	Vector4(540,225,37,75), Vector4(275,315,36,28),
-	Vector4(243,495,75,85), Vector4(53,430,65,95),
+	Vector4(53,430,65,95),
 	Vector4(427,575,65,70), Vector4(180,600,85,85),
 	Vector4(59,590,65,110), Vector4(130,673,36,35),
 	Vector4(294,895,33,38), Vector4(350,920,47,63),
 	Vector4(555,885,85,80), Vector4(465,970,60,65),
 	Vector4(1015,245,42,50), Vector4(1000,335,50,40),
 	Vector4(1120,410,45,60), Vector4(1250,295,30,55),
-	Vector4(1340,340,65,80), Vector4(1415,290,75,100),
+	Vector4(1415,290,75,100),
 	Vector4(1425,420,65,55), Vector4(1225,570,90,95),
 	Vector4(1015,660,80,90), Vector4(1105,820,75,85),
 	Vector4(1170,930,65,90), Vector4(1340,960,100,100),
@@ -65,7 +65,7 @@ static func generate(world: int, rng: RandomNumberGenerator, entries: Array[Vect
 			var hard := i >= basic_count
 			var point := choose_point(candidates, world, cave, hard, deposits, rng, entries[int(cave)], tree_cover, clear_view)
 			assert(point.is_finite(), "No reachable space for a required ore deposit")
-			var seconds := (10.0 if hard else 3.0) if world > 0 else (green_times.y if hard else green_times.x)
+			var seconds := (5.0 if hard else 3.0) if world > 0 else (green_times.y if hard else green_times.x)
 			deposits.append({"pos":point, "hp":4 if hard else 2, "seconds":seconds, "hard":hard, "cave":cave, "discovered":false})
 	return deposits
 

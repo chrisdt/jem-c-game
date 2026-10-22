@@ -140,7 +140,7 @@ func run() -> void:
 			check(not seen.has(signature),"District did not randomize ore")
 			seen[signature] = true
 			for rock in deposits:
-				check(not rock.discovered and rock.seconds == (9 if rock.hard else 2),"New district changed mining/reveal rules")
+				check(not rock.discovered and rock.seconds == (5 if rock.hard else 2),"New district changed mining/reveal rules")
 				check(floors[rock.cave].has(Vector2i((rock.pos/20).round())),"New Earth ore is unreachable in %d: %s" % [region,rock.pos/EARTH.SIZE*EARTH.ART_SIZE])
 	# Restore a real home state after the geometry checks above.
 	game.earth_region = 0

@@ -34,7 +34,20 @@ func pickup(game, id: String) -> void:
 	game.refresh_ui()
 	check(game.ember_story.props.has(id),"Missing Sunforge quest item: "+id)
 	if not game.ember_story.props.has(id): return
-	place(game,game.ember_story.props[id].position)
+	var target: Vector2 = game.ember_story.props[id].position
+	var ground := Vector2.INF
+	for ring in 10:
+		for ray in 24:
+			var candidate := target+Vector2.from_angle(ray*TAU/24)*ring*10
+			if game.ember_story.floor_at(candidate,spec.region,spec.cave):
+				ground = candidate
+				break
+		if ground.is_finite(): break
+	check(ground.is_finite(),"Pickup has no reachable floor approach: "+id)
+	if not ground.is_finite(): return
+	if id == "core":
+		check(Rect2(1145,700,35,25).has_point(target/Vector2(2000,1400)*Vector2(1500,1050)),"Sunforge core left the lantern-side crate")
+	place(game,ground)
 	game.space_action()
 	check(game.ember_story.collected.has(id),"Space did not collect "+id)
 func gather(game) -> void:
@@ -228,7 +241,8 @@ func run() -> void:
 	game.mission_journal.dismiss()
 	game.cooldown = 0
 	game.space_action()
-	game.ember_story._process(2.1)
+	check(is_equal_approx(game.ember_story.work,0.9),"Resuming observatory lost drilling progress")
+	game.ember_story._process(1.11)
 	check(game.ember_story.observatory_open,"Magma Drill failed to recover star map")
 	await TRAVEL.enter(game,3,false)
 	conversation(game,"orin")

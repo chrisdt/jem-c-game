@@ -1,6 +1,7 @@
 extends Node2D
 
 enum Kind { FROSTLING, DUNE_SPRITE, RAT, BAT }
+const ALIEN_ART = preload("res://environment/alien_mine_art.gd")
 const ART: Texture2D = preload("res://assets/creatures/ambient_creatures.png")
 const FACING = preload("res://environment/wildlife_facing.gd")
 const VERTICAL = preload("res://environment/wildlife_vertical.gd")
@@ -49,6 +50,7 @@ var scare_id := -1
 var scare_area := -1
 var smoke_centre := Vector2.ZERO
 var hostile := false
+var mine_world := 0
 var health := 6
 var last_jab := -1
 var hit_flash := 0.0
@@ -59,7 +61,7 @@ func max_health() -> int:
 	return 3 if kind == Kind.BAT else 6
 
 func hostile_active() -> bool:
-	return hostile and is_instance_valid(game) and game.world == 0 and game.underground and game.area_id() == scare_area
+	return hostile and is_instance_valid(game) and game.underground and game.area_id() == scare_area
 
 func _ready() -> void:
 	rng.randomize()
@@ -119,6 +121,16 @@ func find_start() -> Vector2:
 		for ray in 24:
 			var point := home+Vector2.from_angle(ray*TAU/24.0)*wander_radius*ring/8.0
 			if room_to_wander(point): return point
+	# A randomized deposit can occupy every point in the usual home circle.
+	# Find another clear patch before setting a new leash centre, rather than
+	# leaving a creature stranded on a wall or mineral sprite.
+	var preferred := home
+	for ring in range(1,17):
+		for ray in 24:
+			var point := preferred+Vector2.from_angle(ray*TAU/24.0)*ring*20.0
+			home = point
+			if room_to_wander(point): return point
+	home = preferred
 	return home
 
 func choose_target() -> void:
@@ -271,7 +283,7 @@ func take_hit(jab_id: int, origin: Vector2, damage: int) -> bool:
 
 func remember_removed() -> void:
 	if is_instance_valid(game) and game.has_method("area_id") and scare_area >= 0 and scare_id >= 0:
-		if is_instance_valid(game.get("missions")): game.missions.cleared(kind)
+		if game.world == 0 and is_instance_valid(game.get("missions")): game.missions.cleared(kind)
 		if not game.scared_wildlife.has(scare_area): game.scared_wildlife[scare_area] = {}
 		game.scared_wildlife[scare_area][scare_id] = true
 
@@ -293,7 +305,10 @@ func update_pose() -> void:
 		tilt = sin(state_time*5)*0.012
 	current_frame = frame
 	var base_scale: float = ART_SCALES[kind]*size_variation
-	if facing.y != 0:
+	var alien := mine_world > 0 and kind in [Kind.RAT,Kind.BAT]
+	if alien:
+		ALIEN_ART.apply(sprite,mine_world,kind == Kind.BAT,facing,frame,size_variation)
+	elif facing.y != 0:
 		VERTICAL.apply(sprite, kind + VERTICAL.Species.FROSTLING, facing, frame, base_scale)
 	else:
 		sprite.texture = frames[kind][frame]
@@ -378,7 +393,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO,width*size_variation,Color(0.08,0.11,0.13,0.1 if kind == Kind.BAT else 0.16))
 	draw_set_transform(Vector2.ZERO)
 	if hostile:
-		var y := -82.0 if kind == Kind.BAT else -30.0
+		var y := (-110.0 if mine_world > 0 else -82.0) if kind == Kind.BAT else (-46.0 if mine_world > 0 else -30.0)
 		if state in ["warn","alert"]: draw_string(STYLE.HEADING,Vector2(-4,y),"!",HORIZONTAL_ALIGNMENT_CENTER,12,22,Color("ffd374"))
 		if health_seconds > 0:
 			draw_rect(Rect2(-16,y,32,5),Color("143638"))
