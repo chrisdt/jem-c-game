@@ -136,22 +136,25 @@ func art_routes(game) -> void:
 	walk_route(game,1,4,true,[Vector2(900,400),Vector2(1030,380),Vector2(1100,330),Vector2(1140,300),Vector2(1220,240)])
 
 	walk_route(game,2,1,false,[Vector2(1300,380),Vector2(1100,430),Vector2(850,500),Vector2(650,500),Vector2(450,340),Vector2(300,250)])
-	walk_route(game,2,1,false,[Vector2(850,500),Vector2(750,600),Vector2(650,700),Vector2(750,820),Vector2(800,915)])
+	walk_route(game,2,1,false,[Vector2(850,500),Vector2(750,600),Vector2(600,600),Vector2(600,680),Vector2(650,700),Vector2(750,820),Vector2(800,915)])
+	walk_route(game,2,1,false,[Vector2(650,500),Vector2(570,590),Vector2(400,640),Vector2(200,600),Vector2(150,440),Vector2(250,420)])
+	walk_route(game,2,1,true,[Vector2(750,780),Vector2(750,720),Vector2(550,700),Vector2(380,620),Vector2(300,500),Vector2(320,400),Vector2(300,350),Vector2(340,290),Vector2(450,240),Vector2(550,200),Vector2(600,160),Vector2(630,140),Vector2(680,140),Vector2(720,150),Vector2(780,155),Vector2(850,160),Vector2(950,200),Vector2(1000,250),Vector2(1120,280),Vector2(1200,420),Vector2(1230,530),Vector2(1170,650),Vector2(1190,740),Vector2(1100,800),Vector2(950,740),Vector2(750,720)])
+	walk_route(game,2,1,true,[Vector2(320,400),Vector2(200,360),Vector2(150,300),Vector2(150,240)])
+	walk_route(game,2,1,true,[Vector2(1120,280),Vector2(1190,240),Vector2(1200,205),Vector2(1220,190),Vector2(1260,185),Vector2(1320,190)])
 	walk_route(game,2,2,false,[Vector2(790,205),Vector2(830,310),Vector2(1030,430),Vector2(1320,455)])
-	walk_route(game,2,2,false,[Vector2(200,375),Vector2(350,315),Vector2(650,270),Vector2(830,310)])
-	walk_route(game,2,2,false,[Vector2(350,315),Vector2(270,430),Vector2(290,580),Vector2(350,700),Vector2(650,780),Vector2(950,780),Vector2(1120,800),Vector2(1200,690),Vector2(1300,540),Vector2(1320,455)])
+	walk_route(game,2,2,false,[Vector2(200,385),Vector2(250,410),Vector2(350,350),Vector2(350,315),Vector2(650,270),Vector2(830,310)])
+	walk_route(game,2,2,false,[Vector2(350,315),Vector2(270,430),Vector2(250,570),Vector2(350,700),Vector2(650,780),Vector2(950,780),Vector2(1120,800),Vector2(1200,690),Vector2(1200,520),Vector2(1280,480),Vector2(1320,455)])
 	walk_route(game,2,3,false,[Vector2(750,205),Vector2(800,350),Vector2(900,430),Vector2(1050,480),Vector2(1320,510)])
-	walk_route(game,2,3,false,[Vector2(900,430),Vector2(1100,300),Vector2(1180,260)])
-	walk_route(game,2,3,false,[Vector2(800,350),Vector2(750,500),Vector2(600,630),Vector2(600,750),Vector2(700,840),Vector2(900,900),Vector2(1150,900),Vector2(1340,780),Vector2(1370,650),Vector2(1320,510)])
-
-	walk_route(game,2,4,false,[Vector2(200,390),Vector2(300,430),Vector2(650,450),Vector2(950,350),Vector2(1160,240)])
+	walk_route(game,2,3,false,[Vector2(900,430),Vector2(1100,300),Vector2(1140,250),Vector2(1160,210)])
+	walk_route(game,2,3,false,[Vector2(800,350),Vector2(850,450),Vector2(800,500),Vector2(750,550),Vector2(600,630),Vector2(600,750),Vector2(700,840),Vector2(900,900),Vector2(1150,900),Vector2(1340,780),Vector2(1320,700),Vector2(1310,690),Vector2(1300,660),Vector2(1280,630),Vector2(1280,600),Vector2(1320,510)])
+	walk_route(game,2,4,false,[Vector2(200,415),Vector2(300,430),Vector2(350,390),Vector2(420,430),Vector2(500,480),Vector2(650,450),Vector2(950,420),Vector2(1100,370),Vector2(1160,240)])
 	walk_route(game,2,4,false,[Vector2(300,430),Vector2(250,550),Vector2(300,700),Vector2(550,800),Vector2(800,740),Vector2(1000,750),Vector2(1150,700),Vector2(1250,630),Vector2(1300,600),Vector2(1330,450),Vector2(1330,350),Vector2(1160,240)])
-
-	walk_route(game,2,1,true,[Vector2(750,780),Vector2(750,720),Vector2(550,700),Vector2(380,620),Vector2(300,500),Vector2(320,400),Vector2(470,280),Vector2(600,180),Vector2(800,180),Vector2(1000,250),Vector2(1120,280),Vector2(1200,420),Vector2(1230,530),Vector2(1170,650),Vector2(1190,740),Vector2(1100,800),Vector2(950,740),Vector2(750,720)])
-
-	walk_route(game,2,4,true,[Vector2(280,800),Vector2(280,680),Vector2(320,550),Vector2(380,480),Vector2(450,400),Vector2(600,390),Vector2(650,500),Vector2(850,520),Vector2(930,430),Vector2(1000,330),Vector2(1080,330),Vector2(1120,280),Vector2(1240,230)])
-	walk_route(game,2,4,true,[Vector2(1240,230),Vector2(1200,220),Vector2(1080,230),Vector2(1020,170),Vector2(750,150),Vector2(550,180),Vector2(590,260),Vector2(600,330),Vector2(600,390)])
-	walk_route(game,2,4,true,[Vector2(850,520),Vector2(800,600),Vector2(830,700),Vector2(875,750),Vector2(900,800),Vector2(980,830)])
+	walk_route(game,2,4,false,[Vector2(300,430),Vector2(350,320),Vector2(380,260),Vector2(460,220),Vector2(530,200)])
+	walk_route(game,2,4,true,[Vector2(280,800),Vector2(300,700),Vector2(350,600),Vector2(400,500),Vector2(550,500),Vector2(700,520),Vector2(900,520),Vector2(1000,520),Vector2(1200,500),Vector2(1300,500)])
+	walk_route(game,2,4,true,[Vector2(400,500),Vector2(350,400),Vector2(300,300),Vector2(320,230),Vector2(300,180),Vector2(240,150)])
+	walk_route(game,2,4,true,[Vector2(300,180),Vector2(450,180),Vector2(550,150),Vector2(650,140),Vector2(750,135),Vector2(900,150),Vector2(1000,190),Vector2(1130,220),Vector2(1200,200),Vector2(1250,170),Vector2(1360,220)])
+	walk_route(game,2,4,true,[Vector2(650,400),Vector2(650,300),Vector2(700,270),Vector2(750,260),Vector2(800,270),Vector2(850,300),Vector2(950,350),Vector2(1050,400),Vector2(1100,400),Vector2(1160,400),Vector2(1185,395),Vector2(1185,370),Vector2(1185,360),Vector2(1190,345),Vector2(1200,330),Vector2(1210,300),Vector2(1200,260),Vector2(1230,220),Vector2(1220,170)])
+	walk_route(game,2,4,true,[Vector2(550,500),Vector2(650,550),Vector2(750,600),Vector2(750,650),Vector2(770,700),Vector2(850,760),Vector2(950,820),Vector2(1000,830)])
 
 func run() -> void:
 	var game = load("res://main.tscn").instantiate()
@@ -210,8 +213,8 @@ func run() -> void:
 					var hazard: Vector2 = ({1:Vector2(750,430),4:Vector2(785,450)} if cave else {1:Vector2(350,390),2:Vector2(750,345),3:Vector2(480,450),4:Vector2(770,570)})[region]
 					check(not data.can_walk(region,cave,data.from_art(hazard)-data.FOOT_OFFSET),"Unmarked Frost rock became walkable")
 				else:
-					for hazard in (data.MINE_BLOCKERS[region] if cave else data.SURFACE_BLOCKERS[region]):
-						check(not data.can_walk(region,cave,data.from_art(Vector2(hazard.x,hazard.y))-data.FOOT_OFFSET),"Rock/lava/water center became walkable")
+					var hazard: Vector2 = ({1:Vector2(750,450),4:Vector2(780,400)} if cave else {1:Vector2(370,500),2:Vector2(625,525),3:Vector2(465,410),4:Vector2(430,560)})[region]
+					check(not data.can_walk(region,cave,data.from_art(hazard)-data.FOOT_OFFSET),"Unmarked Ember rock/water/lava became walkable")
 	art_routes(game)
 	game.world = 0
 	game.set_current_region(0)

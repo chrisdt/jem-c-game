@@ -6,6 +6,7 @@ const SIZE := Vector2(2000,1400)
 const ART_SIZE := Vector2(1500,1050)
 const FOOT_OFFSET := Vector2(0,20)
 const MOTION = preload("res://floor_motion.gd")
+const EMBER_MARKUP = preload("res://ember_markup.gd")
 const FROST_MARKUP = preload("res://frost_markup.gd")
 const DENSITY = preload("res://ore_density.gd")
 var world: int
@@ -71,10 +72,10 @@ func _init(planet: int) -> void:
 			[{"side":"north","target":1,"arrival":"south"},{"side":"east","target":2,"arrival":"west"}],
 			[{"side":"west","target":2,"arrival":"east"}],
 		]
-		GATES = [{"west":Vector2(120,380),"south":Vector2(870,955)}, {"east":Vector2(1420,375),"south":Vector2(800,955)}, {"north":Vector2(790,90),"west":Vector2(85,375),"east":Vector2(1420,440)}, {"north":Vector2(750,90),"east":Vector2(1420,520)}, {"west":Vector2(85,390)}]
+		GATES = [{"west":Vector2(120,380),"south":Vector2(870,955)}, {"east":Vector2(1420,300),"south":Vector2(800,955)}, {"north":Vector2(790,90),"west":Vector2(85,375),"east":Vector2(1420,425)}, {"north":Vector2(750,90),"east":Vector2(1420,520)}, {"west":Vector2(85,390)}]
 		var legacy = load("res://desert_layout.gd")
 		MINE_ENTRANCES = [legacy.CAVE,from_art(Vector2(300,190)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(1190,205))]
-		MINE_EXITS = [legacy.MINE_EXIT,from_art(Vector2(750,920)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(200,850))]
+		MINE_EXITS = [legacy.MINE_EXIT,from_art(Vector2(750,900)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(200,850))]
 		MINE_SPAWNS = [legacy.MINE_SPAWN,from_art(Vector2(750,780)),Vector2.ZERO,Vector2.ZERO,from_art(Vector2(350,780))]
 		SURFACE_BLOCKERS = {1:[Vector4(300,110,160,60),Vector4(900,305,80,50),Vector4(370,500,70,40),Vector4(1070,830,75,50),Vector4(545,830,75,40),Vector4(770,660,50,40)],2:[Vector4(625,525,225,120),Vector4(630,650,75,40),Vector4(705,410,60,40),Vector4(1070,710,40,25)],3:[Vector4(465,410,240,145),Vector4(1050,710,255,155),Vector4(930,300,70,35),Vector4(1250,360,70,50)],4:[Vector4(1320,800,170,105),Vector4(1460,720,80,65),Vector4(1190,110,150,70),Vector4(430,180,65,45),Vector4(500,360,90,60),Vector4(750,260,120,50),Vector4(1180,500,120,70),Vector4(430,560,140,60),Vector4(1000,670,130,50),Vector4(810,850,60,35),Vector4(510,700,80,45)]}
 	var folder := "frost" if world == 1 else "ember"
@@ -131,6 +132,7 @@ func has_mine(region: int) -> bool:
 
 func floor_contains(region: int, cave: bool, point: Vector2) -> bool:
 	if world == 1: return FROST_MARKUP.floor_contains(region,cave,point)
+	if world == 2: return EMBER_MARKUP.floor_contains(region,cave,point)
 	var art := point/SIZE*ART_SIZE
 	if cave:
 		var inside_mine := Geometry2D.is_point_in_polygon(art,MINE_FLOORS[region])

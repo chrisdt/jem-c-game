@@ -81,7 +81,6 @@ const ICE_SHIP := Vector2(260, 1070)
 const ICE_CAVE := Vector2(1620, 280)
 const ICE_EXIT := Vector2(968, 1230)
 const ICE_SPAWN := Vector2(968, 1115)
-const MINE_TRIGGER_RADIUS := 65.0
 var mine_transition_cooldown := 0.0
 var world := 0
 var planet_rocks: Dictionary = {}
@@ -479,6 +478,8 @@ func surface_arrival_position() -> Vector2:
 	return [Vector2(320,500), Vector2(390,1120), DESERT_LAYOUT.ARRIVAL][world]
 
 func surface_exit_position() -> Vector2:
+	# Approach Dune Sea's mine to the right of its unmarked rock spur.
+	if world == 2 and current_region() == 1: return cave_position()+Vector2(100,150)
 	if current_region() > 0: return cave_position()+Vector2(0,160)
 	return [Vector2(1430,520), Vector2(1575,385), DESERT_LAYOUT.OUTSIDE][world]
 
@@ -751,11 +752,7 @@ func check_mine_transition(previous: Vector2) -> void:
 	if not regions().has_mine(current_region()):
 		return
 	var doorway := exit_position() if underground else cave_position()
-	if world in [0,1]:
-		if not EARTH.crosses_opening(previous,player,doorway,EARTH.MINE_TRIGGER_EXTENTS): return
-	else:
-		var closest := Geometry2D.get_closest_point_to_segment(doorway, previous, player)
-		if closest.distance_to(doorway) >= MINE_TRIGGER_RADIUS: return
+	if not EARTH.crosses_opening(previous,player,doorway,EARTH.MINE_TRIGGER_EXTENTS): return
 	if current_region() > 0:
 		var entering := not underground
 		begin_earth_transition(current_region(),entering,mine_spawn_position() if entering else surface_exit_position(),surface_exit_position() if entering else mine_spawn_position())
@@ -783,12 +780,7 @@ func check_earth_trail(previous: Vector2) -> void:
 		return
 	for link in regions().LINKS[current_region()]:
 		var point: Vector2 = regions().portal(current_region(),link.side)
-		var crossed: bool
-		if world in [0,1]:
-			crossed = EARTH.crosses_opening(previous,player,point,EARTH.trail_trigger_extents(link.side))
-		else:
-			var closest := Geometry2D.get_closest_point_to_segment(point,previous,player)
-			crossed = closest.distance_to(point) < 55
+		var crossed := EARTH.crosses_opening(previous,player,point,EARTH.trail_trigger_extents(link.side))
 		if crossed:
 			begin_earth_transition(link.target,false,regions().arrival(link.target,link.arrival),regions().arrival(current_region(),link.side))
 			return

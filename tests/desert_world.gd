@@ -31,6 +31,7 @@ func connected(entry: Vector2, cave: bool) -> Dictionary:
 
 func walk_route(game, points: Array, cave: bool) -> void:
 	game.underground = cave
+	game.earth_trail_cooldown = 999
 	game.mine_transition_cooldown = 999
 	game.player = LAYOUT.from_art(points[0]) - LAYOUT.FOOT_OFFSET
 	game.update_exploration()
@@ -96,7 +97,10 @@ func run() -> void:
 	var locations: Array = game.rocks.map(func(rock): return rock.pos)
 	# These waypoints follow the visible lower and upper sandy routes.
 	walk_route(game,[Vector2(1200,850),Vector2(1000,830),Vector2(850,800),Vector2(650,790),Vector2(520,800),Vector2(340,790),Vector2(270,690),Vector2(220,590),Vector2(230,480),Vector2(280,380),Vector2(300,300)],false)
-	walk_route(game,[Vector2(1220,840),Vector2(1270,710),Vector2(1240,570),Vector2(1220,440),Vector2(1220,330),Vector2(1100,270),Vector2(970,240),Vector2(850,235),Vector2(720,230),Vector2(590,230),Vector2(470,270),Vector2(350,290),Vector2(300,300)],false)
+	walk_route(game,[Vector2(1220,840),Vector2(1340,820),Vector2(1340,720),Vector2(1270,670),Vector2(1240,570),Vector2(1220,440),Vector2(1220,330),Vector2(1100,270),Vector2(970,240),Vector2(850,235),Vector2(720,215),Vector2(650,210),Vector2(590,215),Vector2(470,270),Vector2(350,290),Vector2(300,300)],false)
+	walk_route(game,[Vector2(300,300),Vector2(270,330),Vector2(240,380),Vector2(160,390),Vector2(80,390)],false)
+	walk_route(game,[Vector2(850,800),Vector2(850,900),Vector2(850,980)],false)
+	walk_route(game,[Vector2(1100,270),Vector2(1100,200),Vector2(1070,150),Vector2(1070,100),Vector2(1030,50),Vector2(990,25)],false)
 	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(780,500))),"Player can walk onto the central sandstone mesa")
 	for i in 3:
 		game.underground = game.rocks[i].cave
@@ -113,12 +117,15 @@ func run() -> void:
 	game.move_player(Vector2.UP,0.3)
 	check(game.underground and game.player == LAYOUT.MINE_SPAWN and game.lava_environment.visible,"Walking into the desert entrance did not open the Lava Mine")
 	check(game.fog.active_map == 5,"Lava Mine shares the surface exploration mask")
-	walk_route(game,[Vector2(280,810),Vector2(280,730),Vector2(280,650),Vector2(270,580),Vector2(250,500),Vector2(300,430),Vector2(340,360),Vector2(330,300),Vector2(300,230),Vector2(280,170)],true)
-	walk_route(game,[Vector2(300,550),Vector2(310,480),Vector2(325,435),Vector2(350,400),Vector2(415,400),Vector2(470,430),Vector2(500,460),Vector2(600,460),Vector2(660,451),Vector2(880,451),Vector2(1110,451),Vector2(1190,450),Vector2(1200,380),Vector2(1240,320),Vector2(1210,260),Vector2(1170,200),Vector2(1240,180),Vector2(1260,160),Vector2(1350,160),Vector2(1360,220),Vector2(1340,200),Vector2(1350,270)],true)
-	walk_route(game,[Vector2(1190,450),Vector2(1170,520),Vector2(1170,580),Vector2(1140,645),Vector2(1160,700),Vector2(1250,760),Vector2(1360,770)],true)
+	walk_route(game,[Vector2(550,450),Vector2(650,450),Vector2(800,450),Vector2(950,450),Vector2(1100,450),Vector2(1220,430)],true)
+	walk_route(game,[Vector2(260,850),Vector2(300,780),Vector2(300,650),Vector2(280,580),Vector2(280,480),Vector2(400,440),Vector2(550,450)],true)
+	walk_route(game,[Vector2(400,440),Vector2(350,350),Vector2(325,270),Vector2(330,200),Vector2(330,170),Vector2(450,180),Vector2(550,150),Vector2(680,120),Vector2(720,115)],true)
+	walk_route(game,[Vector2(1220,430),Vector2(1260,350),Vector2(1320,300),Vector2(1340,240),Vector2(1330,190),Vector2(1240,170),Vector2(1170,210),Vector2(1100,210),Vector2(1000,170),Vector2(920,140)],true)
+	walk_route(game,[Vector2(1220,430),Vector2(1300,470),Vector2(1300,550),Vector2(1330,620),Vector2(1350,710),Vector2(1250,710),Vector2(1200,700),Vector2(1280,670)],true)
 	for point in [Vector2(880,300),Vector2(920,560),Vector2(1050,780)]:
 		check(not LAYOUT.can_walk(LAYOUT.from_art(point) - LAYOUT.FOOT_OFFSET,true),"Lava is walkable at %s" % point)
-	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(164,471)) - LAYOUT.FOOT_OFFSET,true),"Player can stand on the painted western rock wall")
+	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(130,480)) - LAYOUT.FOOT_OFFSET,true),"Player can stand on the painted western rock wall")
+	check(not LAYOUT.can_walk(LAYOUT.from_art(Vector2(600,350))-LAYOUT.FOOT_OFFSET,true),"Raised rock above the bridge became walkable")
 	for x in [665,880,1120]:
 		check(LAYOUT.can_walk(LAYOUT.from_art(Vector2(x,451)) - LAYOUT.FOOT_OFFSET,true),"Stone bridge deck is blocked")
 	var rare: int = game.rocks.find_custom(func(rock): return rock.hard)
