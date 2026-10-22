@@ -1,7 +1,7 @@
-# Sunny Scout — Connected Frost crossroads
+# Sunny Scout — Mission item icons
 
-Full browser game exported with Godot 4.6.3 from source commit `6b3476e6fc162b31a16913f930432fcf3f5b0b4e`.
-Editable project: `main`. Build release: `4167af5d84a69ccb65be`.
+Full browser game exported with Godot 4.6.3 from source commit `6fb97b33e0416db0b9ec77a040706b19f5e224c2`.
+Editable project: `main`. Build release: `66f32f40ab068cd3f6dd`.
 
 ## Upload to WP Engine
 
@@ -23,14 +23,16 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Canyon Camp's west, north, south and bridge footprint trails now meet at
-  one continuous four-way intersection, with a curved western approach that
-  matches the surrounding snow tracks.
-- Verified all 33 Frost routes in both directions, including the new painted
-  west-to-east crossing, all trail/mine approaches and solid hazards. Browser
-  review checks the updated crossroads artwork.
-- Includes the four animated alien mine creatures, faster resumable mining,
-  relocated quest items and all previous world and controls updates.
+- Character mission dialogue now shows the matching item artwork in parentheses
+  beside requested materials, equipment and collectible names across Earth,
+  Frost Canyon and Ember Dunes. Quantities and item names stay readable.
+- Uses the same artwork as pickups and equipment, including beacon fragments,
+  the heart-crystal, power coupling, Sunforge core, glowleaf and empty flask.
+- Dialogue measures wrapped text and icons together to keep recipes clear of
+  the buttons. Keyboard, touch, quest offers and cancellation remain supported.
+- Verified 78 actual mission pages in keyboard/touch layouts, character bubble
+  input, Rowan/Bea and all Frost/Ember quest flows, plus nine browser views.
+- Includes previous world, mine creature, mining and controls improvements.
 
 ## Play and compete
 
