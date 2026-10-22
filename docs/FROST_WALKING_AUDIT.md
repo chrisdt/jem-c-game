@@ -22,7 +22,7 @@ planets retain their previous behavior.
 
 ## Coverage
 
-The focused audit passes **33 artwork routes walked in both directions**, **10,288
+The focused audit passes **33 artwork routes walked in both directions**, **10,320
 real player-movement steps**, **30 trail approaches** and **18 mine approaches**.
 Every sampled floor point connects to its area's arrival through swept movement;
 no isolated samples remain. Explicit positive/negative checks cover the frozen
@@ -93,3 +93,11 @@ The western contour includes the new trail width and the northeast connection
 joins the existing floor. The other outcrops, ice banks and canyon remain blocked.
 Prism Pass's Glacier Crown exit has an unobstructed matching footprint trail off
 the east edge. Three independent routes check these paths in both directions.
+
+## Connected crossroads before the bridge
+
+The western footprint trail now curves into the same crossing as the north,
+south and east/bridge trails. The painting has one continuous four-way junction
+instead of a western dead end and a separate northern merge. The west-to-east
+audit follows its painted centre through art points (300,470), (345,485) and
+(400,490); the existing north/south route crosses the same open ground.

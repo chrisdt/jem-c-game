@@ -8,7 +8,7 @@ const MOTION = preload("res://floor_motion.gd")
 const TRAVEL = preload("res://tests/support/area_travel.gd")
 const GRID := 24.0
 const ROUTES := [
-	[0,false,"cleared Frozen Basin junction",[Vector2(70,470),Vector2(150,450),Vector2(240,450),Vector2(300,450),Vector2(340,440),Vector2(340,550)]],
+	[0,false,"cleared Frozen Basin junction",[Vector2(70,450),Vector2(150,450),Vector2(240,455),Vector2(300,470),Vector2(345,485),Vector2(400,490),Vector2(520,495)]],
 	[0,false,"cleared Prism Pass junction",[Vector2(1190,330),Vector2(1280,330),Vector2(1340,340),Vector2(1400,330),Vector2(1460,320)]],
 	[2,false,"Glacier Crown signed exit",[Vector2(1320,455),Vector2(1400,450),Vector2(1460,435),Vector2(1490,435)]],
 	[0,false,"camp and canyon bridge",[Vector2(300,840),Vector2(500,820),Vector2(500,720),Vector2(410,680),Vector2(330,610),Vector2(340,550),Vector2(400,490),Vector2(520,495),Vector2(630,500),Vector2(770,500),Vector2(920,500),Vector2(1000,470),Vector2(1090,400),Vector2(1110,320),Vector2(1190,330),Vector2(1210,290)]],
