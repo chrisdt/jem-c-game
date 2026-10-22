@@ -1,7 +1,7 @@
-# Sunny Scout — Earth mine walking update
+# Sunny Scout — Earth surface walking update
 
-Full browser game exported with Godot 4.6.3 from source commit `185b53fc89cddb16d4f470978794b17f9b354746`.
-Editable project: `main`. Build release: `83815547dc466ece5132`.
+Full browser game exported with Godot 4.6.3 from source commit `40f9b5280e9fbd10a03bc15f38fce87e989f5fdf`.
+Editable project: `main`. Build release: `2afd96958b524844f31c`.
 
 ## Upload to WP Engine
 
@@ -23,16 +23,19 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Moss Mine, Copper Hollow and Crystal Depths now follow the supplied red
-  walking-area markups. Landing Meadow keeps its previous marked boundary.
-- Unpainted walls, pools, rock pillars and boarded doorways remain solid.
-  Moss Mine's two unmarked lower alcoves are closed to walking and spawning.
-- Mineral deposits leave room around their footprint so they cannot block a
-  narrow corridor and strand Buddy. Material quantities remain the same.
-- Checked 28 walking routes in both directions, every connected Earth floor
-  sample, all 18 mine entrance/exit approaches and all 30 trail approaches.
-  Also checked 150 landing ore layouts, 200 expanded-Earth layouts, quest
-  object access, Buddy following and mine combat. Source paintings are unchanged.
+- Pinewood Trail, Willow Marsh, Sunstone Ridge and Old Quarry now follow the
+  supplied red walking-area markups. Landing Meadow and all three mine
+  markups remain included.
+- The marked bridge, fishing jetty, ruin interior, stone arch opening and
+  quarry pond ledge are usable. Unmarked rocks, forest, water, logs and
+  ruin walls are excluded. Red annotations are never displayed in play.
+- Quarry arrival clears the sign-side stones. Bea stands on adjacent clear
+  ground beside her log. Wood prefers grass and can rest on marked dirt or
+  stone, preserving all six crafting pickups with the new boundaries.
+- Checked 32 routes both ways, 14,995 connected Earth floor samples, 30 trail
+  approaches, 18 mine approaches, 200 randomized expanded-Earth ore layouts,
+  quest access, Buddy following, wildlife, healing plants and pickups.
+- Original background paintings and the other planets are unchanged.
 
 ## Play and compete
 
