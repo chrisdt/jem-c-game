@@ -96,7 +96,10 @@ static func fill(label: RichTextLabel, text: String, world: int) -> void:
 		label.add_text("\u00a0(")
 		var icon := texture(item.id)
 		var dimensions := icon.get_size()*(24.0/maxf(icon.get_width(),icon.get_height()))
-		label.add_image(icon,maxi(1,roundi(dimensions.x)),maxi(1,roundi(dimensions.y)),Color.WHITE,INLINE_ALIGNMENT_CENTER,Rect2(),null,false,item.name,false,false,item.name)
+		# Keep the default pixel units: Godot 4.7 replaced the optional
+		# percentage booleans with ImageUnit enums. The common arguments work
+		# in both the editor and our 4.6 Web export runtime.
+		label.add_image(icon,maxi(1,roundi(dimensions.x)),maxi(1,roundi(dimensions.y)),Color.WHITE,INLINE_ALIGNMENT_CENTER,Rect2(),null,false,item.name)
 		label.add_text(")")
 		cursor = item.end
 	label.add_text(text.substr(cursor))
