@@ -1,7 +1,7 @@
-# Sunny Scout — Frozen pond guardian update
+# Sunny Scout — Redrock passage fix
 
-Full browser game exported with Godot 4.6.3 from source commit `d8c36d2a32b90773441bab81f0aae315f208fe40`.
-Editable project: `main`. Build release: `17b100eef22064d37d9a`.
+Full browser game exported with Godot 4.6.3 from source commit `f22e7ce9f3bb1d80c7bc4ab973b5626144c83b1d`.
+Editable project: `main`. Build release: `cdbf9b42a10925971d2b`.
 
 ## Upload to WP Engine
 
@@ -23,18 +23,16 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Eira's frozen mission rock sits directly on Glacier Crown's southeast ice
-  pond, with its guardian yeti stationed beside it. The rock stays anchored
-  to the landmark and its base rests on the ice.
-- Eira's dialogue and the quest journal point players to the pond. Defeat the
-  guardian, then open the rock with a Crystal Drill or Magma Drill to recover
-  the keepsake. The existing combat warnings and mission requirements remain.
-- Verified reachable approaches across all eight Frost areas, all four Frost
-  quests, the live guardian blocking drilling, combat, opening the cache and
-  retained quest progress after travel. Browser review checks the pond scene,
-  guarded interaction and successful recovery after defeating the yeti.
-- Includes the matching Prism Pass exit trail, refreshed Pip beacon artwork,
-  Deep Prism access corrections, and previous Earth, Frost and Ember updates.
+- Opens the clear sandy passage between the cactus beds below Redrock Arches'
+  east trail. The previous walking boundary cut across the visible ground;
+  it now follows the cactus and rock edges so players can walk down and back up.
+- Two new regression routes cover straight approaches through the passage.
+  All 32 desert artwork routes pass both ways, with 14,655 connected floor
+  samples, 30 trail approaches, 18 mine approaches and reachable quest objects.
+- Chromium walks down, back up and down again on three lanes across the
+  corrected passage. Both cactus beds and the adjoining rocks remain blocked.
+- Includes the frozen-pond cache and guardian, matching Prism Pass exit trail,
+  refreshed beacon artwork and previous Earth, Frost and Ember updates.
 
 ## Play and compete
 
