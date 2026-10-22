@@ -20,9 +20,9 @@ const PROPS := {
 	"trail_aurora":{"region":3,"cave":false,"foot":Vector2(650,660),"cell":6,"width":50.0},
 	"heart_crystal":{"region":2,"cave":false,"foot":Vector2(1693,267),"cell":3,"width":60.0,"landmark":true},
 	"coupling":{"region":4,"cave":true,"foot":Vector2(825,755),"cell":4,"width":38.0},
-	"cache":{"region":4,"cave":false,"foot":Vector2(1550,750),"cell":7,"width":108.0},
+	"cache":{"region":4,"cave":false,"foot":Vector2(1694,1061),"cell":7,"width":108.0,"landmark":true},
 }
-const YETI_HOMES := {1:Vector2(1150,1010),2:Vector2(1240,680),4:Vector2(1430,730)}
+const YETI_HOMES := {1:Vector2(1150,1010),2:Vector2(1240,680),4:Vector2(1594,1054)}
 var game: Node
 var npcs: Array = []
 var accepted: Dictionary = {}
@@ -100,7 +100,7 @@ func pages(role: String) -> Array[String]:
 		"tavi":
 			if action(role) == "Build Crystal Drill": return ["Everything's ready! I'll build your Crystal Drill here for 5 frost ore and 2 amethysts, using your hand drill and power coupling. It mines faster on every world."]
 			return ["I'm Tavi. Bring your hand drill, the power coupling from Deep Prism Mine, 5 frost ore and 2 amethysts.","Still needed: "+", ".join(missing_upgrade(role))+". Return to me in Prism Pass to build the Crystal Drill."]
-		"eira": return ["An expedition lost a keepsake behind frozen rock in Glacier Crown.","Use a Crystal Drill or Magma Drill to open it. A yeti patrols nearby: watch its raised-paw warning, dodge, then jab!","Clear the guardian and recover the keepsake. Bring it back and we'll honour the old explorers together."]
+		"eira": return ["An expedition lost a keepsake inside the frozen rock on Glacier Crown's ice pond.","Use a Crystal Drill or Magma Drill to open it. A yeti guards the pond: watch its raised-paw warning, dodge, then jab!","Clear the guardian and recover the keepsake. Bring it back and we'll honour the old explorers together."]
 	return []
 
 func missing_upgrade(role: String) -> PackedStringArray:
@@ -145,7 +145,7 @@ func finish(role: String, confirmed: bool) -> void:
 
 func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
-	var details := ["Pip at Canyon Camp: recover the three brass-and-crystal beacon fragments from Frozen Basin, Prism Pass and Aurora Shelf. Look for their golden glints on the snow.","Nix in Frozen Basin: bring a sword, 4 frost ore, 1 amethyst and the heart-crystal from the centre of Prism Pass's ruined stone circle.","Tavi in Prism Pass: bring a hand drill, 5 frost ore, 2 amethysts and the coupling from Deep Prism Mine.","Eira on Aurora Shelf: open Glacier Crown's frozen cache with a Crystal Drill or Magma Drill, defeat its guardian yeti and return the keepsake."]
+	var details := ["Pip at Canyon Camp: recover the three brass-and-crystal beacon fragments from Frozen Basin, Prism Pass and Aurora Shelf. Look for their golden glints on the snow.","Nix in Frozen Basin: bring a sword, 4 frost ore, 1 amethyst and the heart-crystal from the centre of Prism Pass's ruined stone circle.","Tavi in Prism Pass: bring a hand drill, 5 frost ore, 2 amethysts and the coupling from Deep Prism Mine.","Eira on Aurora Shelf: defeat the guardian yeti on Glacier Crown's ice pond, open the frozen cache with a Crystal Drill or Magma Drill and return the keepsake."]
 	for i in ORDER.size():
 		var role: String = ORDER[i]
 		var progress: String = ["%d / 3 beacon fragments" % fragments(),"%d/4 frost ore · %d/1 amethyst" % [mini(game.frost_ore,4),mini(game.amethysts,1)],"%d/5 frost ore · %d/2 amethysts" % [mini(game.frost_ore,5),mini(game.amethysts,2)],"Return the keepsake" if cache_open else "Crystal Drill · guardian · frozen cache"][i]
@@ -193,8 +193,8 @@ func sync_area() -> void:
 			props[id].visible = prop_exists(id)
 			continue
 		if not prop_exists(id): continue
-		# This crystal belongs on the pedestal, with a reachable approach in
-		# front. Floor fitting would slide it off the centre of the landmark.
+		# Keep authored landmarks on the pedestal or frozen pond instead of
+		# letting floor fitting slide them onto a neighbouring rock outcrop.
 		if not positions.has(id): positions[id] = spec.foot if spec.get("landmark",false) else fit_floor(spec.foot,spec.region,spec.cave)
 		var point: Vector2 = positions[id]
 		if not point.is_finite(): continue
@@ -207,6 +207,7 @@ func sync_area() -> void:
 		if id.begins_with("beacon_") or id == "heart_crystal":
 			prop.scale.y = prop.scale.x if id.begins_with("beacon_") else prop.scale.x*0.85
 			prop.offset.y = -prop.texture.get_height()
+		if id == "cache": prop.offset.y = -prop.texture.get_height()
 		if id == "heart_crystal":
 			# A dark silhouette separates the brass/crystal outline from snow.
 			# It inherits the collectible's fog fade and disappears with it.

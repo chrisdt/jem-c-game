@@ -13,7 +13,7 @@ The starter sword (3 copper + 2 wood) and hand drill (5 copper) can only be craf
 | Pip, aurora scout | Right of Canyon Camp's shelter | Recover the three beacon fragments from Frozen Basin, Prism Pass and Aurora Shelf. Return to restore the trail beacons. |
 | Nix, crystal smith | Frozen Basin clearing | Bring the Earth sword, the heart-crystal at the centre of Prism Pass's ruined stone circle, 4 frost ore and 1 amethyst. Forges Frostfang. |
 | Tavi, engineer | Prism Pass | Bring the hand drill, Deep Prism Mine's unique power coupling, 5 frost ore and 2 amethysts. Fits the Crystal Drill. |
-| Eira, expedition keeper | Aurora Shelf | Use the Crystal Drill on Glacier Crown's frozen cache, defeat its guardian yeti and return the expedition keepsake. |
+| Eira, expedition keeper | Aurora Shelf | Find the frozen cache on Glacier Crown's southeast ice pond, defeat its guardian yeti, drill it open and return the expedition keepsake. |
 
 The four quests appear in Frost Canyon's own expandable J / Quests popup. Earth keeps its separate six active story quests and optional objectives. Snow Sprites fade in with exploration, wave on the first close approach, stand on contact shadows, and puff away after completion. There are no alien cats. Frozen characters and objects stay on their own planet.
 
@@ -38,7 +38,7 @@ and explains its purpose. Space stays available for combat nearby.
 - Yeti patrols occupy Frozen Basin, Prism Pass and Glacier Crown. They have 16 health, front/back/side walking art, a clear 0.85-second warning, a locked attack aim, and recovery time after attacking. A hit does **3 half-heart units = 1.5 hearts**. Dodging the marked aim during the warning avoids the strike. Invulnerability prevents repeated contact damage. Defeated yetis disappear in snow puffs and stay defeated through area/planet trips.
 - Landing shelters, signed trail entries and NPC conversation approaches are safe. Warm up within the Canyon Camp shelter area to recover half a heart every 1.5 seconds. Defeat restores health at a safe arrival without losing materials or equipment. No sound is added.
 
-The frozen cache requires a Crystal Drill or Magma Drill, its guardian's defeat and the mining tool slot. Drilling takes two seconds, animates Sunny and shows progress; movement, damage, equipment changes or a popup pause the work. Returning resumes its remaining progress. It never gates an ordinary trail, mine doorway or rocket.
+The frozen cache is grounded on the southeast ice pond in Glacier Crown, with its guardian stationed beside it on the walkable ice. Eira and the journal describe this landmark. The cache requires a Crystal Drill or Magma Drill, its guardian's defeat and the mining tool slot. Drilling takes two seconds, animates Sunny and shows progress; movement, damage, equipment changes or a popup pause the work. Returning resumes its remaining progress. It never gates an ordinary trail, mine doorway or rocket.
 
 ## Assets, performance and checks
 

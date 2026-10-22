@@ -131,6 +131,17 @@ func run() -> void:
 	check_equipment(game)
 	await TRAVEL.enter(game,4,false)
 	var yeti = game.frost_story.yetis[0]
+	var cache = game.frost_story.props.cache
+	# Independent artwork bounds of Glacier Crown's southeast frozen pond.
+	var pond := Rect2(1175,740,190,105)
+	var art_scale := Vector2(1499,1049)/Vector2(2000,1400)
+	check(pond.has_point(cache.position*art_scale),"Frozen cache is not on the ice pond")
+	check(pond.has_point(yeti.home*art_scale) and yeti.home.distance_to(cache.position) < 150,"Guardian is not protecting the pond cache")
+	check(game.trial.floor_at(cache.position) and game.trial.floor_at(yeti.home),"Pond encounter is outside walkable ice")
+	place(game,cache.position)
+	game.trial.equip(0)
+	game.interact() # E inspects the guard; Space stays available for combat.
+	check(not game.frost_story.working() and not game.frost_story.cache_open and game.message.contains("yeti"),"A living pond guardian did not prevent cache drilling")
 	var spot := approach(game,yeti,65)
 	check(spot.is_finite(),"Guardian yeti has no reachable attack approach")
 	place(game,spot)
