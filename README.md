@@ -1,7 +1,7 @@
-# Sunny Scout — Frost and Ember wild foods
+# Sunny Scout — score posting and saved results
 
-Full browser game exported with Godot 4.6.3 from source commit `ae066c289144928a4620374b8241572bf3b994ca`.
-Editable project: `main`. Build release: `1181ad77ecc66b0e0dd0`.
+Full browser game exported with Godot 4.6.3 from source commit `4d1274cbfda9b6c0b34f91062b85234494a60f5b`.
+Editable project: `main`. Build release: `4f3b47dbbf7398ef7a5f`.
 
 ## Upload to WP Engine
 
@@ -23,20 +23,22 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Added Frozen berries and Aurora pods to Frost, and Emberfruit and Sunspine
-  bulbs to Ember: one native food plant on each of their ten outdoor maps.
-- Walk close while hurt to harvest. Frozen berries and Emberfruit restore one
-  heart; Aurora pods and Sunspine bulbs restore two, capped at five hearts.
-  Full health leaves food available. Food restores health without curing venom.
-- Plants have gently moving ripe and picked artwork, fitted to clear snow/sand
-  away from minerals, doors, camp pads, NPCs and quest objects. Harvested foliage
-  stays picked through district, mine and rocket trips. No food grows in mines.
-- Pip and Sol explain the local foods. Earth's four plants and optional fruit
-  objective remain separate; no inventory ingredients or cooking were added.
-- Checked all 15 outdoor districts, exact healing/cap, menu/pause/full-health
-  protection and harvest memory on Godot 4.6.3 and 4.7.2. Also rendered and
-  harvested all four native foods in the browser with no script errors.
-- Includes the latest Landing Meadow walking area and repainted mine exits.
+- Godot builds now register timed runs with the hosted shared scoreboard.
+  Browser builds use their own website's PHP scoreboard.
+- Failed finish checks offer Retry and post. Failed posts can be retried;
+  the button no longer stays silently disabled after a connection failure.
+- Timed finishes save automatically on this device. A run without an online
+  starting token offers Save on this device, separate from shared ranking.
+- Best times includes This device times and Last result. Reopen the latest
+  completed result after restarting to retry posting, while its token is valid.
+  Local records stay in this browser profile or Godot user data, and do not
+  save gameplay or transfer across devices. Clearing that data removes them.
+- Checked offline autosave, nickname changes, native HTTP registration,
+  failed-finish retry through paused touch input, verified posting/rank and
+  saved-result restore in Godot 4.6.3 and 4.7.2. Browser checks cover mouse
+  clicks, interrupted verification/posting and result recovery after reload.
+- Includes all four native Frost/Ember wild foods, Landing Meadow navigation
+  changes and the repainted mine exits from the previous build.
 
 ## Play and compete
 
