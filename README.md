@@ -1,7 +1,7 @@
-# Sunny Scout — Mine exit surface views
+# Sunny Scout — Repainted mine exits
 
-Full browser game exported with Godot 4.6.3 from source commit `295996b9bc41e4833cec12d620b794ea3e9854a8`.
-Editable project: `main`. Build release: `9c32dca50a96ac1234c5`.
+Full browser game exported with Godot 4.6.3 from source commit `9c63b42da3a3b5e0aca7cfa6d3dab9087fffdbed`.
+Editable project: `main`. Build release: `571c9115f527b89c6da7`.
 
 ## Upload to WP Engine
 
@@ -23,20 +23,18 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- All nine mine exit openings now show their matching surface district:
-  meadow, pinewood, quarry, Canyon Camp, Frozen Basin, Glacier Crown,
-  Mesa Camp, Dune Sea and Obsidian Rise. Lava exits now have warm desert
-  and basalt views instead of the generic blue mountains.
-- The scenery is clipped inside the original openings with a soft transition
-  into the mine floor. Timber frames, lanterns and routes remain in place.
-- Repositioned and fitted SURFACE lettering onto the front beam faces,
-  including the sloped Earth frames and Frost's narrow space between icicles.
-  Deep Prism retains its wooden sign beside the natural arch.
-- Checked all nine mine encounters in Godot 4.6.3 and 4.7.2, startup and final
-  exit meshes in 4.7.2, and all nine rendered exits in the browser.
+- Repainted all nine mine exit views directly into their background images.
+  Each glimpse uses simple, soft shapes and the lighting of its original door,
+  with meadow, pines, quarry, snowy canyon, frozen basin, violet ice crystals,
+  red mesas, golden dunes or dark basalt to match the return district.
+- Removed the separate landscape atlas and runtime overlays. Each threshold
+  blends into the original floor; frames and lanterns remain in place.
+- Retains the corrected SURFACE labels on the wooden beams and Deep Prism's
+  separate wooden sign. Walk routes and travel triggers are unchanged.
+- Verified all nine map dimensions and that no pixels outside the doorway masks
+  changed. Checked Godot 4.7.2 startup and all nine rendered browser exits.
 - Includes the dialogue icon compatibility fix and previous world updates.
-  The four approved wild food designs are documented in the source project;
-  they are still concepts and have not been added as gameplay pickups.
+  The four approved wild food designs remain concepts in the source project.
 
 ## Play and compete
 
