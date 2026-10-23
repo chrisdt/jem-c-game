@@ -1,7 +1,7 @@
-# Sunny Scout — camp save totems
+# Sunny Scout — mobile fullscreen and camp totems
 
-Godot 4.6.3 browser export. Source: `16c03b63bd4cb49708b0714d74d28823e3c7299f` on `main`.
-Build release: `6f0720c2cd98bcd04e40`. All 31 browser files verified against the export.
+Godot 4.6.3 browser export. Source: `417561c8bd25aa32e17647a919702beea0c8ce6f` on `main`.
+Build release: `d0e0699dd603de6ec49c`. All 31 browser files verified against the export.
 
 ## Update the game
 
@@ -20,7 +20,19 @@ For first-time Explore saves setup only, install the included
 `sunny-scout-scores.zip` (version 1.1.0) through WordPress Plugins > Upload Plugin.
 Existing scores and saved adventures remain compatible.
 
+## Mobile full screen
+
+Tap the four-corner button near the top of the page to enter or exit full screen.
+On iPhones without browser fullscreen support, it shows Safari's Share > Add to
+Home Screen steps. Enable Open as Web App if shown, then open the new Sunny Scout
+icon. A tap is required; browsers do not allow automatic fullscreen on URL load.
+The existing WordPress plugin needs no update.
+
 ## Changes
+
+- Added a persistent 44px fullscreen touch control with request-failure feedback,
+  Safari API support and Home Screen guidance. Already-installed standalone
+  mode hides the extra button. This does not add offline play.
 
 - Exactly one save totem at each world's starting camp. Frost is in the clearing
   in front of camp; Ember is on the sand above/right of the stall, above the CAMP
@@ -41,7 +53,10 @@ local save/reload/Continue; missing texture cache and clean imports; normal NPC
 speech-bubble regression; actual WordPress/MariaDB save, recovery and conflicts;
 Chromium save/reload/Continue; existing speedrun posting. The final export was
 also rendered at the relocated Frost and Ember camps without script errors.
+Mobile Chromium touch fullscreen entry/exit passed on the guide and during real
+continued gameplay. API rejection, simulated iOS/prefixed Safari and standalone
+mode passed. A physical iPhone was not available for testing.
 
 Editable Godot project:
-https://codeload.github.com/chrisdt/jem-c-game/zip/16c03b63bd4cb49708b0714d74d28823e3c7299f
-Details: docs/EXPLORE_SAVES.md on main.
+https://codeload.github.com/chrisdt/jem-c-game/zip/417561c8bd25aa32e17647a919702beea0c8ce6f
+Details: docs/EXPLORE_SAVES.md and docs/MOBILE_PLAY.md on main.
