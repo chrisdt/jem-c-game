@@ -17,6 +17,7 @@ var board_button: Button
 var board_rows: Array[Control] = []
 var board_heading: Control
 var board_mode := true
+var board_local := false
 var fetching := false
 var previous_pause := false
 var owns_pause := false
@@ -72,15 +73,18 @@ func _ready() -> void:
 	var small := STYLE.label(panel,"Best time per nickname · Three worlds · 14 story quests",Vector2(32,490),Vector2(824,28),15)
 	small.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	board_button = STYLE.button(panel,"Leaderboard",Vector2(32,554),Vector2(230,56),18)
-	board_button.pressed.connect(open_board)
+	board_button.pressed.connect(func(): open_board(not board_local) if board_mode else open_board())
 	back_button = STYLE.button(panel,"Back",Vector2(288,554),Vector2(280,56),18)
 	back_button.pressed.connect(func():
 		if board_mode and game != null and run_session.finished: open_results()
 		else: dismiss())
 	again_button = STYLE.button(panel,"New adventure",Vector2(594,554),Vector2(262,56),18)
 	again_button.pressed.connect(func():
-		dismiss()
-		get_tree().change_scene_to_file("res://startup.tscn"))
+		if game == null and board_mode:
+			if run_session.restore_result(): open_results()
+		else:
+			dismiss()
+			get_tree().change_scene_to_file("res://startup.tscn"))
 	run_session.changed.connect(present)
 	get_viewport().size_changed.connect(layout)
 	layout()
@@ -109,8 +113,10 @@ func open_results() -> void:
 	nickname.text = run_session.nickname
 	show_modal()
 	present()
-func open_board() -> void:
+func open_board(local := false) -> void:
+	request_generation += 1
 	board_mode = true
+	board_local = local
 	show_modal()
 	present()
 	fetch_board()
@@ -119,10 +125,12 @@ func present() -> void:
 	for item in [time_label,stats,name_label,nickname,post_button]: item.visible = not board_mode
 	board_heading.visible = board_mode
 	for row in board_rows: row.visible = board_mode
-	board_button.visible = not board_mode
-	again_button.visible = game != null and run_session.finished
+	board_button.visible = true
+	board_button.text = ("Shared times" if board_local else "This device times") if board_mode else "Leaderboard"
+	again_button.visible = (game != null and run_session.finished) or (game == null and not run_session.last_result.is_empty())
+	again_button.text = "Last result" if game == null and board_mode else "New adventure"
 	if board_mode:
-		title.text = "Best adventure times"
+		title.text = "Times on this device" if board_local else "Best adventure times"
 		subtitle.text = "Fastest first · All 14 story quests · Optional challenges stay optional"
 		back_button.text = "Back to results" if game != null and run_session.finished else "Back"
 	else:
@@ -134,10 +142,15 @@ func present() -> void:
 		name_label.visible = run_session.timed
 		nickname.visible = run_session.timed
 		post_button.visible = run_session.timed
-		post_button.disabled = not run_session.verified or run_session.submitting or run_session.submitted
-		nickname.editable = not run_session.submitting and not run_session.submitted
-		post_button.text = "Posted!" if run_session.submitted else ("Posting…" if run_session.submitting else "Post my time")
-		back_button.text = "Keep exploring"
+		post_button.disabled = run_session.verifying or run_session.submitting or run_session.submitted
+		nickname.editable = not run_session.submitting and not run_session.verifying and not run_session.submitted
+		if run_session.submitted: post_button.text = "Posted!"
+		elif run_session.verifying: post_button.text = "Checking time…"
+		elif run_session.submitting: post_button.text = "Posting…"
+		elif run_session.token.is_empty(): post_button.text = "Save on this device"
+		elif not run_session.verified: post_button.text = "Retry and post"
+		else: post_button.text = "Post my time"
+		back_button.text = "Keep exploring" if game != null else "Back to welcome"
 func fetch_board() -> void:
 	if fetching: return
 	fetching = true
@@ -146,20 +159,29 @@ func fetch_board() -> void:
 	notice.text = "Reading shared times…"
 	for row in board_rows:
 		for cell in row.get_meta("cells"): cell.text = ""
-	var reply: Dictionary = await run_session.api("board")
+	var local := board_local
+	var reply: Dictionary = {"scores":run_session.local_scores.duplicate(true)} if local else await run_session.api("board")
 	fetching = false
 	if id != request_generation or not visible or not board_mode:
 		if visible and board_mode: fetch_board()
 		return
 	if not reply.has("scores"):
-		notice.text = reply.get("error","The leaderboard couldn't open. You can still play.")
+		board_local = true
+		present()
+		notice.text = str(reply.get("error","Shared times couldn't open."))+" Showing times saved on this device."
+		render_scores(run_session.local_scores.duplicate(true))
 		return
 	if reply.get("campaign",run_session.CAMPAIGN) != run_session.CAMPAIGN:
 		notice.text = "These times belong to a different adventure version. Please refresh."
 		return
-	notice.text = "No times yet. Finish a speedrun to set the first record!" if reply.scores.is_empty() else "Top 10 explorers · One best time per nickname"
-	for i in mini(10,reply.scores.size()):
-		var row: Dictionary = reply.scores[i]
+	if local:
+		notice.text = "Times saved in this browser or Godot device · Shared ranking is separate"
+	else: notice.text = "No times yet. Finish a speedrun to set the first record!" if reply.scores.is_empty() else "Top 10 explorers · One best time per nickname"
+	render_scores(reply.scores)
+func render_scores(scores: Array) -> void:
+	scores.sort_custom(func(a,b): return int(a.get("duration_ms",0)) < int(b.get("duration_ms",0)))
+	for i in mini(10,scores.size()):
+		var row: Dictionary = scores[i]
 		var cells: Array = board_rows[i].get_meta("cells")
 		cells[0].text = str(i+1)
 		cells[1].text = str(row.get("nickname","Scout")).substr(0,16)

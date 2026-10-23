@@ -6,7 +6,7 @@ Sunny Scout wears a hard hat with a lamp, tan work shirt, teal overalls and brow
 
 ## Frozen expedition
 
-**Speedruns and shared best times:** finish the 14 story quests across all three worlds, then post a nickname to the leaderboard. The welcome screen offers a speedrun, relaxed play and best times. Enemy defeats are bonus statistics; optional Earth challenges stay optional. A small PHP endpoint stores a JSON text file on the host—no database or game-progress saving. [Rules and hosting setup](docs/SPEEDRUN_LEADERBOARD.md).
+**Speedruns and shared best times:** finish the 14 story quests across all three worlds, then post a nickname to the leaderboard. The welcome screen offers a speedrun, relaxed play and best times. Enemy defeats are bonus statistics; optional Earth challenges stay optional. A small PHP endpoint stores a JSON text file on the host—no database or game-progress saving. Godot builds connect to the hosted scoreboard too. Finished times are also saved on this device, with retry and Last result recovery if posting fails. [Rules and hosting setup](docs/SPEEDRUN_LEADERBOARD.md).
 
 Story quests can be accepted and handed in independently on every world when
 their actual item/equipment requirements are met. Nix no longer waits for Pip;

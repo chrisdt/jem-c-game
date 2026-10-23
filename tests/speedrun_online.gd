@@ -12,6 +12,9 @@ func settle(predicate: Callable) -> void:
 func run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var session = root.get_node("RunSession")
+	check(session.endpoint() == session.SHARED_ENDPOINT,"Native Godot doesn't default to the hosted score service")
+	session.storage_path = args[1]+".local.json"
+	session.load_scores()
 	session.endpoint_override = args[0]
 	session.choose(true)
 	change_scene_to_file("res://main.tscn")
@@ -41,13 +44,34 @@ func run() -> void:
 	for role in game.frost_story.ORDER: game.frost_story.complete[role] = true
 	for role in game.ember_story.ORDER: game.ember_story.complete[role] = true
 	session.record_enemy()
+	# A lost finish request used to permanently disable the post button.
+	session.endpoint_override = "http://127.0.0.1:1/api/leaderboard.php"
 	game.refresh_ui()
-	await settle(func(): return session.verified)
+	await settle(func(): return session.finished and not session.verifying)
+	check(not session.verified and session.local_saved,"Failed finish lost the local result")
+	check(not game.score_panel.post_button.disabled and game.score_panel.post_button.text == "Retry and post","Failed finish cannot be retried")
+	session.endpoint_override = args[0]
+	game.score_panel.nickname.text = "JeremyTest"
+	# Use real touch events while the game tree is paused. Browser checks
+	# separately exercise physical mouse clicks.
+	await process_frame
+	var point: Vector2 = game.score_panel.post_button.get_global_rect().get_center()
+	for pressed in [true,false]:
+		var event := InputEventScreenTouch.new()
+		event.position = point
+		event.index = 0
+		event.pressed = pressed
+		root.push_input(event,true)
+		await process_frame
+	await settle(func(): return session.submitted)
 	check(session.finished and session.duration_ms >= 120000,"Server finish did not supply official time")
 	check(game.score_panel.visible and paused,"Online finish did not open paused results")
-	game.score_panel.nickname.text = "JeremyTest"
-	game.score_panel.post_button.pressed.emit()
-	await settle(func(): return session.submitted)
+	check(session.local_saved,"Posted finish wasn't saved on this device")
+	var saved_time: int = session.duration_ms
+	var saved_token: String = session.token
+	session.menu()
+	session.load_scores()
+	check(session.restore_result() and session.submitted and session.token == saved_token and session.duration_ms == saved_time,"Reload lost the completed posting state")
 	check(session.rank == 1 and session.nickname == "JeremyTest","Posted time did not return rank")
 	game.score_panel.open_board()
 	await settle(func(): return not game.score_panel.fetching)
@@ -61,5 +85,5 @@ func run() -> void:
 	check(session.token != token and not session.finished and session.completed_ids.is_empty(),"Reset reused server run")
 	var board: Dictionary = await session.api("board")
 	check(board.has("scores") and board.scores.size() == 1,"Reset removed or duplicated shared score")
-	if failures == 0: print("PASS: real Godot→PHP registration/finish/post/rank, server-clock result, paused completion, refreshed leaderboard and independent reset with persistent scores")
+	if failures == 0: print("PASS: native score endpoint, real Godot→PHP registration, failed-finish retry via paused touch input, verified post/rank, persisted result restore, refreshed leaderboard and independent reset")
 	quit(1 if failures else 0)

@@ -3,7 +3,8 @@
 The welcome screen offers **Start speedrun**, **Explore for fun** and **Best
 times**. A run begins when Earth's initial setup is ready, after the welcome and
 initial world loading and first draw. Speedruns use real elapsed time: menus, travel, background
-tabs and later area loading count. Reloading or confirming R starts fresh.
+tabs and later area loading count. Reloading or confirming R starts fresh gameplay. Completed results are kept on the device;
+Best times → Last result can reopen the latest finish after restarting.
 
 The finish line is **all 14 story quests**: six on Earth, four on Frost Canyon
 and four on Ember Dunes. Earth's four optional challenges do not block finishing;
@@ -19,6 +20,11 @@ welcome screen for a new adventure. Relaxed play also has a completion screen,
 but cannot post a ranked time. Results show hundredths; the compact HUD shows
 minutes and seconds plus story progress. Opening a leaderboard pauses combat
 while the speedrun clock continues.
+
+Native Godot builds now connect to `https://playsunnyscout.com/play/api/leaderboard.php`
+from the start of a speedrun. Hosted browser builds use their own website's PHP
+endpoint. A static host still needs PHP to accept shared scores; it does not
+silently post to another website.
 
 ## A shared text file, without a database
 
@@ -51,7 +57,7 @@ folder when updating the game.
 A server-issued run token starts the official server clock. Small network delays
 can make it differ slightly from the local HUD clock. Completing all story
 quests records its finish before the player types a nickname. Retrying a finish
-or post cannot create a duplicate or extend the stopped time. The board keeps
+or post cannot create a duplicate or change an already recorded server finish. The board keeps
 the fastest time per nickname (case-insensitive), retains the top 50, and displays
 the top 10. Nicknames use 2–16 simple letters, numbers, spaces, hyphens or
 underscores. No real name or account is needed; names are not reserved accounts.
@@ -66,18 +72,34 @@ This is a friendly leaderboard, not cheat-proof competitive verification: the
 server measures time, while the browser reports quest completion. Rules carry a
 campaign version so later changes can use a different board. If connectivity or
 storage fails, the adventure and local finish still work; an unverified run cannot
-post. A failed post can be retried without changing an already verified time.
+post to the shared board. The completion button shows **Retry and post** after a
+failed finish check, and **Post my time** after successful verification. Both
+finish checks and posts can be retried. An already recorded server finish keeps
+its original time; if the first finish request never reaches the server, the
+server clock includes the outage until the first successful finish request.
+
+Every timed finish is also saved automatically in `user://speedrun_scores.json`.
+**This device times** shows up to 50 recent local results, sorted fastest first;
+it is separate from the verified shared leaderboard. With no starting token,
+the completion button becomes **Save on this device**, which updates the nickname
+without pretending a local result was posted online. Local results stay in this
+browser profile or Godot user data, not across devices, and are lost if that data
+is cleared. Only the latest completed result retains its private token for
+retrying a post after reopening **Best times → Last result**. Starting tokens
+still expire after six hours. This saves completed times, not game progress.
 
 ## Validation
 
 - `tests/speedrun.gd`: modes, welcome leaderboard without loading a world,
   monotonic timing through menus, exactly 14 story quests, optional exclusions,
-  actual enemy defeat counting, one completion, offline results and fresh reset.
+  actual enemy defeat counting, one completion, offline autosave/local board,
+  nickname updates without duplicate records, and fresh reset.
 - `tests/leaderboard.php`: storage, tokens, exact quest IDs, server time,
   idempotent finishes/posts, name validation, best-time replacement, concurrent
   writers and protection against overwriting corrupt data.
 - `tests/test_leaderboard_http.py`: disposable PHP HTTP server, real Godot client
-  registration/completion/submission/rank, request validation and concurrent PHP
+  registration, failed-finish retry through actual paused-screen touch input,
+  submission/rank, saved-result restore, request validation and concurrent PHP
   workers. `SCOUT_TEST_PHP` can select the PHP executable.
 - `tests/test_leaderboard_browser.py`: the actual exported Web welcome board,
   registration after the world's first draw and in-game board, using local PHP,

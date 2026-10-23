@@ -8,6 +8,9 @@ func check(ok: bool, message: String) -> void:
 		push_error(message)
 func run() -> void:
 	var session = root.get_node("RunSession")
+	session.endpoint_override = "http://127.0.0.1:1/api/leaderboard.php"
+	session.storage_path = "user://speedrun-test-%d.json" % OS.get_process_id()
+	session.load_scores()
 	change_scene_to_file("res://startup.tscn")
 	await scene_changed
 	await process_frame
@@ -19,7 +22,8 @@ func run() -> void:
 	event.keycode = KEY_SPACE
 	welcome._input(event)
 	check(welcome.stage == welcome.Stage.GUIDE and not root.has_node("GreenPlanet"),"Leaderboard loaded the world or Space started behind it")
-	check(welcome.score_panel.notice.text.contains("hosted"),"Offline native scoreboard lacks useful fallback")
+	while welcome.score_panel.fetching: await process_frame
+	check(welcome.score_panel.board_local and welcome.score_panel.notice.text.contains("device"),"Offline scoreboard lacks saved device times")
 	welcome.score_panel.dismiss()
 	welcome.start_exploring(false)
 	while is_instance_valid(welcome) and current_scene == welcome: await process_frame
@@ -61,7 +65,14 @@ func run() -> void:
 	check(session.finished and not session.running and session.completed_ids.size() == 14,"All three worlds did not finish the run")
 	check(game.score_panel.visible and paused,"Finish popup didn't pause the world")
 	check(game.score_panel.stats.text.contains("Enemies defeated: 2") and game.score_panel.stats.text.contains("Recoveries: 1"),"Finish statistics wrong")
-	check(not session.verified and game.score_panel.post_button.disabled,"Offline run can post an unverified shared score")
+	while session.verifying: await process_frame
+	check(not session.verified and not game.score_panel.post_button.disabled and game.score_panel.post_button.text == "Save on this device","Offline result has no usable save button")
+	check(session.local_saved and FileAccess.file_exists(session.storage_path),"Offline finish wasn't automatically saved")
+	await session.submit("Offline-Scout")
+	check(not session.submitted and session.local_scores.size() == 1 and session.local_scores[0].nickname == "Offline-Scout","Local save posted an unverified time or duplicated the run")
+	game.score_panel.open_board(true)
+	check(game.score_panel.board_rows[0].get_meta("cells")[1].text == "Offline-Scout","Local saved result missing from device times")
+	game.score_panel.open_results()
 	var stopped: int = session.duration_ms
 	session.record_enemy()
 	session.record_recovery()
@@ -85,5 +96,6 @@ func run() -> void:
 	await process_frame
 	check(session.running and not session.finished and session.enemies == 0 and session.completed_ids.is_empty(),"Confirmed reset reused previous run")
 	check(RUN.format_time(123450,true) == "2:03.45" and RUN.format_time(3661000) == "1:01:01","Run time formatting is wrong")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(session.storage_path))
 	if failures == 0: print("PASS: welcome modes/leaderboard, no early world/timer, monotonic menu-counting clock, exactly 14 story quests without optional tasks, once-only completion/stats, modal pause, offline finish, reset and time formatting")
 	quit(1 if failures else 0)
