@@ -1,7 +1,7 @@
-# Sunny Scout — Repainted mine exits
+# Sunny Scout — Updated Landing Meadow walking area
 
-Full browser game exported with Godot 4.6.3 from source commit `682fa0a999ddc4db3fa94f0b633e75e1fbb7ec10`.
-Editable project: `main`. Build release: `9a9313f145dff192653a`.
+Full browser game exported with Godot 4.6.3 from source commit `cb35f3d0a519262de14cf9c5d9e32d0e2b0c423f`.
+Editable project: `main`. Build release: `ccf27cec8f8e3f1bd932`.
 
 ## Upload to WP Engine
 
@@ -23,18 +23,16 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Repainted all nine mine exit views directly into their background images.
-  Each glimpse uses simple, soft shapes and the lighting of its original door,
-  with meadow, pines, quarry, snowy canyon, frozen basin, violet ice crystals,
-  red mesas, golden dunes or dark basalt to match the return district.
-- Removed the separate landscape atlas and runtime overlays. Each threshold
-  blends into the original floor; frames and lanterns remain in place.
-- Retains the corrected SURFACE labels on the wooden beams and Deep Prism's
-  separate wooden sign. Walk routes and travel triggers are unchanged.
-- Verified all nine map dimensions and that no pixels outside the doorway masks
-  changed. Checked Godot 4.7.2 startup and all nine rendered browser exits.
-- Includes the dialogue icon compatibility fix and previous world updates.
-  The four approved wild food designs remain concepts in the source project.
+- Updated the first Earth screen, Landing Meadow, to follow the revised red
+  walking-area markup, including its wider northern clearing and lower edges.
+- Removed collision from decorations painted red. The unpainted camp, pond bank,
+  boulders, shrubs and signs remain blocked; the background artwork is unchanged.
+- Moved Moss Mine's surface entry trigger onto the revised doorway approach,
+  including access from the right. Return positions and travel cooldowns remain safe.
+- Player, companion and enemy floor checks share the updated meadow boundary.
+- Checked 2,836 real movement steps in both directions on Godot 4.6.3 and 4.7.2,
+  all Earth navigation and doorway approaches, safe arrivals and quest access.
+- Retains the repainted mine exits, corrected sign labels and dialogue icon fix.
 
 ## Play and compete
 
