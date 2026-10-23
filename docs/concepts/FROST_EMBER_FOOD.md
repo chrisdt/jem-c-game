@@ -1,26 +1,25 @@
-# Frost and Ember food concepts
+# Approved Frost and Ember wild food concepts
 
-![Four proposed healing foods](frost-ember-food.png)
+![Approved Aurora pods and Sunspine bulbs](aurora-pods-sunspine-bulbs.png)
 
-These are concepts for review, not new inventory items in this build.
+The four wild foods below are approved designs, not new inventory items in the
+current build. The two earlier prepared-meal ideas have been replaced by native
+plants, giving each off-world biome two foraged foods like Earth's berries and
+apples. Soup and skewers are no longer part of this proposal.
 
-Frostberries and emberfruit are the preferred wild pickups. Soup and skewers
-are recipe ideas only: prepared meals must come from an alien settlement's
-cook, never appear as loose bowls or dishes in the wilderness. There are no
-Earth mushrooms, peppers or other imported ingredients assumed on these worlds.
-
-| World | Item | Proposed effect | Suggested source |
+| World | Food | Appearance and source | Healing |
 | --- | --- | --- | --- |
-| Frost | Frostberries | Restore one heart | Frosted shrubs beside sheltered trails |
-| Frost | Crystal Soup | Restore two hearts | Camp recipe only, using local icecap fungi and frostleaf |
-| Ember | Emberfruit | Restore one heart | Prickly pear patches away from lava |
-| Ember | Cactus Skewers | Restore two hearts | Camp recipe only, using emberfruit and edible sunspine pads |
+| Frost | Frozen berries | Blue berry clusters on frosted shrubs beside sheltered trails | One heart |
+| Frost | Aurora pods | Plump violet pods on curling alien vines, with teal leaves and faint cyan veins | Two hearts |
+| Ember | Emberfruit | Orange fruit on branching alien cactus plants | One heart |
+| Ember | Sunspine bulbs | Golden bulbs nestled inside fleshy teal spiral leaves | Two hearts |
 
-Use the same half-heart units and health cap as Earth's berries/apples. Food
-should remain optional, work through the existing interaction button, and only
-be consumed when healing is needed. Keep silhouettes clear against snow or sand.
-Soup and skewers offer local alternatives to return trips for camp healing.
+All four grow naturally on their own plants and are ready to eat. Use Earth's
+existing pick-and-heal interaction, half-heart units and health cap: gather only
+when healing is needed, avoid consuming a plant at full health, and remember
+picked plants when revisiting an area. No ingredient inventory or cooking system
+is proposed. Keep each plant's silhouette distinct from ore deposits and rocks.
 
-The concept sheet's soup and skewers are provisional visual placeholders. Any
-future implementation needs local ingredient artwork, sources and camp cooking
-before those meals make sense. The two foraged fruits can work independently.
+The approved mockup shows the Aurora plant on snow and the Sunspine plant on
+warm volcanic sand, with detached ripe foods for their item-icon studies. The
+older `frost-ember-food.png` sheet is superseded and retains the rejected meals.
