@@ -90,7 +90,7 @@ func pages(role: String) -> Array[String]:
 	if done(role): return [closing(role)]
 	if not available(role): return []
 	match role:
-		"sol": return ["I'm Sol. Welcome to Ember Dunes, home of the Sunstone Folk! Our camp cooling station needs three parts.","Find them in Dune Sea, Sunken Oasis and Redrock Arches. Bring them here and we'll make a safe place to rest.","Watch for alien scorpions! A raised tail warns of a venom sting. Dodge while it aims. Camp shade clears venom; the repaired cooler also restores hearts."]
+		"sol": return ["I'm Sol. Welcome to Ember Dunes, home of the Sunstone Folk! Our cooling station needs three parts. Emberfruit heals one heart; Sunspine bulbs heal two. Walk close to pick them when hurt.","Find them in Dune Sea, Sunken Oasis and Redrock Arches. Bring them here and we'll make a safe place to rest.","Watch for alien scorpions! A raised tail warns of a venom sting. Dodge while it aims. Camp shade clears venom; the repaired cooler also restores hearts."]
 		"luma": return ["I'm Luma. Oasis glowleaf can stop scorpion venom!","Find two glowleaf plants: one in Sunken Oasis, one in Redrock Arches. Bring the empty flask from Lava Mine below Mesa Camp.","I'll make an antidote canteen with three doses. Press 3 or tap its icon while poisoned. Refill it at Sol's repaired cooling station."]
 		"brasa":
 			var recipes: Array[String] = ["I'm Brasa, the Sunforge smith. Recover the power core from the crate beneath a lantern in Sunfire Cavern, below Dune Sea."]

@@ -102,7 +102,7 @@ func run() -> void:
 			if region != game.current_region(): await TRAVEL.enter(game,region,false)
 			game.refresh_ui()
 			check(not game.trial.is_active() and game.trial.snakes.is_empty(),"Snakes/combat leaked to another planet")
-			check(game.gardens.plants.is_empty() and not game.gardens.visible,"Earth fruit/berry plants are still on another planet")
+			check(game.gardens.plants.all(func(p): return p.wild_kind >= 0 and not p.apple),"Earth fruit/berry plants are still on another planet")
 			check(game.wood_supplies.piles.is_empty() and not game.wood_supplies.visible,"Earth wood is on another planet")
 			check(game.trial.sword_owned and game.upgraded,"Rocket travel lost completed crafts")
 		await TRAVEL.enter(game,0,false)

@@ -93,7 +93,7 @@ func pages(role: String) -> Array[String]:
 	if done(role): return [closing(role)]
 	if not available(role): return []
 	match role:
-		"pip": return ["Welcome to Frost Canyon! I'm Pip, an aurora trail scout.","Find three brass-and-crystal beacon fragments in Frozen Basin, Prism Pass and Aurora Shelf. Look for golden glints on the snow, then bring them here.","Warm up beside the Canyon Camp shelter to recover hearts. The rocket is ready whenever you want to visit another world."]
+		"pip": return ["Welcome to Frost Canyon! I'm Pip, an aurora trail scout.","Find three brass-and-crystal beacon fragments in Frozen Basin, Prism Pass and Aurora Shelf. Look for golden glints on the snow, then bring them here.","Frozen berries restore one heart; Aurora pods restore two. Walk close when hurt to pick them. Warm up at the Canyon Camp shelter, or use the rocket to travel."]
 		"nix":
 			if action(role) == "Forge Frostfang Sword": return ["You have everything! I'll forge your Frostfang here for 4 frost ore and 1 amethyst, using your sword and heart-crystal. It works on every planet."]
 			return ["I'm Nix, the crystal smith. Bring your Earth sword, 4 frost ore, 1 amethyst and the heart-crystal from the centre of Prism Pass's ruined stone circle.","Still needed: "+", ".join(missing_upgrade(role))+". Return to me in Frozen Basin to forge the sword. Earth's camp builds the starter sword and hand drill."]
