@@ -1,7 +1,7 @@
-# Sunny Scout — Updated Landing Meadow walking area
+# Sunny Scout — Frost and Ember wild foods
 
-Full browser game exported with Godot 4.6.3 from source commit `cb35f3d0a519262de14cf9c5d9e32d0e2b0c423f`.
-Editable project: `main`. Build release: `ccf27cec8f8e3f1bd932`.
+Full browser game exported with Godot 4.6.3 from source commit `ae066c289144928a4620374b8241572bf3b994ca`.
+Editable project: `main`. Build release: `1181ad77ecc66b0e0dd0`.
 
 ## Upload to WP Engine
 
@@ -23,16 +23,20 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Updated the first Earth screen, Landing Meadow, to follow the revised red
-  walking-area markup, including its wider northern clearing and lower edges.
-- Removed collision from decorations painted red. The unpainted camp, pond bank,
-  boulders, shrubs and signs remain blocked; the background artwork is unchanged.
-- Moved Moss Mine's surface entry trigger onto the revised doorway approach,
-  including access from the right. Return positions and travel cooldowns remain safe.
-- Player, companion and enemy floor checks share the updated meadow boundary.
-- Checked 2,836 real movement steps in both directions on Godot 4.6.3 and 4.7.2,
-  all Earth navigation and doorway approaches, safe arrivals and quest access.
-- Retains the repainted mine exits, corrected sign labels and dialogue icon fix.
+- Added Frozen berries and Aurora pods to Frost, and Emberfruit and Sunspine
+  bulbs to Ember: one native food plant on each of their ten outdoor maps.
+- Walk close while hurt to harvest. Frozen berries and Emberfruit restore one
+  heart; Aurora pods and Sunspine bulbs restore two, capped at five hearts.
+  Full health leaves food available. Food restores health without curing venom.
+- Plants have gently moving ripe and picked artwork, fitted to clear snow/sand
+  away from minerals, doors, camp pads, NPCs and quest objects. Harvested foliage
+  stays picked through district, mine and rocket trips. No food grows in mines.
+- Pip and Sol explain the local foods. Earth's four plants and optional fruit
+  objective remain separate; no inventory ingredients or cooking were added.
+- Checked all 15 outdoor districts, exact healing/cap, menu/pause/full-health
+  protection and harvest memory on Godot 4.6.3 and 4.7.2. Also rendered and
+  harvested all four native foods in the browser with no script errors.
+- Includes the latest Landing Meadow walking area and repainted mine exits.
 
 ## Play and compete
 
