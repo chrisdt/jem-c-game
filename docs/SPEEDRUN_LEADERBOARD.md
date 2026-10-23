@@ -21,12 +21,43 @@ but cannot post a ranked time. Results show hundredths; the compact HUD shows
 minutes and seconds plus story progress. Opening a leaderboard pauses combat
 while the speedrun clock continues.
 
-Native Godot builds now connect to `https://playsunnyscout.com/play/api/leaderboard.php`
-from the start of a speedrun. Hosted browser builds use their own website's PHP
-endpoint. A static host still needs PHP to accept shared scores; it does not
-silently post to another website.
+## WordPress installation (recommended on WP Engine)
 
-## A shared text file, without a database
+Build the small installer with `python tools/package_wordpress_scores.py`.
+In WordPress, select **Plugins → Add New Plugin → Upload Plugin**, upload
+`build/sunny-scout-scores.zip`, install and activate. Activation creates one
+non-autoloaded score record in the existing WordPress options table. There are
+no database credentials or schemas to configure, and no game data files to write.
+The plugin starts a fresh board; it does not import old file-based scores.
+
+Click **Play Sunny Scout** beside the plugin, or under **Tools → Sunny Scout
+Scores**, and share that Play link. It uses `/index.php?sunny_scout=play` so
+plain permalinks and a root-hosted game `index.html` both work. The plugin detects
+existing exported game files in the WordPress root or `/play/`, preserves any
+versioned asset base URL, and runs the full-screen game using those assets.
+The plugin ZIP contains only its three small source/readme files, not the game.
+
+The new Play link is required for database-backed scores in existing browser
+builds. The page directs their score requests to WordPress REST before they
+reach the old physical PHP file. A standalone game HTML/PHP file is served
+outside WordPress, so installing a plugin cannot intercept that old URL.
+No file rewrites, permission changes, `.htaccess` edits or game re-upload are
+performed. Root `index.php` is the existing WordPress entry, not a new file.
+
+Updated native Godot builds use
+`https://playsunnyscout.com/index.php?rest_route=/sunny-scout/v1/leaderboard`.
+The same REST route works for browser and native clients; GET cache-busting uses
+`&` when the URL already has query parameters. New browser builds also honor
+the same-origin endpoint supplied by the plugin's Play page.
+
+Database updates use binary compare-and-swap with bounded retries, so concurrent
+players do not overwrite each other's starts or scores. The state is read
+straight from the database instead of trusting a cached WordPress option.
+Deactivation and reactivation retain scores. Uninstall does not delete them.
+The existing campaign rules, server timing, rate limits and public/private field
+boundaries are retained. This is score storage, not game-progress saving.
+
+## Standalone PHP host (legacy file backend)
 
 Upload **all 31 files** inside `build/web/`, including
 **`api/leaderboard.php`**, to `/play/`. The compiled game still works on static
@@ -62,7 +93,8 @@ the fastest time per nickname (case-insensitive), retains the top 50, and displa
 the top 10. Nicknames use 2–16 simple letters, numbers, spaces, hyphens or
 underscores. No real name or account is needed; names are not reserved accounts.
 
-Updates hold a file lock and atomically rename a complete replacement document.
+WordPress updates use atomic database comparisons. The standalone backend holds
+a file lock and atomically renames a complete replacement document.
 Malformed requests, excessive starts, invalid names, expired tokens and incomplete
 quest lists are rejected. Private tokens are never included in the public list.
 Temporary starts expire after six hours; posted best times persist. Corrupt stored
@@ -93,6 +125,16 @@ retrying a post after reopening **Best times → Last result**. Starting tokens
 still expire after six hours. This saves completed times, not game progress.
 
 ## Validation
+
+- `tests/wordpress_score_rules.php`: plugin rules and legacy campaign compatibility,
+  server timing, quest validation, frozen/idempotent results and privacy.
+- `tests/test_wordpress_scores.py`: disposable real WordPress/MariaDB, actual ZIP
+  upload/activation, database API and 16 concurrent starts, browser registration
+  with read-only existing root game assets, real Godot finish/post through the
+  query-based REST endpoint, root and /play/ detection and versioned bases.
+  Requires Docker images `wordpress:php8.3-apache` and `mariadb:11.4`, Godot,
+  Playwright and Chromium. It disables email/external WordPress HTTP requests
+  in the fixture and never contacts or changes production.
 
 - `tests/speedrun.gd`: modes, welcome leaderboard without loading a world,
   monotonic timing through menus, exactly 14 story quests, optional exclusions,

@@ -3,7 +3,7 @@ extends Node
 signal changed
 signal adventure_completed
 signal start_resolved
-const SHARED_ENDPOINT := "https://playsunnyscout.com/play/api/leaderboard.php"
+const SHARED_ENDPOINT := "https://playsunnyscout.com/index.php?rest_route=/sunny-scout/v1/leaderboard"
 const SCORE_FILE := "user://speedrun_scores.json"
 const WEB_SCORE_KEY := "sunny-scout-completed-three-worlds-story-v1"
 const CAMPAIGN := "three-worlds-story-v1"
@@ -189,7 +189,7 @@ func endpoint() -> String:
 	if not OS.has_feature("web"): return SHARED_ENDPOINT
 	# Use the page URL, not document.baseURI: versioned releases use a base
 	# tag for scenery, but scores must live outside replaceable releases.
-	return str(JavaScriptBridge.eval("(()=>{const p=new URL(location.href);if(!['http:','https:'].includes(p.protocol))return '';const n=p.pathname.indexOf('/releases/');return new URL(n<0?'api/leaderboard.php':p.pathname.slice(0,n+1)+'api/leaderboard.php',p).href})()"))
+	return str(JavaScriptBridge.eval("(()=>{const p=new URL(location.href);if(typeof window.scoutScoresEndpoint==='string'){const s=new URL(window.scoutScoresEndpoint,p);if(s.origin===p.origin)return s.href}if(!['http:','https:'].includes(p.protocol))return '';const n=p.pathname.indexOf('/releases/');return new URL(n<0?'api/leaderboard.php':p.pathname.slice(0,n+1)+'api/leaderboard.php',p).href})()"))
 func api(action: String, data := {}) -> Dictionary:
 	var url := endpoint()
 	if url.is_empty(): return {"error":"Shared scores need an online PHP website. Your time can be saved on this device."}
@@ -201,7 +201,7 @@ func api(action: String, data := {}) -> Dictionary:
 	var payload: Dictionary = data.duplicate()
 	payload.action = action
 	var method := HTTPClient.METHOD_GET if action == "board" else HTTPClient.METHOD_POST
-	if method == HTTPClient.METHOD_GET: url += "?fresh="+str(Time.get_ticks_msec())
+	if method == HTTPClient.METHOD_GET: url += ("&" if url.contains("?") else "?")+"fresh="+str(Time.get_ticks_msec())
 	var error := request.request(url,["Content-Type: application/json","Accept: application/json"],method,"" if method == HTTPClient.METHOD_GET else JSON.stringify(payload))
 	if error != OK:
 		request.queue_free()
