@@ -1,7 +1,7 @@
 # Sunny Scout — score posting and saved results
 
-Full browser game exported with Godot 4.6.3 from source commit `4d1274cbfda9b6c0b34f91062b85234494a60f5b`.
-Editable project: `main`. Build release: `4f3b47dbbf7398ef7a5f`.
+Full browser game exported with Godot 4.6.3 from source commit `cfbaa949ddaee10268f3aca83647be8fc46971c6`.
+Editable project: `main`. Build release: `0c3a1cd992759ad66b23`.
 
 ## Upload to WP Engine
 
@@ -27,7 +27,8 @@ Publishing this branch does not upload to WP Engine.
   Browser builds use their own website's PHP scoreboard.
 - Failed finish checks offer Retry and post. Failed posts can be retried;
   the button no longer stays silently disabled after a connection failure.
-- Timed finishes save automatically on this device. A run without an online
+- Timed finishes save automatically on this device; browser saves commit
+  synchronously so a quick reload preserves the newest result. A run without an online
   starting token offers Save on this device, separate from shared ranking.
 - Best times includes This device times and Last result. Reopen the latest
   completed result after restarting to retry posting, while its token is valid.
