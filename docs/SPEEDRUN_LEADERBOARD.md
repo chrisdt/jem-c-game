@@ -113,3 +113,18 @@ still expire after six hours. This saves completed times, not game progress.
   scoreboard data, using an isolated filesystem instead of a hosting account.
 
 No test hooks or seed data are included in the production browser build.
+
+## Diagnosing server save failures
+
+If reading scores works but starting a run returns HTTP 503, inspect the PHP
+error log for **Sunny Scout scoreboard:**. The endpoint records the operation,
+exception class and server error; filesystem write/rename failures include the
+underlying PHP error. Browser responses remain generic. Request bodies, run
+tokens, nicknames and client addresses are not logged by this diagnostic.
+A corrupt stored JSON document is also logged without overwriting it.
+
+WordPress audit events and HTTP access statuses alone do not identify the
+exception. Install the updated `server/leaderboard.php` at
+`/play/api/leaderboard.php`, reproduce once by starting a speedrun, then read
+the new PHP log entry. Preserve `/play/api/data/`; do not delete scores or
+change permissions without first identifying the actual error.

@@ -76,12 +76,30 @@ final class ScoutScores {
             $encoded = self::GUARD.json_encode($state, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)."\n";
             $temporary = $this->directory.'/pending-'.bin2hex(random_bytes(8)).'.php';
             try {
-                if (file_put_contents($temporary,$encoded)!==strlen($encoded)) throw new RuntimeException('Cannot write scores');
+                error_clear_last();
+                if (@file_put_contents($temporary,$encoded)!==strlen($encoded)) {
+                    $detail = error_get_last()['message']??'No filesystem error supplied';
+                    throw new RuntimeException('Cannot write scores: '.$detail);
+                }
                 @chmod($temporary,0600);
-                if (!rename($temporary,$file)) throw new RuntimeException('Cannot commit scores');
+                error_clear_last();
+                if (!@rename($temporary,$file)) {
+                    $detail = error_get_last()['message']??'No filesystem error supplied';
+                    throw new RuntimeException('Cannot commit scores: '.$detail);
+                }
             } finally { if (is_file($temporary)) @unlink($temporary); }
             return [200,$reply];
         } finally { flock($lock,LOCK_UN); fclose($lock); }
+    }
+    public static function logFailure(Throwable $error, string $method, mixed $action): void {
+        // Only controlled operation names and the server exception are logged.
+        // Never log the request body, nickname, run token or client address.
+        $action = in_array($action, ['start','complete','submit'], true) ? $action : 'unknown';
+        $method = in_array($method, ['GET','POST'], true) ? $method : 'other';
+        error_log('Sunny Scout scoreboard: '.json_encode([
+            'method'=>$method, 'action'=>$action,
+            'exception'=>get_class($error), 'detail'=>$error->getMessage()
+        ], JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE));
     }
     private function publicScores(array $scores): array {
         return array_map(fn($row)=>['nickname'=>$row['nickname'],'duration_ms'=>$row['duration_ms'],'enemies'=>$row['enemies'],'finished_ms'=>$row['finished_ms']],array_values(array_slice($scores,0,10,true)));
@@ -112,10 +130,13 @@ try {
     // A direct versioned-release URL shares the same persistent score file.
     if (basename(dirname(__DIR__,2)) === 'releases' && preg_match('/\A[a-f0-9]{20}\z/D',basename(dirname(__DIR__)))) $defaultDirectory = dirname(__DIR__,3).'/api/data';
     $directory = getenv('SUNNY_SCOUT_DATA_DIR') ?: $defaultDirectory;
+    $storageRequest = true;
     [$status,$reply] = (new ScoutScores($directory))->request($method,$body,(int)floor(microtime(true)*1000),$_SERVER['REMOTE_ADDR']??'unknown');
     http_response_code($status); echo json_encode($reply,JSON_THROW_ON_ERROR);
 } catch (JsonException $error) {
+    if ($storageRequest??false) ScoutScores::logFailure($error,$method??'unknown',$body['action']??null);
     http_response_code(400); echo json_encode(['error'=>'The scoreboard request or stored data could not be read. Please try again later.']);
 } catch (Throwable $error) {
+    ScoutScores::logFailure($error,$method??'unknown',$body['action']??null);
     http_response_code(503); echo json_encode(['error'=>'Shared scores are unavailable. Your adventure can still be completed.']);
 }

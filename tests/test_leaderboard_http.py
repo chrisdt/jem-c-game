@@ -61,7 +61,24 @@ def run():
    raw=(root/'data/scores.php').read_text().split('\n',1)[1];state=json.loads(raw)
    assert all(t in state['runs'] for t in tokens)
    assert request()[2]['scores'][0]['nickname']=='JeremyTest'
-   print('PASS: HTTP headers/body/origin/method checks, real Godot client, 16 concurrent PHP writers, and file-backed persistent scores',flush=True)
+   # Reproduce a host that can read/lock existing data but cannot create
+   # a replacement score file. Existing scores must survive, the browser
+   # receives no private paths, and the real reason reaches PHP's log.
+   directory=root/'data'; before=(directory/'scores.php').read_bytes()
+   directory.chmod(0o500)
+   try:
+    code,_,reply=request({'action':'start','campaign':CAMPAIGN,'nickname':'NeverLogThisNickname','token':'NeverLogThisToken'})
+    assert code==503 and reply=={'error':'Shared scores are unavailable. Your adventure can still be completed.'}
+    assert (directory/'scores.php').read_bytes()==before
+    assert request()[0]==200
+    diagnostic=(root/'php.log').read_text()
+    assert 'Sunny Scout scoreboard:' in diagnostic and 'Cannot write scores:' in diagnostic and 'Permission denied' in diagnostic
+    assert 'NeverLogThisNickname' not in diagnostic and 'NeverLogThisToken' not in diagnostic
+    assert all(token not in diagnostic for token in tokens)
+   finally: directory.chmod(0o700)
+   assert request({'action':'start','campaign':CAMPAIGN})[0]==200
+   assert request()[2]['scores'][0]['nickname']=='JeremyTest'
+   print('PASS: HTTP/client/concurrency, read-only storage reproduction, private PHP diagnostics without token leakage, preserved scores and recovery after restoring write access',flush=True)
   finally:
    import signal
    os.killpg(server.pid,signal.SIGTERM)
