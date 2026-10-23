@@ -1,12 +1,12 @@
 # Earth walking and doorway audit
 
-Checked 22 October 2026. Earth only: all five surface districts and all three mines.
+Checked 23 October 2026. Earth only: all five surface districts and all three mines.
 
-The audit passes **32 routes walked in both directions**, **11,127 real player-movement steps**, **14,995 connected floor samples**, **30 trail approaches** and **18 mine approaches**. No sampled floor positions or interior rooms remain disconnected. The separate Landing Meadow markup test adds six routes walked both ways (1,859 real-control steps).
+The audit passes **32 routes walked in both directions**, **11,127 real player-movement steps**, **15,471 connected floor samples**, **30 trail approaches** and **18 mine approaches**. No sampled floor positions or interior rooms remain disconnected. The separate Landing Meadow markup test adds seven routes walked both ways (2,836 real-control steps), checked on Godot 4.6.3 and 4.7.2.
 
 ## Corrections
 
-- **Landing Meadow markup:** red means walkable ground. `landing_layout.gd` traces the supplied 1499 × 1049 annotation in background coordinates, with holes for its unpainted camp, pond, boulders, signs and shrubs. Movement checks Sunny's feet with an eight-unit ground radius and sweeps/slides around boundaries. Player movement, enemy floor checks, story placement and the companion use this navigation; the existing conservative grass/ore placement mask remains separate. The scenery is unchanged and the red overlay is never shown in play. Trail probes avoid the unpainted east sign and southern shrub.
+- **Landing Meadow markup:** red means walkable ground. `landing_layout.gd` traces the revised 23 October 1499 × 1049 annotation in background coordinates, with holes for its unpainted camp, pond, boulders, signs and shrubs. Movement checks Sunny's feet with an eight-unit ground radius and sweeps/slides around boundaries. Player movement, enemy floor checks, story placement and the companion use this navigation; the existing conservative grass/ore placement mask remains separate. The scenery is unchanged and the red overlay is never shown in play. The revised boundary opens the northern clearing and lower edges, removes the former collision islands where decorations are now painted red, and keeps the unpainted camp, pond bank, boulders, shrubs and signs blocked. Trail probes avoid the unpainted east sign and southern shrub. The Moss Mine entry trigger sits on the revised threshold so approaches from the right enter before meeting its rocky bank; the safe return stays outside the trigger.
 - **Three mine markups:** `earth_mine_markup.gd` traces the supplied red-ground contours for Moss Mine, Copper Hollow and Crystal Depths in their original 1499 × 1049 background coordinates. The same outlines control player/companion collision, enemy floor checks and deposit placement. Boarded door faces, pillars, rock peninsulas and pools remain excluded. Source paintings are unchanged.
 - **Moss Mine:** the two unmarked lower alcoves are now blocked. Routes use the four marked side chambers and the main galleries; random ore and creatures cannot be placed in the removed alcoves. Copper Hollow no longer permits crossing the rock spur between the southwest room and the southern entrance. Crystal Depths follows the dry western pool rim and excludes the central boarded rock peninsula.
 - **Mine minerals:** deposits require a clear 85-unit ring around their position so a mineral cannot fill a narrow marked passage and strand Buddy. This affects placement, not the walking boundary or material budget. Regression checks include the previously blocking Crystal Depths corridor, 150 landing layouts, 200 expanded-Earth layouts and Buddy following through all three mines.
@@ -22,7 +22,7 @@ Every floor sample below is linked to the area’s arrival by swept movement tha
 
 | Area | Valid floor samples | Reachable |
 | --- | ---: | ---: |
-| Landing Meadow | 2,639 | 2,639 |
+| Landing Meadow | 3,115 | 3,115 |
 | Moss Mine | 1,098 | 1,098 |
 | Pinewood Trail | 2,334 | 2,334 |
 | Copper Hollow | 1,066 | 1,066 |

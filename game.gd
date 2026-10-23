@@ -4,7 +4,7 @@ var run_session: Node
 const SPEED := 235.0
 const CAMP := Vector2(470, 400)
 const EARTH_START := Vector2(515, 430) # Clearing in front of the camp workbench.
-const CAVE := Vector2(1480, 340)
+const CAVE := Vector2(1480, 370)
 const MINE_EXIT := Vector2(150, 610)
 const MINE_SPAWN := Vector2(420, 620)
 const MINE_LAYOUT = preload("res://mine_layout.gd")

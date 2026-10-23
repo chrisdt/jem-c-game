@@ -90,7 +90,7 @@ Earth now has **five times the original surface area**: five 2000 × 1400 distri
 | Sunstone Ridge | Rocky uplands, ruined lookout and a looping lower trail | — |
 | Old Quarry | Limestone terraces, old railway, water and dry galleries | Crystal Depths |
 
-The meadow's east trail reaches Pinewood; its south trail reaches Willow Marsh. Pinewood connects south to the ridge and east to the quarry. Willow Marsh connects east to the ridge, forming a loop back to camp. The rocket and workbench stay in Landing Meadow. Walk back there to upgrade or travel to another world.
+The meadow's east trail reaches Pinewood; its south trail reaches Willow Marsh. Pinewood connects south to the ridge and east to the quarry. Willow Marsh connects east to the ridge, forming a loop back to camp. The rocket and workbench stay in Landing Meadow. Walk back there to upgrade or travel to another world. Its walking boundary follows the revised red-ground annotation: the northern clearing and lower edges are open, while the unpainted camp, pond, boulders and signs remain solid. Player, companion and enemy movement share that boundary.
 
 `earth_regions.gd` contains the links, foot-based floor boundaries, safe arrivals, ore zones and separate discovery IDs. The original meadow/Moss Mine remain available immediately. Other districts create their randomized ore **once on first entry**; unloading scenery never resets deposits, collected materials, fitted tools or explored mist. Earth contains 16 deposits when fully explored: 13 copper and 3 blue crystals. Copper remains 2 seconds; blue crystal remains 5 seconds and needs the hand drill. Session progress resets with **R** or closing the game; there is no disk save.
 

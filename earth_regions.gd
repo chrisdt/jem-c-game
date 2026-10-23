@@ -35,7 +35,9 @@ const GATES := [
 	{"north":Vector2(710,90),"west":Vector2(85,465)},
 	{"west":Vector2(85,420)},
 ]
-const MINE_ENTRANCES := [Vector2(1480,340),Vector2(1090,245) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(1100,225) / ART_SIZE * SIZE]
+# The revised meadow apron reaches the doorway from below its rocky right bank.
+# Centre its trigger on that marked threshold; retain a safe return farther out.
+const MINE_ENTRANCES := [Vector2(1480,370),Vector2(1090,245) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(1100,225) / ART_SIZE * SIZE]
 const MINE_EXITS := [Vector2(150,610),Vector2(750,875) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(160,835) / ART_SIZE * SIZE]
 const MINE_SPAWNS := [Vector2(420,620),Vector2(750,745) / ART_SIZE * SIZE,Vector2.ZERO,Vector2.ZERO,Vector2(290,790) / ART_SIZE * SIZE]
 const MOTION = preload("res://floor_motion.gd")
