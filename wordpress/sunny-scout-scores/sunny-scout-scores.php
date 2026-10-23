@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Sunny Scout Scores
- * Description: Shared Sunny Scout times using your existing WordPress database. Activate, then use the Play Sunny Scout link.
- * Version: 1.0.0
+ * Description: Shared Sunny Scout times and private Explore checkpoints using your existing WordPress database.
+ * Version: 1.1.0
  * Requires at least: 6.0
  * Requires PHP: 8.1
  * Author: Sunny Scout
@@ -12,6 +12,7 @@
 declare(strict_types=1);
 if (!defined('ABSPATH')) exit;
 require_once __DIR__.'/score-rules.php';
+require_once __DIR__.'/adventure-store.php';
 
 final class Sunny_Scout_WordPress_Store {
     public const OPTION = 'sunny_scout_scores_three_worlds_v1';
@@ -107,12 +108,44 @@ final class Sunny_Scout_Scores_Plugin {
         return home_url('/index.php?rest_route=/sunny-scout/v1/leaderboard');
     }
 
+    public static function adventureUrl(): string { return home_url('/index.php?rest_route=/sunny-scout/v1/adventure'); }
+
     public static function registerRest(): void {
         register_rest_route('sunny-scout/v1','/leaderboard',[
             'methods'=>['GET','POST'],
             'permission_callback'=>'__return_true',
             'callback'=>[self::class,'restRequest'],
         ]);
+        register_rest_route('sunny-scout/v1','/adventure',[
+            'methods'=>['POST'], 'permission_callback'=>'__return_true',
+            'callback'=>[self::class,'adventureRequest'],
+        ]);
+    }
+
+    public static function adventureRequest(WP_REST_Request $request): WP_REST_Response {
+        $origin=(string)$request->get_header('origin');
+        $parts=wp_parse_url(home_url());
+        $expected=$parts['scheme'].'://'.$parts['host'].(isset($parts['port'])?':'.$parts['port']:'');
+        $status=400; $reply=['error'=>'Invalid adventure request.'];
+        try {
+            if ($origin!=='' && strcasecmp(rtrim($origin,'/'),$expected)!==0) { $status=403; $reply=['error'=>'Use saves from the game website.']; }
+            elseif (!str_starts_with(strtolower((string)$request->get_header('content-type')),'application/json')) { $status=415; $reply=['error'=>'JSON required.']; }
+            elseif (strlen($request->get_body())>Sunny_Scout_Adventure_Store::MAX_BYTES+4096) { $status=413; $reply=['error'=>'Adventure request is too large.']; }
+            else {
+                $body=json_decode($request->get_body(),true,64,JSON_THROW_ON_ERROR);
+                if (is_array($body) && !array_is_list($body)) [$status,$reply]=(new Sunny_Scout_Adventure_Store())->request($body);
+            }
+        } catch (JsonException $error) {
+            $status=400; $reply=['error'=>'Invalid adventure data.'];
+        } catch (Throwable $error) {
+            // Never log bodies, recovery codes, snapshots or addresses.
+            error_log('Sunny Scout adventure storage: '.get_class($error));
+            $status=503; $reply=['error'=>'Online saves are unavailable. Your checkpoint can still be kept on this device.'];
+        }
+        $response=new WP_REST_Response($reply,$status);
+        $response->header('Cache-Control','no-store, no-cache, must-revalidate, max-age=0');
+        $response->header('X-Content-Type-Options','nosniff');
+        return $response;
     }
 
     public static function restRequest(WP_REST_Request $request): WP_REST_Response {
@@ -198,6 +231,7 @@ final class Sunny_Scout_Scores_Plugin {
         // REST goes through an existing WordPress file; nginx may reject a
         // nonexistent *.php virtual URL before WordPress can route it.
         $api = wp_json_encode(self::apiUrl(),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
+        $extra .= '<script>window.scoutAdventureEndpoint='.wp_json_encode(self::adventureUrl(),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT).';</script>';
         $extra .= '<script>(()=>{window.scoutScoresEndpoint='.$api.';const send=window.fetch.bind(window);const paths=[new URL("api/leaderboard.php",location.href).pathname,new URL("api/leaderboard.php",document.baseURI).pathname];window.fetch=(input,init)=>{const source=new URL(input instanceof Request?input.url:String(input),document.baseURI);if(source.origin===location.origin&&paths.includes(source.pathname)){const target=new URL(window.scoutScoresEndpoint);if(source.searchParams.has("fresh"))target.searchParams.set("fresh",source.searchParams.get("fresh"));input=input instanceof Request?new Request(target.href,input):target.href}return send(input,init)}})();</script>';
         $html = preg_replace_callback('/<head\b[^>]*>/i',static fn($match)=>$match[0].$extra,$html,1,$count);
         if ($count !== 1) wp_die('The Sunny Scout game HTML is incomplete.','Sunny Scout',['response'=>503]);
@@ -228,7 +262,9 @@ final class Sunny_Scout_Scores_Plugin {
         echo '<p><a class="button button-primary" href="'.esc_url(self::playUrl()).'">Play Sunny Scout</a></p>';
         echo '<p>Share this game link: <code>'.esc_html(self::playUrl()).'</code></p>';
         echo '<p>Use this link for the database-backed leaderboard. Your previous game URL can still use its old score endpoint.</p>';
-        echo '<p>Fresh leaderboard · All 14 story quests · One best time per nickname</p></div>';
+        echo '<p>Fresh leaderboard · All 14 story quests · One best time per nickname</p>';
+        echo '<p>Explore checkpoints are private and stored separately from scores. Players keep their recovery code; no account is required. Updated game files are required for save totems.</p>';
+        echo '</div>';
     }
 }
 

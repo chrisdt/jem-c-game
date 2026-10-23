@@ -9,6 +9,7 @@ boot_splash/fullsize=true
 boot_splash/use_filter=true
 [autoload]
 RunSession="*res://ui/run_session.gd"
+AdventureSave="*res://ui/adventure_session.gd"
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=800

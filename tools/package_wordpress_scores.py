@@ -5,7 +5,7 @@ import hashlib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = ("sunny-scout-scores.php", "score-rules.php", "readme.txt")
+FILES = ("sunny-scout-scores.php", "score-rules.php", "adventure-store.php", "readme.txt")
 
 
 def package(destination: Path) -> Path:

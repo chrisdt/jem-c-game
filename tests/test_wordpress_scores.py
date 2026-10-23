@@ -167,6 +167,45 @@ def run():
             assert php("echo get_option('blogname');")=="Sunny Scout Test"
             print("PASS: real database API, origin/body validation, verified/idempotent finish and post, private/non-autoloaded storage, 16 concurrent starts without lost updates",flush=True)
 
+            adventure_route = "/index.php?rest_route=/sunny-scout/v1/adventure"
+            recovery = secrets.token_hex(16)
+            checkpoint = secrets.token_hex(12)
+            sample = {"version":1,"mode":"explore","state":{"map":[]}}
+            write = {"action":"save","code":recovery,"revision":0,"checkpoint":checkpoint,"snapshot":sample}
+            before_scores = api()[2]["scores"]
+            assert api(write,path=adventure_route)[0]==200
+            assert api(write,path=adventure_route)[2]["revision"]==1, "Lost-response retry not idempotent"
+            loaded = api({"action":"load","code":recovery},path=adventure_route)
+            assert loaded[0]==200 and loaded[2]["snapshot"]==sample and "no-store" in loaded[1].get("Cache-Control","")
+            assert api({"action":"load","code":secrets.token_hex(16)},path=adventure_route)[0]==404
+            assert api({"action":"load","code":recovery},path=adventure_route,headers={"Origin":"https://elsewhere.invalid"})[0]==403
+            assert api(write | {"checkpoint":secrets.token_hex(12)},path=adventure_route)[0]==409
+            assert api(write | {"snapshot":sample | {"mode":"speedrun"}},path=adventure_route)[0]==400
+            assert api(write | {"large":"x"*530000},path=adventure_route)[0]==413
+            # Same-save stale writes must conflict; different players must not
+            # lose each other's snapshots or serialize through the score row.
+            def same_write(_):
+                return api(write | {"revision":1,"checkpoint":secrets.token_hex(12)},path=adventure_route)
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                competing = list(pool.map(same_write,range(8)))
+                independent = list(pool.map(lambda _: api(write | {"code":secrets.token_hex(16),"checkpoint":secrets.token_hex(12)},path=adventure_route),range(8)))
+            assert sum(reply[0]==200 for reply in competing)==1
+            assert sum(reply[0]==409 for reply in competing)==7
+            assert all(reply[0]==200 for reply in independent)
+            stored_keys = php("global $wpdb; $rows=$wpdb->get_results(\"SELECT option_name,autoload FROM {$wpdb->options} WHERE option_name LIKE 'sunny_scout_adventure_v1_%'\",ARRAY_A); echo json_encode($rows);")
+            assert recovery not in stored_keys and all(row["autoload"] in ("no","off") for row in json.loads(stored_keys))
+            assert api()[2]["scores"]==before_scores
+            php("Sunny_Scout_Scores_Plugin::activate();")
+            assert api({"action":"load","code":recovery},path=adventure_route)[2]["revision"]==2
+            print("PASS: private Explore database API, idempotent retries, origin/body/mode validation, concurrent saves/conflicts, non-autoloaded hashed keys and retained scores/checkpoints",flush=True)
+
+            env = os.environ | {"XDG_DATA_HOME":"/workspace/.runtime/data","XDG_CONFIG_HOME":"/workspace/.runtime/config","XDG_CACHE_HOME":"/workspace/.runtime/cache"}
+            with (ARTIFACTS/"godot-adventure.log").open("w") as log:
+                result = subprocess.run([os.environ.get("SCOUT_TEST_GODOT","godot"),"--headless","--path",str(ROOT),"--script","tests/wordpress_adventure.gd","--",base+adventure_route,str(temporary/"adventure-device")],env=env,stdout=log,stderr=subprocess.STDOUT,timeout=100)
+            output = (ARTIFACTS/"godot-adventure.log").read_text()
+            assert result.returncode==0 and "PASS:" in output and "ERROR:" not in output, output
+            print(output,flush=True)
+
             # Match the user's root-hosted game with read-only asset symlinks.
             # WordPress's existing index.php remains untouched and serves REST.
             docker("exec",wp,"php","-r","foreach(scandir('/var/www/html/play') as $name) { if(in_array($name,['.','..','api'],true)) continue; $to='/var/www/html/'.$name; if(file_exists($to)||is_link($to)) throw new RuntimeException('Fixture collision'); symlink('/var/www/html/play/'.$name,$to); }")
@@ -182,19 +221,46 @@ def run():
                 page.on("response",lambda response: responses.append(response) if "leaderboard" in response.url else None)
                 page.goto(base+"/index.php?sunny_scout=play",wait_until="domcontentloaded")
                 page.locator("#status").wait_for(state="hidden",timeout=180000)
-                page.mouse.click(824,663)
+                page.mouse.click(824,625)
                 page.wait_for_timeout(1500)
                 assert any(response.status==200 and response.request.method=="GET" for response in responses)
                 page.screenshot(path=str(ARTIFACTS/"browser-leaderboard.png"))
                 page.mouse.click(624,662)
                 page.wait_for_timeout(500)
-                page.mouse.click(948,598)
+                page.mouse.click(948,560)
                 deadline = time.monotonic()+180
                 while not any(response.status==200 and response.request.method=="POST" for response in responses) and time.monotonic()<deadline:
                     page.wait_for_timeout(300)
                 assert any(response.status==200 and response.request.method=="POST" for response in responses)
                 assert all("rest_route=" in response.url for response in responses), "Old browser scores were not redirected to WordPress REST"
                 page.screenshot(path=str(ARTIFACTS/"browser-game.png"))
+                page.goto(base+"/index.php?sunny_scout=play",wait_until="domcontentloaded")
+                page.locator("#status").wait_for(state="hidden",timeout=180000)
+                page.wait_for_timeout(500)
+                page.mouse.click(1100,625) # Explore for fun
+                page.wait_for_timeout(12000)
+                page.screenshot(path=str(ARTIFACTS/"browser-explore-before-walk.png"))
+                page.keyboard.down("d")
+                page.wait_for_timeout(2000)
+                page.keyboard.up("d")
+                page.screenshot(path=str(ARTIFACTS/"browser-explore-after-walk.png"))
+                (ARTIFACTS/"browser-errors.json").write_text(json.dumps(errors))
+                page.wait_for_function("!!localStorage.getItem('sunny-scout-explore-checkpoint-v1')",timeout=30000)
+                page.wait_for_function("!JSON.parse(localStorage.getItem('sunny-scout-explore-checkpoint-v1')).pending",timeout=30000)
+                page.screenshot(path=str(ARTIFACTS/"browser-save-totem.png"))
+                browser_save = page.evaluate("JSON.parse(localStorage.getItem('sunny-scout-explore-checkpoint-v1'))")
+                assert len(browser_save["code"])==32 and browser_save["snapshot"]["mode"]=="explore"
+                assert api({"action":"load","code":browser_save["code"]},path=adventure_route)[0]==200
+                page.reload(wait_until="domcontentloaded")
+                page.locator("#status").wait_for(state="hidden",timeout=180000)
+                page.wait_for_timeout(500)
+                page.mouse.click(824,685) # Continue adventure
+                page.wait_for_timeout(7000)
+                page.screenshot(path=str(ARTIFACTS/"browser-continued-adventure.png"))
+                assert page.evaluate("JSON.parse(localStorage.getItem('sunny-scout-explore-checkpoint-v1')).code")==browser_save["code"]
+                # Device-local saves are synchronous and must survive reload;
+                # the private code stays in the JSON body, never the page URL.
+                assert browser_save["code"] not in page.url
                 assert not errors, errors
                 browser.close()
             print("PASS: existing browser game and assets, welcome leaderboard and timed-run registration through plugin Play link",flush=True)

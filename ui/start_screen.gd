@@ -15,6 +15,11 @@ const SCORE_PANEL = preload("res://ui/scoreboard_panel.gd")
 var score_panel: SCORE_PANEL
 var board_button: Button
 var relax_button: Button
+var continue_button: Button
+var recover_button: Button
+const ADVENTURE_PANEL = preload("res://ui/adventure_panel.gd")
+var adventure_panel: ADVENTURE_PANEL
+var adventure: Node
 var start_button: Button
 var walk_text: Label
 var mine_text: Label
@@ -32,6 +37,7 @@ var previous_aspect := Window.CONTENT_SCALE_ASPECT_KEEP
 
 func _ready() -> void:
 	run_session = get_node("/root/RunSession")
+	adventure = get_node("/root/AdventureSave")
 	run_session.menu()
 	window = get_window()
 	previous_aspect = window.content_scale_aspect
@@ -51,7 +57,7 @@ func _ready() -> void:
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(content)
 	logo = STYLE.icon(content,STARTUP_ART.logo_texture(),Vector2(76,86),Vector2(530,156))
-	var panel := STYLE.panel(content,Vector2(676,62),Vector2(544,680))
+	var panel := STYLE.panel(content,Vector2(676,24),Vector2(544,752))
 	var eyebrow := STYLE.label(panel,"YOUR EXPLORER'S GUIDE",Vector2(32,22),Vector2(480,24),14,true)
 	eyebrow.add_theme_color_override("font_color",STYLE.GOLD)
 	STYLE.label(panel,"How to play",Vector2(32,49),Vector2(480,42),30,true)
@@ -66,9 +72,18 @@ func _ready() -> void:
 	board_button.pressed.connect(func(): score_panel.open_board())
 	relax_button = STYLE.button(panel,"Explore for fun",Vector2(280,578),Vector2(232,46),18)
 	relax_button.pressed.connect(func(): start_exploring(false))
+	continue_button = STYLE.button(panel,"Continue adventure",Vector2(32,638),Vector2(232,46),17)
+	continue_button.pressed.connect(continue_adventure)
+	recover_button = STYLE.button(panel,"Use recovery code",Vector2(280,638),Vector2(232,46),17)
+	recover_button.pressed.connect(func(): adventure_panel.open(true))
+	adventure_panel = ADVENTURE_PANEL.new()
+	add_child(adventure_panel)
+	adventure_panel.recovered.connect(func(): start_exploring(false,true))
+	adventure.changed.connect(present_adventure)
+	present_adventure()
 	score_panel = SCORE_PANEL.new()
 	add_child(score_panel)
-	footer = STYLE.label(panel,"",Vector2(32,638),Vector2(480,32),12)
+	footer = STYLE.label(panel,"",Vector2(32,696),Vector2(480,40),12)
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	load_status = STYLE.label(panel,"",Vector2(32,586),Vector2(480,22),14)
 	load_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -117,15 +132,32 @@ func set_touch_mode(value: bool) -> void:
 	mine_text.text = "Tap action · Talk / use / gather / mine\nMove away to pause mining." if value else "E · Talk / use / open camp or rocket\nE / Space · Gather / mine. Move to pause."
 	combat_text.text = "Tap tool / sword slots · Choose equipment\nTap Attack / Jab · Fight   Tap antidote · Cure" if value else "1 · Mining tool   2 · Sword   Space · Attack\n3 · Use antidote (once earned)"
 	menu_text.text = "Tap Quests · Missions   Tap ? · Controls\nUse Close / X buttons to leave menus." if value else "J · Quests   ? button · Controls\nR · Restart (asks first)   Esc · Close panels"
-	footer.text = "Speedrun: finish 14 story quests (extras optional).\nMenus + travel count · No mid-run saves · Use a nickname"
+	footer.text = "Speedrun: 14 quests · No checkpoints · Menus + travel count\nExplore: walk near a glowing totem to save your adventure."
+	if adventure.status.begins_with("This checkpoint"): footer.text = adventure.status
 
-func start_exploring(timed := true) -> void:
-	if score_panel.visible or stage != Stage.GUIDE:
+func present_adventure() -> void:
+	continue_button.disabled = not adventure.has_save() or adventure.busy
+	continue_button.text = "Checking save…" if adventure.busy else "Continue adventure"
+	recover_button.disabled = adventure.busy
+	relax_button.disabled = adventure.busy
+	start_button.disabled = adventure.busy
+	continue_button.tooltip_text = adventure.saved.get("place","Your most recent Explore checkpoint")
+	relax_button.text = "New Explore adventure" if adventure.has_save() else "Explore for fun"
+
+func continue_adventure() -> void:
+	if stage != Stage.GUIDE or adventure_panel.visible: return
+	if await adventure.continue_adventure(): start_exploring(false,true)
+
+func start_exploring(timed := true, from_checkpoint := false) -> void:
+	if score_panel.visible or adventure_panel.visible or adventure.busy or stage != Stage.GUIDE:
 		return
+	if not timed and not from_checkpoint: adventure.new_adventure()
 	run_session.choose(timed)
 	stage = Stage.LOADING
 	board_button.hide()
 	relax_button.hide()
+	continue_button.hide()
+	recover_button.hide()
 	start_button.disabled = true
 	start_button.text = "Landing on Earth…"
 	footer.hide()
@@ -165,6 +197,8 @@ func load_failed() -> void:
 	start_button.text = "Try again"
 	board_button.show()
 	relax_button.show()
+	continue_button.show()
+	recover_button.show()
 	load_status.text = "Earth couldn't open. Please try again."
 	progress.hide()
 	start_button.grab_focus()
@@ -172,7 +206,7 @@ func load_failed() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.pressed and not touch_mode:
 		set_touch_mode(true)
-	if score_panel.visible: return
+	if score_panel.visible or adventure_panel.visible or adventure.busy: return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_KP_ENTER,KEY_SPACE]:
 		start_exploring()
 		get_viewport().set_input_as_handled()

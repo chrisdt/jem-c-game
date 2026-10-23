@@ -1,5 +1,10 @@
 extends Node2D
 var run_session: Node
+const SAVE_TOTEM = preload("res://environment/save_totem.gd")
+const ADVENTURE_PANEL = preload("res://ui/adventure_panel.gd")
+var save_totem: Node2D
+var adventure_panel: ADVENTURE_PANEL
+var save_button: Button
 
 const SPEED := 235.0
 const CAMP := Vector2(470, 400)
@@ -294,7 +299,9 @@ func _ready() -> void:
 	hud.missions_requested.connect(mission_journal.open)
 	reset_confirmation = RESET_CONFIRMATION.new()
 	add_child(reset_confirmation)
-	reset_confirmation.confirmed.connect(func(): get_tree().reload_current_scene())
+	reset_confirmation.confirmed.connect(func():
+		if not run_session.timed: get_node("/root/AdventureSave").new_adventure()
+		get_tree().reload_current_scene())
 	score_panel = SCORE_PANEL.new()
 	score_panel.game = self
 	add_child(score_panel)
@@ -302,8 +309,21 @@ func _ready() -> void:
 	hud.run_button.pressed.connect(func():
 		if run_session.finished: score_panel.open_results()
 		else: score_panel.open_board())
+	save_totem = SAVE_TOTEM.new()
+	save_totem.game = self
+	add_child(save_totem)
+	adventure_panel = ADVENTURE_PANEL.new()
+	adventure_panel.game = self
+	add_child(adventure_panel)
+	save_button = UI_STYLE.button(hud,"Save · Totems",Vector2(18,218),Vector2(214,34),14)
+	save_button.focus_mode = Control.FOCUS_NONE
+	save_button.visible = not run_session.timed
+	save_button.pressed.connect(func(): adventure_panel.open())
 	refresh_ui()
 	run_session.begin_world()
+	var saves := get_node("/root/AdventureSave")
+	if not run_session.timed and not saves.staged.is_empty():
+		if not saves.restore(self): get_tree().change_scene_to_file.call_deferred("res://startup.tscn")
 	hud.run_button.text = "Run 0:00 · 0/14" if run_session.timed else "Best times"
 
 # The Earth-named transition fields are retained for the existing editor/test
@@ -346,7 +366,7 @@ func has_base() -> bool:
 	return current_region() == 0
 
 func menu_open() -> bool:
-	return (is_instance_valid(score_panel) and score_panel.visible) or planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or (is_instance_valid(mission_journal) and mission_journal.visible) or dialogue_open()
+	return (is_instance_valid(adventure_panel) and adventure_panel.visible) or (is_instance_valid(score_panel) and score_panel.visible) or planet_menu.visible or (is_instance_valid(camp_menu) and camp_menu.visible) or (is_instance_valid(mission_journal) and mission_journal.visible) or dialogue_open()
 
 func dialogue_open() -> bool:
 	return is_instance_valid(character_bubble) and character_bubble.is_dialogue_open()
@@ -1163,6 +1183,7 @@ func refresh_ui() -> void:
 	planet_menu.set_touch_mode(hud.touch_mode)
 	if camp_menu.visible: camp_menu.present()
 	var flying := flight != Flight.IDLE or earth_transition
+	if is_instance_valid(save_button): save_button.visible = not run_session.timed
 	hud_layer.visible = not flying
 	flight_caption_panel.visible = flying
 	flight_caption.text = message

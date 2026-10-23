@@ -35,7 +35,7 @@ Scores**, and share that Play link. It uses `/index.php?sunny_scout=play` so
 plain permalinks and a root-hosted game `index.html` both work. The plugin detects
 existing exported game files in the WordPress root or `/play/`, preserves any
 versioned asset base URL, and runs the full-screen game using those assets.
-The plugin ZIP contains only its three small source/readme files, not the game.
+The plugin ZIP contains only its four small source/readme files, not the game.
 
 The new Play link is required for database-backed scores in existing browser
 builds. The page directs their score requests to WordPress REST before they
@@ -55,7 +55,8 @@ players do not overwrite each other's starts or scores. The state is read
 straight from the database instead of trusting a cached WordPress option.
 Deactivation and reactivation retain scores. Uninstall does not delete them.
 The existing campaign rules, server timing, rate limits and public/private field
-boundaries are retained. This is score storage, not game-progress saving.
+boundaries are retained. Explore checkpoints use a separate private endpoint;
+see [Explore saves](EXPLORE_SAVES.md).
 
 ## Standalone PHP host (legacy file backend)
 
