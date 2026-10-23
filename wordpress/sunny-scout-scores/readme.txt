@@ -53,10 +53,9 @@ Update the plugin AND game files to add save totems. The plugin alone cannot
 add props or Continue buttons to an old compiled game. Upload the new ZIP and
 choose Replace current with uploaded; existing scores and checkpoints remain.
 
-Explore for fun shows two save totems per world: one near the starting camp
-and one in a distant outdoor district. Walk close on clear ground, away from
+Explore for fun shows one save totem at each world's starting camp. Walk close on clear ground, away from
 nearby enemies, to save. The crystal gives one brief coloured pulse and an
-Adventure saved message after a checkpoint is kept. While nearby, a checkpoint
+Saving... then Saved speech bubble after a checkpoint is kept. While nearby, a checkpoint
 can refresh after 20 seconds. Save > Save and quit keeps another checkpoint
 before returning to the guide. Totems and saving are absent from speedruns.
 

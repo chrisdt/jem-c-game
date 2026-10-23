@@ -1,13 +1,17 @@
 extends Node2D
 
 const STYLE = preload("res://ui/expedition_style.gd")
-const ART := [preload("res://assets/saves/earth_totem.png"),preload("res://assets/saves/frost_totem.png"),preload("res://assets/saves/ember_totem.png")]
+const BUBBLE = preload("res://ui/character_bubble.gd")
+# Paths intentionally stay strings: a newly unpacked editor project may not
+# have generated these textures yet. Never make game.gd parsing depend on them.
+const ART := ["res://assets/saves/earth_totem.png","res://assets/saves/frost_totem.png","res://assets/saves/ember_totem.png"]
+static var textures: Dictionary = {}
 const COLOURS := [Color("51f6a6"),Color("72dbff"),Color("ffb339")]
-# Exactly two outdoor checkpoints per world: starting camp + a far district.
+# One checkpoint per world, at its starting camp.
 const HOMES := {
-	0:{0:Vector2(730,450),3:Vector2(1170,780)},
-	1:{0:Vector2(860,1050),4:Vector2(1450,1090)},
-	2:{0:Vector2(1370,1100),4:Vector2(660,750)},
+	0:{0:Vector2(730,450)},
+	1:{0:Vector2(580,1165)},
+	2:{0:Vector2(1555,970)},
 }
 const RADIUS := 88.0
 const REENTER_DISTANCE := 125.0
@@ -16,12 +20,15 @@ var game: Node
 var session: Node
 var picture: Sprite2D
 var glow: Node2D
-var caption: Label
+var bubble: BUBBLE
 var area := -1
 var colour := Color.WHITE
 var seconds := 0.0
 var flare := 0.0
-var message_seconds := 0.0
+var feedback := ""
+var saving_started_ms := 0
+var saving_area := -1
+var feedback_generation := 0
 var entered := false
 var retry_after := 0.0
 var points: Dictionary = {}
@@ -39,23 +46,38 @@ func _ready() -> void:
 	glow.material = additive
 	glow.draw.connect(draw_glow)
 	add_child(glow)
-	caption = Label.new()
-	caption.position = Vector2(-150,-132)
-	caption.size = Vector2(300,40)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	caption.add_theme_font_override("font",STYLE.BODY)
-	caption.add_theme_font_size_override("font_size",15)
-	caption.add_theme_color_override("font_color",Color("fff3d0"))
-	caption.add_theme_color_override("font_outline_color",Color("142c2a"))
-	caption.add_theme_constant_override("outline_size",5)
-	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(caption)
-	session.checkpoint_saved.connect(saved)
+	bubble = BUBBLE.new()
+	bubble.hint_width = 170
+	bubble.center_hint = true
+	add_child(bubble)
+	session.checkpoint_started.connect(started)
+	session.checkpoint_finished.connect(finished)
 	refresh_area()
+
+static func texture_for(world: int) -> Texture2D:
+	if textures.has(world): return textures[world]
+	var path: String = ART[world]
+	var texture: Texture2D
+	if not OS.has_feature("web") and FileAccess.file_exists(path):
+		# Native/editor fallback reads the shipped PNG, independent of machine-
+		# specific .godot/imported/*.ctex files. Web uses its packaged imports.
+		var image := Image.new()
+		if image.load_png_from_buffer(FileAccess.get_file_as_bytes(path)) == OK:
+			var factor := 256.0/maxi(image.get_width(),image.get_height())
+			image.resize(maxi(1,roundi(image.get_width()*factor)),maxi(1,roundi(image.get_height()*factor)),Image.INTERPOLATE_LANCZOS)
+			image.fix_alpha_edges()
+			image.generate_mipmaps()
+			texture = ImageTexture.create_from_image(image)
+	else:
+		texture = load(path) as Texture2D
+	if texture != null: textures[world] = texture
+	return texture
 
 func refresh_area() -> void:
 	visible = not game.run_session.timed and not game.underground and game.flight == 0 and not game.earth_transition and HOMES[game.world].has(game.current_region())
-	if not visible: return
+	if not visible:
+		if is_instance_valid(bubble): bubble.dismiss()
+		return
 	var key: int = game.area_id()
 	if area != key:
 		area = key
@@ -63,12 +85,17 @@ func refresh_area() -> void:
 		retry_after = RESAVE_SECONDS if restored_checkpoint else 0.0
 		restored_checkpoint = false
 		flare = 0
-		message_seconds = 0
+		feedback = ""
 		colour = COLOURS[game.world]
 		if not points.has(key): points[key] = find_site(HOMES[game.world][game.current_region()])
 		position = points[key]
-		var texture: Texture2D = ART[game.world]
-		var bounds := texture.get_image().get_used_rect()
+		var texture := texture_for(game.world)
+		if texture == null:
+			hide()
+			return
+		# Faint alpha specks extend below the painted base. Crop to visible
+		# pixels, as for NPC feet, so the stone touches its contact shadow.
+		var bounds: Rect2i = game.HUMAN_NPC.visible_bounds(texture.get_image())
 		var atlas := AtlasTexture.new()
 		atlas.atlas = texture
 		atlas.region = Rect2(bounds)
@@ -111,10 +138,7 @@ func _process(delta: float) -> void:
 	if not visible: return
 	seconds += delta
 	flare = maxf(0,flare-delta)
-	message_seconds = maxf(0,message_seconds-delta)
 	retry_after = maxf(0,retry_after-delta)
-	caption.visible = message_seconds > 0 or game.player.distance_to(position) < 150
-	if message_seconds <= 0: caption.text = "Save totem · walk close"
 	if game.player.distance_to(position) > REENTER_DISTANCE: entered = false
 	if not game.menu_open() and not game.hud.help.visible and can_save() and not session.busy and (not entered or retry_after <= 0):
 		entered = true
@@ -125,20 +149,40 @@ func _process(delta: float) -> void:
 
 func keep_checkpoint() -> void:
 	if not await session.checkpoint(game):
-		caption.text = "Check your checkpoint · Save menu"
-		message_seconds = 4
+		if feedback != "Saving...": show_feedback("Check your checkpoint in Save",4)
 
-func saved() -> void:
-	if not visible or game.run_session.timed or game.player.distance_to(position) > RADIUS: return
-	flare = 0.8
-	message_seconds = 3.0
-	caption.text = "Adventure saved"
+func show_feedback(text: String, duration: float) -> void:
+	if not is_visible_in_tree() or game.run_session.timed: return
+	feedback = text
+	bubble.hint_width = 170 if text in ["Saving...","Saved"] else 250
+	bubble.show_hint(text,self,Vector2(0,-100),duration)
+
+func started() -> void:
+	if not can_save(): return
+	feedback_generation += 1
+	saving_area = game.area_id()
+	saving_started_ms = Time.get_ticks_msec()
+	show_feedback("Saving...",60)
+
+func finished(kept: bool, online: bool) -> void:
+	if saving_area < 0: return
+	var generation := feedback_generation
+	# Let even a fast local save show Saving before showing the result.
+	var remaining := 0.4-(Time.get_ticks_msec()-saving_started_ms)/1000.0
+	if remaining > 0: await get_tree().create_timer(remaining).timeout
+	if generation != feedback_generation or game.area_id() != saving_area or not is_visible_in_tree() or game.run_session.timed: return
+	saving_area = -1
+	if kept:
+		flare = 0.8
+		show_feedback("Saved" if online else "Saved on this device",3)
+	else:
+		show_feedback("Couldn't save · open Save",4)
 
 func _draw() -> void:
 	if not visible: return
-	draw_set_transform(Vector2(0,2),0,Vector2(1,0.36))
-	draw_circle(Vector2.ZERO,30,Color(0.025,0.06,0.07,0.23))
-	draw_circle(Vector2.ZERO,22,Color(0.025,0.06,0.07,0.17))
+	draw_set_transform(Vector2(0,-2),0,Vector2(1,0.27))
+	draw_circle(Vector2.ZERO,26,Color(0.025,0.06,0.07,0.18))
+	draw_circle(Vector2.ZERO,19,Color(0.025,0.06,0.07,0.19))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_glow() -> void:

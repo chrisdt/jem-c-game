@@ -75,7 +75,7 @@ func present() -> void:
 		primary.text = "Finding adventure…" if session.busy else "Find my adventure"
 		primary.disabled = session.busy
 	else:
-		detail.text = "Walk close to a glowing save totem to keep a checkpoint. There are two on each world. Speedruns do not use checkpoints."
+		detail.text = "Walk close to the glowing totem at each world's camp to save. Speedruns do not use checkpoints."
 		code_field.text = session.recovery_code() if not session.code.is_empty() else "No checkpoint yet in this adventure"
 		var near: bool = is_instance_valid(game) and game.save_totem.can_save()
 		primary.text = "Saving checkpoint…" if session.busy else ("Continue online save" if session.conflict else ("Save and quit" if near else "Return to game"))

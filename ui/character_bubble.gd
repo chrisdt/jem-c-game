@@ -34,6 +34,8 @@ var final_action := "Close"
 var remaining := 0.0
 var previous_focus: Control
 var last_view_size := Vector2.ZERO
+var hint_width := 360.0
+var center_hint := false
 
 func _ready() -> void:
 	layer = 5
@@ -149,7 +151,7 @@ func update_page() -> void:
 	var action := "Next" if page_index < pages.size()-1 else final_action
 	next_button.text = action if touch_mode else "E  "+action
 	last_view_size = get_viewport().get_visible_rect().size
-	var width := minf(360,last_view_size.x-safe_insets.x-safe_insets.z)
+	var width := minf(hint_width if mode == Mode.HINT else 360.0,last_view_size.x-safe_insets.x-safe_insets.z)
 	panel.size.x = width
 	var body_top := (57.0 if touch_mode else 45.0) if mode == Mode.DIALOGUE else 16.0
 	var body_width := width-36
@@ -158,7 +160,9 @@ func update_page() -> void:
 		ITEM_ICONS.fill(body_label,pages[page_index],dialogue_world)
 	else:
 		body_label.clear()
+		if center_hint: body_label.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
 		body_label.add_text(pages[page_index])
+		if center_hint: body_label.pop()
 	# Measure after wrapping inline images, so the footer never covers a recipe.
 	var text_height := maxf(28,body_label.get_content_height()+6)
 	body_label.position = Vector2(18,body_top)

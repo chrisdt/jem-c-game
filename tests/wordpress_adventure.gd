@@ -33,9 +33,12 @@ func run() -> void:
 	game.update_exploration()
 	game.save_totem.refresh_area()
 	game.save_totem._process(0.01)
+	check(game.save_totem.feedback=="Saving...","Online save skipped Saving speech bubble")
 	await settle(session)
+	var feedback_deadline := Time.get_ticks_msec()+2000
+	while game.save_totem.feedback=="Saving..." and Time.get_ticks_msec()<feedback_deadline: await process_frame
 	check(session.has_save() and not session.saved.pending and session.revision==1,"Approaching totem did not save online: "+session.status)
-	check(game.save_totem.flare>0 and game.save_totem.caption.text=="Adventure saved","Online totem did not light up")
+	check(game.save_totem.flare>0 and game.save_totem.feedback=="Saved" and game.save_totem.bubble.visible,"Online totem did not light up")
 	if not session.has_save():
 		quit(1)
 		return

@@ -50,8 +50,8 @@ func run() -> void:
 	root.get_node("RunSession").choose(false)
 	var game: Node = await fresh()
 	var locations := []
-	# The real streamed maps must provide an accessible approach to all six
-	# checkpoints. No totem can accidentally appear on the other nine maps.
+	# The real streamed maps must provide an accessible approach to all three
+	# camps. No totem can accidentally appear on the other twelve maps.
 	for world in [0,1,2]:
 		if game.world != world:
 			game.flight_destination = world
@@ -66,16 +66,35 @@ func run() -> void:
 				continue
 			var point: Vector2 = game.save_totem.position
 			check(point.is_finite() and game.trial.floor_at(point),"Totem not on floor %d/%d: %s" % [world,region,point])
+			if world == 1: check(point.distance_to(Vector2(580,1165)) < 25,"Frost totem moved away from the front clearing: %s" % point)
+			if world == 2: check(point.distance_to(Vector2(1555,970)) < 25,"Ember totem moved away from the sand above the camp sign: %s" % point)
 			var reached := false
 			for candidate in floor_points(game):
-				if candidate.distance_to(point) < 60: reached = true
+				if candidate.distance_to(point) < 60 and game.trial.clear_line(candidate,point): reached = true
 			check(reached,"Unreachable totem %d/%d: %s" % [world,region,point])
 			locations.append({"world":world,"region":region,"point":point})
-	check(locations.size()==6,"Expected exactly two totems on each world")
+	check(locations.size()==3,"Expected exactly one camp totem on each world")
+	for world in [0,1,2]: check(game.save_totem.HOMES[world].keys()==[0],"A totem remained outside camp")
 	# Complete data from all three planets, including previously visited maps,
 	# spent fruit/wood, boss health, fog and partially mined rare deposits.
-	game.player = game.save_totem.position+Vector2(40,0)
 	for enemy in game.ember_story.scorpions: enemy.health = 0
+	game.rocks[0].hp = 0
+	game.rocks[1]["work"] = 1.25
+	var mined_at: Vector2 = game.rocks[1].pos
+	await TRAVEL.enter(game,0,false)
+	game.save_totem.refresh_area()
+	# Approach on the authored floor, including the narrow camp clearing.
+	var approach := Vector2.INF
+	for candidate in floor_points(game):
+		var distance := candidate.distance_to(game.save_totem.position)
+		if distance >= 30 and distance < 60 and game.trial.clear_line(candidate,game.save_totem.position):
+			approach = candidate
+			break
+	check(approach.is_finite(),"No clear camp approach for saving")
+	game.player = approach
+	game.camera.position = game.player
+	game.camera.reset_smoothing()
+	game.camera.force_update_scroll()
 	game.ore = 17
 	game.blue_crystals = 4
 	game.frost_ore = 9
@@ -100,9 +119,6 @@ func run() -> void:
 	game.trial.sword_owned = true
 	game.trial.mine_health[23] = {"2/4/1":0}
 	game.companion.recruited = true
-	game.rocks[0].hp = 0
-	game.rocks[1]["work"] = 1.25
-	var mined_at: Vector2 = game.rocks[1].pos
 	game.update_exploration()
 	var codec := SNAPSHOT.new()
 	var snapshot := SNAPSHOT.capture(game)
@@ -127,9 +143,15 @@ func run() -> void:
 	game.fog.observe(game.area_id(),game.save_totem.position)
 	game.save_totem.refresh_area()
 	var count_before := pulses
-	check(await session.checkpoint(game),"Offline device checkpoint failed")
+	session.checkpoint(game)
+	check(game.save_totem.feedback=="Saving..." and game.save_totem.bubble.visible,"Saving speech bubble not shown")
+	await settle_save(session)
+	var feedback_deadline := Time.get_ticks_msec()+2000
+	while game.save_totem.feedback=="Saving..." and Time.get_ticks_msec()<feedback_deadline: await process_frame
+	check(session.has_save(),"Offline device checkpoint failed")
 	check(session.has_save() and session.saved.pending and session.device_saved,"Offline copy not retained")
 	check(pulses==count_before+1 and game.save_totem.flare>0,"Successful local checkpoint didn't pulse crystal")
+	check(game.save_totem.feedback=="Saved on this device" and game.save_totem.bubble.visible,"Offline save was incorrectly announced as online")
 	game.save_totem.entered = true
 	game.save_totem.retry_after = 20
 	game.save_totem._process(0.81)
@@ -145,15 +167,15 @@ func run() -> void:
 	while game.earth_transition:
 		game.advance_earth_transition(0.02)
 		await process_frame
-	check(game.world==2 and game.current_region()==4 and game.player.is_equal_approx(place),"Continue restored wrong world/position")
+	check(game.world==2 and game.current_region()==0 and game.player.is_equal_approx(place),"Continue restored wrong world/position")
 	check(game.ore==17 and game.frost_ore==9 and game.gold_ore==6 and game.rubies==2,"Inventory was lost")
 	check(game.upgraded and game.story.drill_improved and game.frost_story.crystal_drill and game.ember_story.sunfang,"Upgrades were lost")
 	check(game.trial.health==7 and game.trial.wood==5 and game.companion.recruited,"Health/wood/Buddy were lost")
-	check(game.ember_story.antidote_doses==2 and game.ember_story.scorpions[0].health==0,"Canteen/guardian were lost")
+	check(game.ember_story.antidote_doses==2 and game.ember_story.records["4/0"].health==0,"Canteen/guardian were lost")
 	var found := false
-	for rock in game.rocks:
+	for rock in game.outer_rocks[2][4]:
 		if rock.pos.is_equal_approx(mined_at): found = is_equal_approx(rock.get("work",0),1.25)
-	check(found and game.rocks[0].hp==0,"Depleted/partially mined deposits reset")
+	check(found and game.outer_rocks[2][4][0].hp==0,"Depleted/partially mined deposits reset")
 	check(game.fog.is_revealed(game.area_id(),place),"Exploration mask was lost")
 	# A new Explore does not erase the existing saved checkpoint. Timed mode
 	# does not render totems, create checkpoints or modify saved Explore data.
@@ -172,5 +194,5 @@ func run() -> void:
 	var report := FileAccess.open("/workspace/artifacts/save-totems/locations.json",FileAccess.WRITE)
 	if report: report.store_string(JSON.stringify(locations))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(session.storage_path))
-	if failures==0: print("PASS: six reachable totems, JSON state round trip, local offline persistence/Continue, all-world progress and partial mining restore, single coloured pulse and speedrun isolation")
+	if failures==0: print("PASS: three reachable camp totems, Saving/Saved speech bubbles, JSON state round trip, local offline persistence/Continue, all-world progress and partial mining restore, single coloured pulse and speedrun isolation")
 	quit(1 if failures else 0)

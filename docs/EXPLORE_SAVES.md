@@ -1,15 +1,17 @@
 # Explore checkpoints
 
-Explore mode has exactly two save totems on each world: Landing Meadow and
-Sunstone Ridge on Earth; Canyon Camp and Glacier Crown on Frost; Mesa Camp and
-Obsidian Rise on Ember. They use the approved moss/emerald, snow/cyan and
+Explore mode has exactly one save totem per world: at the starting camp in
+Landing Meadow on Earth, Canyon Camp on Frost and Mesa Camp on Ember. They use the approved moss/emerald, snow/cyan and
 basalt/amber designs. Locations fit the authored walkable floor, clear of ore
-and people. The normal fog reveals them. They do not add floor or block travel.
+and people. Frost's totem stands in the clearing in front of camp; Ember's
+stands on the open sand above and right of the stall, above the camp sign.
+The normal fog reveals them. They do not add floor or block travel.
 
 Walk within 88 world units with a clear ground approach and no living hostile
 within 165 units. A checkpoint is kept on the device before an online upload.
 Its crystal gives one smooth 0.8-second pulse in the world's colour, with a
-small Adventure saved caption for three seconds. It never flashes repeatedly
+speech bubble that changes from Saving... to Saved for three seconds once the
+save request completes. An offline local save says Saved on this device. It never flashes repeatedly
 within a pulse. While standing near a totem, checkpoints can refresh every 20
 seconds; leaving beyond 125 units re-arms a new approach. No online request is
 issued every frame. Flight, map transitions, dialogs, help and combat prevent
@@ -21,6 +23,10 @@ progress to the leaderboard. Continue and recovery explicitly start untimed.
 Score tokens and server timing never enter an Explore snapshot.
 
 ## Install both updates
+
+For an existing installation already using plugin 1.1.0, the camp placement,
+texture and speech-bubble fixes require only replacing the complete game build.
+The installed plugin and saved adventures remain compatible.
 
 1. Build/upload the updated Sunny Scout Scores plugin ZIP (version 1.1.0).
    WordPress's Replace current with uploaded preserves the existing database.
@@ -84,9 +90,18 @@ the client can rebase a later pending device checkpoint only over its own
 recorded uncertain checkpoint IDs. Other conflicts show Continue online save in the Save panel so the player can
 explicitly resume the newer online adventure. Plugin updates/activation do not reset stored data.
 
+## Texture portability and contact shadow
+
+Totem script parsing uses asset path strings, never preloads of generated
+textures. Native/editor builds can read the original shipped PNGs, resize and
+cache them at runtime, so missing machine-specific .ctex imports cannot break
+parsing or rendering. Exported Web uses the packaged imported textures. Visible
+bounds ignore near-transparent alpha specks below the painted stone; the base
+is anchored directly over a small contact shadow.
+
 ## Validation
 
-`tests/adventure_saves.gd` checks all six reachable outdoor locations, absence
+`tests/adventure_saves.gd` checks all three reachable camp locations, absence
 on other districts, real JSON/device reload/Continue through streamed maps,
 all-world state and partial mining, pulse feedback and speedrun isolation.
 `tests/wordpress_adventure.gd` runs against disposable WordPress/MariaDB to check

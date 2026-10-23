@@ -2,6 +2,8 @@ extends Node
 
 signal changed
 signal checkpoint_saved
+signal checkpoint_started
+signal checkpoint_finished(kept: bool, online: bool)
 const SNAPSHOT = preload("res://ui/adventure_snapshot.gd")
 const FILE := "user://explore_checkpoint.json"
 const WEB_KEY := "sunny-scout-explore-checkpoint-v1"
@@ -83,6 +85,7 @@ func persist(record: Dictionary) -> bool:
 func checkpoint(game: Node) -> bool:
 	if busy or game.run_session.timed or game.underground or game.earth_transition or game.flight != 0 or game.trial.health <= 0: return false
 	if conflict: return false
+	checkpoint_started.emit()
 	if code.is_empty(): code = Crypto.new().generate_random_bytes(16).hex_encode()
 	var snapshot := SNAPSHOT.capture(game)
 	var record := {"code":code,"revision":revision,"checkpoint":Crypto.new().generate_random_bytes(12).hex_encode(),"snapshot":snapshot,"pending":true,"place":game.PLANET_NAMES[game.world]+" · "+game.regions().NAMES[game.current_region()]}
@@ -95,18 +98,20 @@ func checkpoint(game: Node) -> bool:
 	if JSON.stringify(record).length() > 524288:
 		status = "This adventure is too large to save. Your previous checkpoint is kept."
 		changed.emit()
+		checkpoint_finished.emit(false,false)
 		return false
 	var local_ok := persist(record)
 	device_saved = local_ok
 	status = "Checkpoint saved on this device. Saving online…" if local_ok else "Saving checkpoint online…"
 	changed.emit()
-	if local_ok: checkpoint_saved.emit()
 	# If local storage is unavailable, still attempt the online copy. Retain it
 	# in memory so a successful save gives the player their recovery code.
 	if not local_ok: saved = record
 	var online_ok := await upload()
-	if online_ok and not local_ok: checkpoint_saved.emit()
-	return local_ok or online_ok
+	var kept := local_ok or online_ok
+	if kept: checkpoint_saved.emit()
+	checkpoint_finished.emit(kept,online_ok)
+	return kept
 
 func endpoint() -> String:
 	if not endpoint_override.is_empty(): return endpoint_override
