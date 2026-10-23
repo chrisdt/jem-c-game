@@ -17,7 +17,6 @@ const PLANET_MENU = preload("res://planet_menu.gd")
 const CATALOG = preload("res://ui/world_catalog.gd")
 const UI_STYLE = preload("res://ui/expedition_style.gd")
 const WORLD_SIGNS = preload("res://environment/world_signs.gd")
-const MINE_SURFACE_VIEWS = preload("res://environment/mine_surface_views.gd")
 const GAME_HUD = preload("res://ui/game_hud.gd")
 const RESET_CONFIRMATION = preload("res://ui/reset_confirmation.gd")
 var reset_confirmation: RESET_CONFIRMATION
@@ -1263,8 +1262,6 @@ func _draw() -> void:
 			draw_texture_rect(ICE_ART, Rect2(0, 0, 2000, 1400), false)
 		elif world == 2 and current_region() == 0:
 			draw_texture_rect(DESERT_ART, Rect2(0, 0, 2000, 1400), false)
-	if underground:
-		MINE_SURFACE_VIEWS.draw(self,world,current_region())
 	WORLD_SIGNS.draw_map(self, world, current_region(), underground, regions())
 
 	for rock_index in rocks.size():
