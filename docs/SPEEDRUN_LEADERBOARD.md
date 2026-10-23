@@ -78,7 +78,11 @@ finish checks and posts can be retried. An already recorded server finish keeps
 its original time; if the first finish request never reaches the server, the
 server clock includes the outage until the first successful finish request.
 
-Every timed finish is also saved automatically in `user://speedrun_scores.json`.
+Every timed finish is also saved automatically. Native builds use
+`user://speedrun_scores.json`; browser builds synchronously save to their own
+site's local storage so an immediate reload cannot restore an older result.
+If browser local storage is unavailable, Godot's user filesystem is used as a
+fallback; browser filesystem persistence may be delayed.
 **This device times** shows up to 50 recent local results, sorted fastest first;
 it is separate from the verified shared leaderboard. With no starting token,
 the completion button becomes **Save on this device**, which updates the nickname
@@ -102,8 +106,9 @@ still expire after six hours. This saves completed times, not game progress.
   submission/rank, saved-result restore, request validation and concurrent PHP
   workers. `SCOUT_TEST_PHP` can select the PHP executable.
 - `tests/test_leaderboard_browser.py`: the actual exported Web welcome board,
-  registration after the world's first draw and in-game board, using local PHP,
-  Playwright and Chromium with disposable score data.
+  registration after the world's first draw, in-game board, Last result and
+  mouse saving followed by an immediate reload, using local PHP, Playwright and
+  Chromium with disposable score data.
 - `tests/test_wpengine_deploy.py`: full deployment integrity, rollback and retained
   scoreboard data, using an isolated filesystem instead of a hosting account.
 

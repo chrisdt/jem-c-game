@@ -85,5 +85,9 @@ func run() -> void:
 	check(session.token != token and not session.finished and session.completed_ids.is_empty(),"Reset reused server run")
 	var board: Dictionary = await session.api("board")
 	check(board.has("scores") and board.scores.size() == 1,"Reset removed or duplicated shared score")
+	# Free streamed world resources before the engine tears down its loaders.
+	change_scene_to_file("res://startup.tscn")
+	await scene_changed
+	await create_timer(0.5).timeout
 	if failures == 0: print("PASS: native score endpoint, real Godot→PHP registration, failed-finish retry via paused touch input, verified post/rank, persisted result restore, refreshed leaderboard and independent reset")
 	quit(1 if failures else 0)

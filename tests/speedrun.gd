@@ -97,5 +97,9 @@ func run() -> void:
 	check(session.running and not session.finished and session.enemies == 0 and session.completed_ids.is_empty(),"Confirmed reset reused previous run")
 	check(RUN.format_time(123450,true) == "2:03.45" and RUN.format_time(3661000) == "1:01:01","Run time formatting is wrong")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(session.storage_path))
+	# Free streamed world resources before the engine tears down its loaders.
+	change_scene_to_file("res://startup.tscn")
+	await scene_changed
+	await create_timer(0.5).timeout
 	if failures == 0: print("PASS: welcome modes/leaderboard, no early world/timer, monotonic menu-counting clock, exactly 14 story quests without optional tasks, once-only completion/stats, modal pause, offline finish, reset and time formatting")
 	quit(1 if failures else 0)

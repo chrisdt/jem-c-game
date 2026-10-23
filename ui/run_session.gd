@@ -5,6 +5,7 @@ signal adventure_completed
 signal start_resolved
 const SHARED_ENDPOINT := "https://playsunnyscout.com/play/api/leaderboard.php"
 const SCORE_FILE := "user://speedrun_scores.json"
+const WEB_SCORE_KEY := "sunny-scout-completed-three-worlds-story-v1"
 const CAMPAIGN := "three-worlds-story-v1"
 const STORY_IDS := ["rowan","bea","otis","mara","iris","finn","frost_pip","frost_nix","frost_tavi","frost_eira","ember_sol","ember_luma","ember_brasa","ember_orin"]
 var timed := false
@@ -39,8 +40,17 @@ func _ready() -> void:
 func load_scores() -> void:
 	local_scores = []
 	last_result = {}
-	if not FileAccess.file_exists(storage_path): return
-	var data = JSON.parse_string(FileAccess.get_file_as_string(storage_path))
+	var source := ""
+	if OS.has_feature("web"):
+		# Godot's user filesystem syncs to IndexedDB asynchronously. Read the
+		# synchronous browser copy first so a quick reload cannot roll it back.
+		source = str(JavaScriptBridge.eval("(()=>{try{return localStorage.getItem("+JSON.stringify(WEB_SCORE_KEY)+")||''}catch(_){return ''}})()"))
+	if source.is_empty():
+		if not FileAccess.file_exists(storage_path): return
+		source = FileAccess.get_file_as_string(storage_path)
+	var parser := JSON.new()
+	if parser.parse(source) != OK: return
+	var data = parser.data
 	if not data is Dictionary or data.get("campaign", "") != CAMPAIGN: return
 	if data.get("scores") is Array: local_scores = data.scores
 	if data.get("last_result") is Dictionary: last_result = data.last_result
@@ -58,19 +68,29 @@ func save_result() -> bool:
 	for key in ["token", "submitted", "rank"]: row.erase(key)
 	scores.push_front(row)
 	scores.resize(mini(scores.size(),50))
-	var path := storage_path+".tmp"
-	var file := FileAccess.open(path,FileAccess.WRITE)
-	if file == null: return false
-	file.store_string(JSON.stringify({"campaign":CAMPAIGN,"scores":scores,"last_result":result}))
-	file.flush()
-	var error := file.get_error()
-	file.close()
-	if error != OK: return false
-	if DirAccess.rename_absolute(ProjectSettings.globalize_path(path),ProjectSettings.globalize_path(storage_path)) != OK: return false
+	var contents := JSON.stringify({"campaign":CAMPAIGN,"scores":scores,"last_result":result})
+	var stored := false
+	if OS.has_feature("web"):
+		# Commit before reporting success; a delayed filesystem sync could lose
+		# the newest nickname/posted state if the page closes immediately.
+		stored = bool(JavaScriptBridge.eval("(()=>{try{localStorage.setItem("+JSON.stringify(WEB_SCORE_KEY)+","+JSON.stringify(contents)+");return true}catch(_){return false}})()"))
+	if not stored: stored = write_score_file(contents)
+	if not stored: return false
 	local_scores = scores
 	last_result = result
 	local_saved = true
 	return true
+
+func write_score_file(contents: String) -> bool:
+	var path := storage_path+".tmp"
+	var file := FileAccess.open(path,FileAccess.WRITE)
+	if file == null: return false
+	file.store_string(contents)
+	file.flush()
+	var error := file.get_error()
+	file.close()
+	if error != OK: return false
+	return DirAccess.rename_absolute(ProjectSettings.globalize_path(path),ProjectSettings.globalize_path(storage_path)) == OK
 
 func restore_result() -> bool:
 	if last_result.is_empty(): return false

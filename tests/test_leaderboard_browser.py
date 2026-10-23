@@ -4,6 +4,7 @@ Requires Playwright and Chromium; never contacts or updates the live website.
 Export Web first. SCOUT_TEST_PHP / SCOUT_TEST_CHROMIUM select local executables.
 """
 from pathlib import Path
+import json
 import os
 import socket
 import subprocess
@@ -58,9 +59,34 @@ def run():
                         while replies.count(("GET", 200)) < 2 and time.monotonic() < deadline:
                             page.wait_for_timeout(250)
                         assert replies.count(("GET", 200)) >= 2, "In-game scoreboard failed"
+                        # A private completed-result fixture never enters the shared
+                        # board. Exercise Last result and actual mouse saving, then
+                        # reload immediately to catch delayed browser FS writes.
+                        local = {"id": "browser-local-test", "nickname": "Local-Scout",
+                                 "duration_ms": 123450, "enemies": 7, "recoveries": 1,
+                                 "token": "", "verified": False, "submitted": False, "rank": 0}
+                        key = "sunny-scout-completed-three-worlds-story-v1"
+                        stored = {"campaign": "three-worlds-story-v1", "scores": [local], "last_result": local}
+                        page.evaluate("([key,value]) => localStorage.setItem(key,value)", [key, json.dumps(stored)])
+                        page.goto(f"http://127.0.0.1:{port}/", wait_until="domcontentloaded")
+                        page.locator("#status").wait_for(state="hidden", timeout=180000)
+                        page.mouse.click(824, 663)  # Welcome: Best times.
+                        page.wait_for_timeout(1000)
+                        page.mouse.click(921, 662)  # Last result.
+                        page.wait_for_timeout(300)
+                        page.mouse.click(424, 483)  # Nickname.
+                        page.keyboard.press("Control+A")
+                        page.keyboard.type("Recovered-Scout")
+                        post_count = replies.count(("POST", 200))
+                        page.mouse.click(836, 483)  # Save on this device.
+                        page.wait_for_function("key => JSON.parse(localStorage.getItem(key)).last_result.nickname === 'Recovered-Scout'", arg=key, timeout=10000)
+                        page.reload(wait_until="domcontentloaded")
+                        saved = page.evaluate("key => JSON.parse(localStorage.getItem(key))", key)
+                        assert saved["last_result"]["nickname"] == "Recovered-Scout" and len(saved["scores"]) == 1
+                        assert not saved["last_result"]["submitted"] and replies.count(("POST", 200)) == post_count
                         assert not errors, errors
                         assert (Path(temporary) / "data/scores.php").is_file()
-                        print("PASS: production Web welcome board, world-painted timer registration and in-game board against PHP")
+                        print("PASS: production Web boards/registration, Last result, actual mouse local save and immediate-reload persistence without unverified shared posting")
                     finally:
                         browser.close()
             finally:
