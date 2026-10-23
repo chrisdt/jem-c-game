@@ -1,7 +1,7 @@
-# Sunny Scout — scoreboard failure diagnostics
+# Sunny Scout — WordPress database scores
 
-Full browser game exported with Godot 4.6.3 from source commit `519c1dd09c0a72512cc3153c432e001e6f613f45`.
-Editable project: `main`. Build release: `65fca5dd099d4856c3bb`.
+Full browser game exported with Godot 4.6.3 from source commit `5d0272abd0b29edcd8bf30843257ced4443d8764`.
+Editable project: `main`. Build release: `5d12930126a8fc329100`.
 
 ## Upload to WP Engine
 
@@ -23,17 +23,25 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Added private PHP error logging for scoreboard exceptions. The log identifies
-  the operation and underlying error while the browser keeps its generic message.
-- Score write/rename failures include the underlying filesystem error in the
-  server log. Request bodies, nicknames, tokens and addresses are not logged.
-- Tested a host that reads existing scores but cannot write replacements:
-  registration returns 503, existing scores remain intact, and the private log
-  records the write error. Restoring write access allows registration again.
-- This is a diagnostic update; the actual live hosting failure still needs its
-  logged exception investigated. Existing score data must be preserved.
-- Includes the previous posting retries, immediate browser result persistence,
-  Last result recovery, native Godot scoreboard connection and all game content.
+- Includes sunny-scout-scores.zip: an 8 KB WordPress plugin. Upload it under
+  Plugins > Add New Plugin > Upload Plugin, install, activate, then click
+  Play Sunny Scout beside the plugin or under Tools > Sunny Scout Scores.
+- The Play link uses the game files already in the WordPress root or /play/.
+  Share that link for database-backed scores. Existing browser builds work
+  without re-uploading the game. The original direct game URL can still use
+  its previous standalone file endpoint.
+- Activation sets up one non-autoloaded record in the existing WordPress
+  database. No new credentials, database setup, score-file writes, permission
+  changes or rewrite-file edits are needed. It starts a fresh leaderboard.
+- Atomic database comparisons preserve concurrent updates. Server timing,
+  14-quest verification, bounded starts, nickname validation and best-time
+  ranking retain the existing game rules. Public responses omit private tokens.
+- Updated native Godot projects use the same WordPress REST endpoint. The Web
+  build also accepts the same-origin endpoint supplied by the plugin's Play page.
+- Tested actual ZIP upload and activation on WordPress 7.1.3 / MariaDB 11.4,
+  16 concurrent registrations, browser game with read-only root assets, native
+  Godot paused finish/post, both game locations and existing versioned bases.
+- Includes all previous game content, local result saves and posting retries.
 
 ## Play and compete
 
