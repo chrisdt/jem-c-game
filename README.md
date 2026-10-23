@@ -1,7 +1,7 @@
-# Sunny Scout — score posting and saved results
+# Sunny Scout — scoreboard failure diagnostics
 
-Full browser game exported with Godot 4.6.3 from source commit `cfbaa949ddaee10268f3aca83647be8fc46971c6`.
-Editable project: `main`. Build release: `0c3a1cd992759ad66b23`.
+Full browser game exported with Godot 4.6.3 from source commit `519c1dd09c0a72512cc3153c432e001e6f613f45`.
+Editable project: `main`. Build release: `65fca5dd099d4856c3bb`.
 
 ## Upload to WP Engine
 
@@ -23,23 +23,17 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Godot builds now register timed runs with the hosted shared scoreboard.
-  Browser builds use their own website's PHP scoreboard.
-- Failed finish checks offer Retry and post. Failed posts can be retried;
-  the button no longer stays silently disabled after a connection failure.
-- Timed finishes save automatically on this device; browser saves commit
-  synchronously so a quick reload preserves the newest result. A run without an online
-  starting token offers Save on this device, separate from shared ranking.
-- Best times includes This device times and Last result. Reopen the latest
-  completed result after restarting to retry posting, while its token is valid.
-  Local records stay in this browser profile or Godot user data, and do not
-  save gameplay or transfer across devices. Clearing that data removes them.
-- Checked offline autosave, nickname changes, native HTTP registration,
-  failed-finish retry through paused touch input, verified posting/rank and
-  saved-result restore in Godot 4.6.3 and 4.7.2. Browser checks cover mouse
-  clicks, interrupted verification/posting and result recovery after reload.
-- Includes all four native Frost/Ember wild foods, Landing Meadow navigation
-  changes and the repainted mine exits from the previous build.
+- Added private PHP error logging for scoreboard exceptions. The log identifies
+  the operation and underlying error while the browser keeps its generic message.
+- Score write/rename failures include the underlying filesystem error in the
+  server log. Request bodies, nicknames, tokens and addresses are not logged.
+- Tested a host that reads existing scores but cannot write replacements:
+  registration returns 503, existing scores remain intact, and the private log
+  records the write error. Restoring write access allows registration again.
+- This is a diagnostic update; the actual live hosting failure still needs its
+  logged exception investigated. Existing score data must be preserved.
+- Includes the previous posting retries, immediate browser result persistence,
+  Last result recovery, native Godot scoreboard connection and all game content.
 
 ## Play and compete
 
