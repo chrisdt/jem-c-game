@@ -1,7 +1,7 @@
-# Sunny Scout — Godot dialogue compatibility fix
+# Sunny Scout — Mine exit surface views
 
-Full browser game exported with Godot 4.6.3 from source commit `0495838c60617d85aa11dbd2222325b9fffe38cd`.
-Editable project: `main`. Build release: `35375e5df59485649047`.
+Full browser game exported with Godot 4.6.3 from source commit `295996b9bc41e4833cec12d620b794ea3e9854a8`.
+Editable project: `main`. Build release: `9c32dca50a96ac1234c5`.
 
 ## Upload to WP Engine
 
@@ -23,13 +23,20 @@ Publishing this branch does not upload to WP Engine.
 
 ## This update
 
-- Fixed mission item icons failing to compile in Godot 4.7.2. The icon renderer
-  now uses shared add_image arguments and default pixel units, compatible with
-  both the new ImageUnit enums and the previous percentage flags.
-- Tested cold startup, real dialogue, 78 mission pages, keyboard/touch paging
-  and cancellation on Godot 4.6.3 and 4.7.2. Web export uses Godot 4.6.3.
-- Includes the matching mission icons across all worlds, the cleaned Frost
-  footprint spur, and previous world, mining, creature and controls updates.
+- All nine mine exit openings now show their matching surface district:
+  meadow, pinewood, quarry, Canyon Camp, Frozen Basin, Glacier Crown,
+  Mesa Camp, Dune Sea and Obsidian Rise. Lava exits now have warm desert
+  and basalt views instead of the generic blue mountains.
+- The scenery is clipped inside the original openings with a soft transition
+  into the mine floor. Timber frames, lanterns and routes remain in place.
+- Repositioned and fitted SURFACE lettering onto the front beam faces,
+  including the sloped Earth frames and Frost's narrow space between icicles.
+  Deep Prism retains its wooden sign beside the natural arch.
+- Checked all nine mine encounters in Godot 4.6.3 and 4.7.2, startup and final
+  exit meshes in 4.7.2, and all nine rendered exits in the browser.
+- Includes the dialogue icon compatibility fix and previous world updates.
+  The four approved wild food designs are documented in the source project;
+  they are still concepts and have not been added as gameplay pickups.
 
 ## Play and compete
 
