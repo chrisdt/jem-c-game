@@ -1,7 +1,7 @@
 # Sunny Scout — Repainted mine exits
 
-Full browser game exported with Godot 4.6.3 from source commit `9c63b42da3a3b5e0aca7cfa6d3dab9087fffdbed`.
-Editable project: `main`. Build release: `571c9115f527b89c6da7`.
+Full browser game exported with Godot 4.6.3 from source commit `682fa0a999ddc4db3fa94f0b633e75e1fbb7ec10`.
+Editable project: `main`. Build release: `9a9313f145dff192653a`.
 
 ## Upload to WP Engine
 
