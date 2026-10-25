@@ -4,9 +4,6 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="theme-color" content="#09242a">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-title" content="Sunny Scout">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<title>Sunny Scout — Planet Adventures</title>
 	<style>
 		* { box-sizing: border-box; }
@@ -15,13 +12,6 @@
 		body { color: #fff0cc; font-family: Georgia, 'Times New Roman', serif; }
 		#canvas { display: block; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 		#canvas:focus { outline: none; }
-		#fullscreen { position: fixed; top: max(8px, env(safe-area-inset-top)); left: max(8px, calc(50% - 72px)); width: 44px; height: 44px; padding: 9px; z-index: 12; border: 1px solid #d6ad58; border-radius: 9px; background: #123631eb; color: #fff0cc; cursor: pointer; touch-action: manipulation; }
-		#fullscreen svg { display: block; width: 24px; height: 24px; pointer-events: none; }
-		#fullscreen:focus-visible, #fullscreen-close:focus-visible { outline: 3px solid #ffe4a0; outline-offset: 3px; }
-		#fullscreen-help { width: min(390px, calc(100% - 32px)); padding: 24px; border: 2px solid #cba354; border-radius: 14px; background: #123631; color: #fff0cc; font: 17px/1.5 Arial, sans-serif; }
-		#fullscreen-help::backdrop { background: #03191da8; }
-		#fullscreen-help h2 { font: bold 25px Georgia, serif; }
-		#fullscreen-close { min-height: 44px; padding: 8px 22px; border: 1px solid #d6ad58; border-radius: 8px; background: #234b45; color: #fff0cc; font: inherit; cursor: pointer; touch-action: manipulation; }
 		#status { position: fixed; inset: 0; background: #061b22 url('scout-backdrop-944a03ab102e.jpg') center / cover no-repeat; z-index: 10; }
 		#stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 800px; transform: translate(-50%, -50%) scale(var(--stage-scale, 1)); visibility: hidden; }
 		#game-title { position: absolute; left: 76px; top: 86px; width: 530px; height: 156px; margin: 0; }
@@ -57,14 +47,6 @@
 </head>
 <body>
 	<canvas id="canvas" tabindex="0">Your browser needs canvas support to play Sunny Scout.</canvas>
-	<button id="fullscreen" type="button" aria-label="Full screen" aria-pressed="false" title="Full screen" hidden>
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>
-	</button>
-	<dialog id="fullscreen-help" aria-labelledby="fullscreen-heading">
-		<h2 id="fullscreen-heading">Play full screen</h2>
-		<p id="fullscreen-message"></p>
-		<form method="dialog"><button id="fullscreen-close" type="submit">Got it</button></form>
-	</dialog>
 	<div id="status" role="region" aria-label="Loading Sunny Scout">
 		<div id="stage">
 			<h1 id="game-title"><img src="scout-logo-699f2041637e.png" alt="Sunny Scout — Planet Adventures"></h1>
@@ -82,52 +64,6 @@
 		</div>
 	</div>
 	<noscript>Sunny Scout — Planet Adventures<br>Turn on JavaScript in your browser to begin exploring.</noscript>
-	<script>
-	(function () {
-		const button = document.getElementById('fullscreen');
-		const help = document.getElementById('fullscreen-help');
-		const canvas = document.getElementById('canvas');
-		const appMode = window.matchMedia('(display-mode: standalone)');
-		const root = document.documentElement;
-		function active() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-		function update() {
-			button.hidden = appMode.matches || navigator.standalone === true;
-			const label = active() ? 'Exit full screen' : 'Full screen';
-			button.setAttribute('aria-label', label);
-			button.setAttribute('aria-pressed', String(active()));
-			button.title = label;
-		}
-		function explain(rejected) {
-			const appleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-			document.getElementById('fullscreen-message').textContent = appleMobile
-				? 'In Safari, tap Share → Add to Home Screen. Turn on Open as Web App if shown, then tap Add. Open Sunny Scout from its new icon to play without the browser bars.'
-				: rejected ? 'Your browser did not allow full screen. Try the button again, or use the full-screen option in your browser menu.'
-				: 'Use the full-screen option in your browser menu. On a computer, you can also try F11 (Control–Command–F on a Mac).';
-			help.showModal();
-		}
-		button.addEventListener('click', async () => {
-			try {
-				if (active()) {
-					const exit = (document.fullscreenElement && document.exitFullscreen) || document.webkitExitFullscreen || document.exitFullscreen;
-					if (exit) await exit.call(document);
-				} else if (root.requestFullscreen && document.fullscreenEnabled !== false) {
-					// This call must stay inside the player's tap, before any await.
-					await root.requestFullscreen({ navigationUI: 'hide' });
-				} else if (root.webkitRequestFullscreen && document.webkitFullscreenEnabled !== false) {
-					await root.webkitRequestFullscreen();
-				} else {
-					explain(false);
-				}
-				if (!help.open) canvas.focus();
-			} catch (_) { explain(true); }
-			update();
-		});
-		document.addEventListener('fullscreenchange', update);
-		document.addEventListener('webkitfullscreenchange', update);
-		appMode.addEventListener('change', update);
-		update();
-	}());
-	</script>
 	<script>
 	(function () {
 		const stage = document.getElementById('stage');
